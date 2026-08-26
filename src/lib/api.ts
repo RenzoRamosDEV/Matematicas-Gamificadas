@@ -51,3 +51,12 @@ export async function finalizarSesion(
   fail('finalizar_sesion', error);
   return data as ResultadoFinal;
 }
+
+/** Últimas sesiones completadas del jugador (RLS solo devuelve las suyas). */
+export async function cargarSesiones(limite = 30): Promise<Session[]> {
+  const { data, error } = await supabase
+    .from('sessions').select('id, fecha, estado, puntos, detalle')
+    .eq('estado', 'completada').order('fecha', { ascending: false }).limit(limite);
+  fail('historial', error);
+  return (data ?? []) as Session[];
+}

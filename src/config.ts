@@ -17,9 +17,11 @@ export const CONFIG = {
 
 export const ORDEN_FASES = ['suma', 'resta', 'mult', 'div'] as const;
 
-export const FASE_INFO = {
-  suma:  { nombre: 'Sumas',            simbolo: '+', emoji: '➕', color: 'from-emerald-500 to-teal-600' },
-  resta: { nombre: 'Restas',           simbolo: '−', emoji: '➖', color: 'from-sky-500 to-blue-600' },
-  mult:  { nombre: 'Multiplicaciones', simbolo: '×', emoji: '✖️', color: 'from-violet-500 to-purple-600' },
-  div:   { nombre: 'Divisiones',       simbolo: '÷', emoji: '➗', color: 'from-rose-500 to-pink-600' },
-} as const;
+export type Acento = 'azul' | 'violeta' | 'verde' | 'amarillo' | 'rosa';
+
+export const FASE_INFO: Record<(typeof ORDEN_FASES)[number], { nombre: string; simbolo: string; acento: Acento }> = {
+  suma:  { nombre: 'Sumas',            simbolo: '+', acento: 'azul' },
+  resta: { nombre: 'Restas',           simbolo: '−', acento: 'violeta' },
+  mult:  { nombre: 'Multiplicaciones', simbolo: '×', acento: 'verde' },
+  div:   { nombre: 'Divisiones',       simbolo: '÷', acento: 'rosa' },
+};
