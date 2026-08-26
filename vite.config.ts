@@ -7,4 +7,9 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: process.env.VITE_BASE ?? '/Matematicas-Gamificadas/',
+  // Solo desarrollo: permite abrir el servidor local desde el móvil (Wi-Fi) o por un túnel (ngrok / Cloudflare).
+  server: {
+    host: true,
+    allowedHosts: ['.ngrok-free.app', '.ngrok-free.dev', '.ngrok.app', '.ngrok.io', '.trycloudflare.com'],
+  },
 })
