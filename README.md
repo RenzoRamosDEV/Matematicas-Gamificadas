@@ -84,12 +84,12 @@ npm run build
 | Acierto | +10 |
 | Fallo / sin responder | 0 (nunca resta) |
 | Fase perfecta | +25 |
-| Velocidad por fase | +20 si sobra >40 % del tiempo · +10 si sobra >20 % |
+| Velocidad por fase | Solo si la fase es perfecta: +20 si sobra >40 % del tiempo · +10 si sobra >20 % |
 | Sesión perfecta | +100 |
 
 **Racha** (con `now()` de Postgres, zona `Europe/Madrid`): ayer → +1; hoy → igual; anteayer con comodín disponible → +1 y gasta el comodín (se recarga 1 cada 30 días); otro caso → 1.
 
-Lo único que el cliente manda que afecta a los puntos es el tiempo restante por fase (para el bonus de velocidad), acotado en la DB a `[0, tiempo_fase]`: como mucho vale +20 por fase.
+Lo único que el cliente manda que afecta a los puntos es el tiempo restante por fase (para el bonus de velocidad), acotado en la DB a `[0, tiempo_fase]`: como mucho vale +20 por fase y solo se concede si la fase está bien resuelta (terminar pronto sin responder no puntúa).
 
 ## Ajustes
 

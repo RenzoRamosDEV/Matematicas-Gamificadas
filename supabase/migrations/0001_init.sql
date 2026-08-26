@@ -187,7 +187,9 @@ begin
     v_pct := case when v_tiempo_fase > 0 then v_restante::numeric / v_tiempo_fase else 0 end;
 
     v_bonus_perf := case when f.ok = f.total and f.total > 0 then c_fase_perfecta else 0 end;
-    v_bonus_vel  := case when v_pct > 0.40 then c_vel_alta
+    -- La velocidad solo cuenta si la fase está bien resuelta: acabar pronto sin responder no da puntos.
+    v_bonus_vel  := case when v_bonus_perf = 0 then 0
+                         when v_pct > 0.40 then c_vel_alta
                          when v_pct > 0.20 then c_vel_media
                          else 0 end;
     v_pts_fase := f.ok * c_acierto + v_bonus_perf + v_bonus_vel;
