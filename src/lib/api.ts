@@ -67,21 +67,19 @@ export async function cargarSesiones(): Promise<Session[]> {
 
 // ---------- Apuntes del calendario ----------------------------------------
 export async function cargarNotas(): Promise<Nota[]> {
-  const { data, error } = await supabase.from('notas').select('fecha, texto, updated_at').order('fecha');
+  const { data, error } = await supabase.from('notas').select('id, fecha, texto, created_at').order('created_at');
   fail('notas', error);
   return (data ?? []) as Nota[];
 }
 
-/** Crea o sustituye el apunte de un día. user_id lo pone la DB (auth.uid()). */
-export async function guardarNota(fecha: string, texto: string): Promise<Nota> {
-  const { data, error } = await supabase
-    .from('notas').upsert({ fecha, texto, updated_at: new Date().toISOString() }, { onConflict: 'user_id,fecha' })
-    .select('fecha, texto, updated_at').single();
-  fail('guardar nota', error);
+/** Añade un apunte a un día. user_id lo pone la DB (auth.uid()). */
+export async function crearNota(fecha: string, texto: string): Promise<Nota> {
+  const { data, error } = await supabase.from('notas').insert({ fecha, texto }).select('id, fecha, texto, created_at').single();
+  fail('guardar apunte', error);
   return data as Nota;
 }
 
-export async function borrarNota(fecha: string): Promise<void> {
-  const { error } = await supabase.from('notas').delete().eq('fecha', fecha);
-  fail('borrar nota', error);
+export async function borrarNota(id: string): Promise<void> {
+  const { error } = await supabase.from('notas').delete().eq('id', id);
+  fail('borrar apunte', error);
 }

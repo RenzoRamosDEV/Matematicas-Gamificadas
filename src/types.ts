@@ -56,9 +56,10 @@ export interface ResultadoFinal {
   fases: FaseDetalle[];
 }
 
-/** Apunte del jugador en el calendario (tabla notas): una por día */
+/** Apunte del jugador en el calendario (tabla notas): puede haber varios por día */
 export interface Nota {
+  id: string;
   fecha: string;
   texto: string;
-  updated_at: string;
+  created_at: string;
 }

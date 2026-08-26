@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FASE_INFO } from '../config';
+import { FASE_INFO, type Acento } from '../config';
 import type { Nota, Profile, Session } from '../types';
-import { borrarNota, cargarNotas, guardarNota } from '../lib/api';
+import { borrarNota, cargarNotas, crearNota } from '../lib/api';
 import { mesDe, mesVecino, nombreDia, type Mes } from '../lib/calendario';
 import { hoyMadrid } from '../lib/semana';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
 import { Calendario } from '../components/Calendario';
 import { Icono, type NombreIcono } from '../components/Icono';
-import type { Acento } from '../config';
 
 interface Props {
   perfil: Profile;
@@ -19,51 +18,54 @@ interface Props {
 }
 
 const MAX_NOTA = 500;
+const fmtHora = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
 
-/** Página de progreso: calendario con los retos completados y apuntes del jugador por día. */
+/** Página de progreso: calendario con los retos completados y los apuntes del jugador (varios por día). */
 export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso }: Props) {
   const hoy = hoyMadrid();
   const [mes, setMes] = useState<Mes>(mesDe(hoy));
   const [seleccion, setSeleccion] = useState(hoy);
-  const [notas, setNotas] = useState<Map<string, Nota>>(new Map());
-  const [borradores, setBorradores] = useState<Record<string, string>>({});   // texto en edición por fecha
+  const [notas, setNotas] = useState<Nota[]>([]);
+  const [borradores, setBorradores] = useState<Record<string, string>>({});   // apunte en edición por fecha
   const [guardando, setGuardando] = useState(false);
-  const [guardadoEn, setGuardadoEn] = useState<string | null>(null);
+  const [borrando, setBorrando] = useState<string | null>(null);
 
   const porFecha = useMemo(() => new Map(sesiones.filter((s) => s.estado === 'completada').map((s) => [s.fecha, s])), [sesiones]);
   const completadas = porFecha.size;
   const delMes = [...porFecha.values()].filter((s) => s.fecha.startsWith(mes));
 
   useEffect(() => {
-    cargarNotas()
-      .then((lista) => setNotas(new Map(lista.map((n) => [n.fecha, n]))))
-      .catch((e: Error) => onAviso(`Apuntes no disponibles: ${e.message}`));
+    cargarNotas().then(setNotas).catch((e: Error) => onAviso(`Apuntes no disponibles: ${e.message}`));
   }, [onAviso]);
 
   const seleccionar = (fecha: string) => { setSeleccion(fecha); setMes(mesDe(fecha)); };
 
-  const textoOriginal = notas.get(seleccion)?.texto ?? '';
-  const borrador = borradores[seleccion] ?? textoOriginal;
-  const cambiado = borrador.trim() !== textoOriginal;
-  const guardado = guardadoEn === seleccion && !cambiado;
-  const setBorrador = (t: string) => { setBorradores((b) => ({ ...b, [seleccion]: t })); setGuardadoEn(null); };
+  const delDia = notas.filter((n) => n.fecha === seleccion);
+  const conNota = useMemo(() => new Set(notas.map((n) => n.fecha)), [notas]);
+  const borrador = borradores[seleccion] ?? '';
+  const setBorrador = (t: string) => setBorradores((b) => ({ ...b, [seleccion]: t }));
 
-  const guardar = async () => {
+  const anadir = async () => {
     const texto = borrador.trim();
+    if (!texto) return;
     setGuardando(true);
     try {
-      if (texto) {
-        const n = await guardarNota(seleccion, texto);
-        setNotas((m) => new Map(m).set(seleccion, n));
-      } else if (textoOriginal) {
-        await borrarNota(seleccion);
-        setNotas((m) => { const c = new Map(m); c.delete(seleccion); return c; });
-      }
-      setBorradores((b) => { const c = { ...b }; delete c[seleccion]; return c; });
-      setGuardadoEn(seleccion);
+      const n = await crearNota(seleccion, texto);
+      setNotas((lista) => [...lista, n]);
+      setBorrador('');
     } catch (e) {
       onAviso(`No se pudo guardar el apunte: ${(e as Error).message}`);
     } finally { setGuardando(false); }
+  };
+
+  const borrar = async (id: string) => {
+    setBorrando(id);
+    try {
+      await borrarNota(id);
+      setNotas((lista) => lista.filter((n) => n.id !== id));
+    } catch (e) {
+      onAviso(`No se pudo borrar el apunte: ${(e as Error).message}`);
+    } finally { setBorrando(null); }
   };
 
   const sesion = porFecha.get(seleccion);
@@ -78,7 +80,7 @@ export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso }: Props
           <Icono nombre="chevLeft" size={16} />Inicio
         </button>
         <h1 className="text-[36px] sm:text-5xl font-bold leading-[1.05] tracking-[-.03em]">Mi progreso</h1>
-        <p className="text-tinta-2 text-[17px] text-pretty">Tus retos día a día. Toca un día para ver cómo fue y dejar tu apunte.</p>
+        <p className="text-tinta-2 text-[17px] text-pretty">Tus retos día a día. Toca un día para ver cómo fue y dejar tus apuntes.</p>
       </section>
 
       <section className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3 in d2">
@@ -92,7 +94,7 @@ export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso }: Props
         <div className="flex flex-col gap-3 in d3">
           <Calendario
             mes={mes} hoy={hoy} seleccion={seleccion} sesiones={porFecha}
-            conNota={new Set(notas.keys())} onSeleccionar={seleccionar} onCambiarMes={(d) => setMes((m) => mesVecino(m, d))}
+            conNota={conNota} onSeleccionar={seleccionar} onCambiarMes={(d) => setMes((m) => mesVecino(m, d))}
           />
           <p className="text-[13px] text-tinta-3 px-1">
             Este mes: <b className="text-tinta-2 font-semibold">{delMes.length}</b> {delMes.length === 1 ? 'reto' : 'retos'} y{' '}
@@ -124,32 +126,50 @@ export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso }: Props
             </div>
           ) : (
             <p className="text-tinta-2 text-sm">
-              {futuro ? 'Todavía no ha llegado. Puedes dejar un apunte para ese día.' : seleccion === hoy ? 'El reto de hoy todavía no está completado.' : 'Ese día no completaste el reto.'}
+              {futuro ? 'Todavía no ha llegado. Puedes dejar apuntes para ese día.' : seleccion === hoy ? 'El reto de hoy todavía no está completado.' : 'Ese día no completaste el reto.'}
             </p>
           )}
 
-          <div className="flex flex-col gap-2 border-t border-linea pt-4">
-            <label className="text-sm font-semibold text-tinta-2 inline-flex items-center gap-1.5" htmlFor="apunte">
-              <Icono nombre="pencil" size={15} />Mi apunte
-            </label>
-            <textarea
-              id="apunte" value={borrador} maxLength={MAX_NOTA} rows={4}
-              onChange={(e) => setBorrador(e.target.value)}
-              onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && cambiado) void guardar(); }}
-              placeholder="Escribe lo que quieras recordar de este día…"
-              className="campo h-auto py-3 resize-none leading-snug text-[15px]"
-            />
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-[12px] text-tinta-3 tabular-nums">{guardado ? 'Guardado' : `${borrador.length} / ${MAX_NOTA}`}</span>
-              <div className="flex gap-2">
-                {textoOriginal && !borrador.trim() && cambiado && (
-                  <Boton variante="glass" className="h-11 px-4 text-sm" onClick={guardar} disabled={guardando}>Borrar apunte</Boton>
-                )}
-                {(borrador.trim() || !textoOriginal) && (
-                  <Boton className="h-11 px-5 text-sm" icono="check" onClick={guardar} disabled={!cambiado || guardando}>
-                    {guardando ? 'Guardando…' : 'Guardar'}
-                  </Boton>
-                )}
+          <div className="flex flex-col gap-3 border-t border-linea pt-4">
+            <h3 className="text-sm font-semibold text-tinta-2 inline-flex items-center gap-1.5">
+              <Icono nombre="pencil" size={15} />Mis apuntes
+              {delDia.length > 0 && <span className="chip ml-1 tabular-nums">{delDia.length}</span>}
+            </h3>
+
+            {delDia.length > 0 ? (
+              <ul className="flex flex-col gap-2">
+                {delDia.map((n) => (
+                  <li key={n.id} className="glass-fuerte border border-linea rounded-[16px] px-3.5 py-2.5 flex items-start gap-3 pop">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[14.5px] leading-snug whitespace-pre-wrap break-words">{n.texto}</p>
+                      <time className="text-[11px] text-tinta-3 tabular-nums" dateTime={n.created_at}>{fmtHora.format(new Date(n.created_at))}</time>
+                    </div>
+                    <button
+                      type="button" onClick={() => borrar(n.id)} disabled={borrando === n.id} aria-label="Borrar apunte" title="Borrar apunte"
+                      className="w-8 h-8 rounded-[10px] grid place-items-center text-tinta-3 hover:text-rosa-2 hover:bg-white active:scale-95 transition shrink-0 disabled:opacity-40"
+                    >
+                      <Icono nombre="x" size={16} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-tinta-3">Todavía no hay apuntes en este día.</p>
+            )}
+
+            <div className="flex flex-col gap-2">
+              <textarea
+                id="apunte" value={borrador} maxLength={MAX_NOTA} rows={2}
+                onChange={(e) => setBorrador(e.target.value)}
+                onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') void anadir(); }}
+                placeholder="Escribe un apunte para este día…"
+                className="campo h-auto py-3 resize-none leading-snug text-[15px]"
+              />
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[12px] text-tinta-3 tabular-nums">{borrador.length} / {MAX_NOTA}</span>
+                <Boton className="h-11 px-5 text-sm" icono="plus" onClick={anadir} disabled={!borrador.trim() || guardando}>
+                  {guardando ? 'Guardando…' : 'Añadir apunte'}
+                </Boton>
               </div>
             </div>
           </div>

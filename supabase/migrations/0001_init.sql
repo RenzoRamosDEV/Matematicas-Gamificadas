@@ -43,14 +43,15 @@ create table if not exists exercises (
 );
 create index if not exists exercises_session_idx on exercises(session_id);
 
--- Apuntes del jugador en el calendario: una nota por día. user_id lo pone la DB.
+-- Apuntes del jugador en el calendario: varios por día, cada uno con su id. user_id lo pone la DB.
 create table if not exists notas (
+  id uuid primary key default gen_random_uuid(),
   user_id uuid not null default auth.uid() references profiles(id) on delete cascade,
   fecha date not null,
   texto text not null check (char_length(texto) between 1 and 500),
-  updated_at timestamptz not null default now(),
-  primary key (user_id, fecha)
+  created_at timestamptz not null default now()
 );
+create index if not exists notas_user_fecha_idx on notas(user_id, fecha);
 
 -- tabla tonta solo para el keep-alive (workflow keep-alive.yml)
 create table if not exists heartbeat (id int primary key default 1, ts timestamptz default now());
