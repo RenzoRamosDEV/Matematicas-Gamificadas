@@ -9,13 +9,14 @@ interface Props {
   resultado: ResultadoFinal;
   yaJugado: boolean;
   onVolver: () => void;
+  onSalir?: () => void;
 }
 
-export function Resumen({ perfil, resultado, yaJugado, onVolver }: Props) {
+export function Resumen({ perfil, resultado, yaJugado, onVolver, onSalir }: Props) {
   const perfecta = resultado.sesion_perfecta;
   return (
     <div className="min-h-full max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
-      <Cabecera perfil={perfil} />
+      <Cabecera perfil={perfil} onSalir={onSalir} />
       <main className="max-w-md mx-auto w-full flex flex-col gap-5 mt-8">
         <div className="text-center flex flex-col items-center gap-3 pop">
           <div className={`tile ${perfecta ? 'tile-amarillo' : 'tile-verde'} w-20 h-20 rounded-[24px]`}>

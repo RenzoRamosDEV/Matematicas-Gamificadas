@@ -19,9 +19,10 @@ interface Props {
   onEmpezar: () => void;
   onVerResultado: () => void;
   cargando: boolean;
+  onSalir?: () => void;
 }
 
-export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, onEmpezar, onVerResultado, cargando }: Props) {
+export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, onEmpezar, onVerResultado, cargando, onSalir }: Props) {
   const nombre = perfil.nombre.charAt(0).toUpperCase() + perfil.nombre.slice(1);
   const completado = estadoReto === 'completado';
 
@@ -46,7 +47,7 @@ export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, on
 
   return (
     <div className="min-h-full max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
-      <Cabecera perfil={perfil} />
+      <Cabecera perfil={perfil} onSalir={onSalir} />
 
       {/* ---- Hero ---- */}
       <section className="mt-6 sm:mt-10 grid lg:grid-cols-[1.1fr_.9fr] gap-5 sm:gap-8 items-center">

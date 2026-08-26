@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// Genera el token (contraseña) de un jugador y el link que hay que mandarle.
+// Genera una contraseña aleatoria para un jugador y su link de acceso directo (opcional: también puede entrar con usuario y contraseña).
 // Uso: node scripts/token.mjs <usuario> [url-base]
-//   node scripts/token.mjs hermano https://renzoramosdev.github.io/Matematicas-Gamificadas/
+//   node scripts/token.mjs abel https://renzoramosdev.github.io/Matematicas-Gamificadas/
 import { randomBytes } from 'node:crypto';
 
-const [usuario = 'hermano', base = 'https://renzoramosdev.github.io/Matematicas-Gamificadas/'] = process.argv.slice(2);
+const [usuario = 'abel', base = 'https://renzoramosdev.github.io/Matematicas-Gamificadas/'] = process.argv.slice(2);
 // Espejo de CONFIG.AUTH_EMAIL_DOMAIN (src/config.ts). Supabase Auth rechaza dominios reservados (.local, .test…).
 const dominio = 'renzoramosdev.github.io';
 const token = randomBytes(24).toString('base64url');

@@ -83,6 +83,11 @@ body {
   .btn-glass:hover:not(:disabled) { transform: translateY(-1px); }
   .btn-peligro { color: #fff; background: linear-gradient(150deg, var(--color-rosa), var(--color-rosa-2)); }
 
+  .campo { height: 52px; padding: 0 16px; font-size: 16px; font-weight: 500; color: var(--color-tinta);
+    background: rgba(255,255,255,.78); border: 1px solid var(--color-linea); border-radius: 16px; corner-shape: superellipse(1.5);
+    outline: none; transition: box-shadow .2s, border-color .2s; }
+  .campo:focus { border-color: transparent; box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-azul) 45%, transparent); }
+
   .tecla { display: grid; place-items: center; height: 60px; font-size: 26px; font-weight: 700; color: var(--color-tinta);
     background: rgba(255,255,255,.72); border: 1px solid var(--color-linea); border-radius: 16px; corner-shape: superellipse(1.5);
     box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 8px 20px -12px rgba(30,40,80,.25); user-select: none; cursor: pointer;

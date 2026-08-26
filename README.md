@@ -1,6 +1,6 @@
 # Reto de cálculo 🧮
 
-Juego diario de aritmética para un niño de 10 años. Cuatro fases (sumas, restas, multiplicaciones, divisiones), timer por bloque, puntos y racha. Sitio 100 % estático en GitHub Pages + Supabase (Postgres, Auth y RPC). Acceso por link único, sin login.
+Juego diario de aritmética para un niño de 10 años. Cuatro fases (sumas, restas, multiplicaciones, divisiones), timer por bloque, puntos y racha. Sitio 100 % estático en GitHub Pages + Supabase (Postgres, Auth y RPC). Login sencillo con usuario y contraseña (o link de acceso directo).
 
 **Objetivo de producto: que vuelva mañana.** Fallar no resta, el tiempo es por fase (no por ejercicio), y hay un comodín de racha al mes.
 
@@ -26,15 +26,15 @@ src/
     generador.ts       ← genSuma/genResta/genMult/genDiv + cuotas de llevadas + dedupe
     generador.test.ts  ← vitest
     supabase.ts        ← cliente
-    auth.ts            ← canje del link único (?u=&t=)
+    auth.ts            ← login usuario+contraseña, salir y link de acceso directo (?u=&t=)
     api.ts             ← selects/inserts y llamadas RPC
     progreso.ts        ← fase actual en localStorage (para sobrevivir a un refresco)
-  screens/             ← Inicio · Fase · Transicion · Resumen · SinAcceso
+  screens/             ← Login · Inicio · Fase · Transicion · Resumen · Estados (error, cargando)
   components/          ← Keypad · Timer · Avatar · Cabecera
 supabase/migrations/0001_init.sql   ← tablas, RLS, RPCs (idempotente)
 .github/workflows/deploy.yml        ← build + deploy a Pages
 .github/workflows/keep-alive.yml    ← ping a Supabase cada 3 días
-scripts/token.mjs                   ← genera token + link para un jugador
+scripts/token.mjs                   ← genera una contraseña aleatoria + link para un jugador (opcional)
 ```
 
 ## Puesta en marcha
@@ -44,16 +44,13 @@ scripts/token.mjs                   ← genera token + link para un jugador
 1. Crea un **proyecto nuevo** (separado de tus otras apps: la config de Auth es global por proyecto).
 2. SQL Editor → pega y ejecuta `supabase/migrations/0001_init.sql`.
 3. Authentication → Providers → Email: desactiva **"Allow new users to sign up"**. Deja "Confirm email" desactivado o marca "Auto Confirm" al crear usuarios.
-4. Crea el jugador:
-   ```bash
-   node scripts/token.mjs hermano https://renzoramosdev.github.io/Matematicas-Gamificadas/
-   ```
-   Te imprime email, contraseña (token) y el link. En Authentication → Users → **Add user** crea `hermano@renzoramosdev.github.io` con ese token como contraseña (marca *Auto Confirm User*).
+4. Crea el jugador en Authentication → Users → **Add user**: email `<usuario>@renzoramosdev.github.io` (p. ej. `abel@renzoramosdev.github.io`) y la contraseña que tú elijas (marca *Auto Confirm User*). El niño entra con **usuario** (`abel`) y esa **contraseña**.
+   Si prefieres una contraseña aleatoria y un link de acceso directo: `node scripts/token.mjs abel https://renzoramosdev.github.io/Matematicas-Gamificadas/`.
    El dominio del email es el de GitHub Pages porque Supabase Auth rechaza dominios reservados (`.local`, `.test`, `example.com`); se cambia en `CONFIG.AUTH_EMAIL_DOMAIN`.
-   El perfil en `profiles` se crea solo (trigger `on_auth_user_created`) con `nombre = hermano`.
+   El perfil en `profiles` se crea solo (trigger `on_auth_user_created`) con `nombre = abel`.
 5. Project Settings → API: copia **Project URL** y **anon public key**.
 
-Más jugadores: repite el paso 4 con otro nombre (`primo`). Cada uno tiene su fila en `profiles`, sus puntos y su racha. Para revocar un link, cambia la contraseña del usuario en el dashboard.
+Más jugadores: repite el paso 4 con otro nombre (`primo`). Cada uno tiene su fila en `profiles`, sus puntos y su racha. Para revocar el acceso, cambia la contraseña del usuario en el dashboard.
 
 ### 2. GitHub
 
@@ -63,16 +60,17 @@ Más jugadores: repite el paso 4 con otro nombre (`primo`). Cada uno tiene su fi
 3. Settings → Pages → Source: **GitHub Actions**.
 4. Push a `main` → el workflow `deploy` publica. `keep-alive` corre cada 3 días para que Supabase no pause el proyecto.
 
-### 3. Mándale el link
+### 3. Entrar
 
-`https://renzoramosdev.github.io/Matematicas-Gamificadas/?u=hermano&t=<token>` — lo abre una vez, la sesión queda en `localStorage`, la URL se limpia y a partir de ahí entra directo desde favoritos.
+Abre `https://renzoramosdev.github.io/Matematicas-Gamificadas/`, escribe usuario y contraseña y aterrizas en el menú. La sesión queda en `localStorage`, así que las siguientes veces entra directo; el botón **Salir** de la cabecera la cierra.
+Acceso directo opcional: `…/?u=abel&t=<contraseña>` entra sin teclear nada y limpia la URL.
 
 ## Desarrollo local
 
 ```bash
 cp .env.example .env.local   # rellena URL y anon key
 npm install
-npm run dev                  # http://localhost:5173/Matematicas-Gamificadas/?u=hermano&t=<token>
+npm run dev                  # http://localhost:5173/Matematicas-Gamificadas/
 npm test                     # tests de los generadores
 npm run build
 ```

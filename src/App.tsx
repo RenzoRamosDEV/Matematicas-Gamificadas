@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CONFIG, ORDEN_FASES } from './config';
 import type { EjercicioDB, Profile, ResultadoFinal, Session } from './types';
-import { entrarConToken, haySesion } from './lib/auth';
+import { entrar, entrarConToken, haySesion, salir } from './lib/auth';
 import { cargarPerfil, cargarSesiones, finalizarSesion, guardarRespuesta, iniciarSesion, insertarEjercicios } from './lib/api';
 import { genSesion } from './lib/generador';
 import { borrarProgreso, guardarProgreso, leerProgreso, type Progreso } from './lib/progreso';
@@ -12,7 +12,8 @@ import { Inicio, type EstadoReto } from './screens/Inicio';
 import { Fase } from './screens/Fase';
 import { Transicion } from './screens/Transicion';
 import { Resumen } from './screens/Resumen';
-import { Cargando, ErrorPantalla, SinAcceso } from './screens/SinAcceso';
+import { Login } from './screens/Login';
+import { Cargando, ErrorPantalla } from './screens/Estados';
 
 type Estado = 'cargando' | 'sin_acceso' | 'error' | 'listo';
 
@@ -73,12 +74,33 @@ export default function App() {
       }
       setEstado('listo');
     } catch (e) {
-      setMensaje((e as Error).message);
+      const msg = (e as Error).message;
+      // Sesión guardada de un usuario que ya no existe (borrado en Supabase): fuera y al login
+      if (msg.startsWith('perfil')) {
+        await salir();
+        setMensaje('Tu sesión ya no es válida. Entra de nuevo.');
+        setEstado('sin_acceso');
+        return;
+      }
+      setMensaje(msg);
       setEstado('error');
     }
   }, [cargarHistorial]);
 
   useEffect(() => { void cargar(); }, [cargar]);
+
+  /** Login con usuario y contraseña: si entra, carga todo y aterriza en el inicio. */
+  const onEntrar = async (usuario: string, password: string) => {
+    const err = await entrar(usuario, password);
+    if (!err) { setEnInicio(true); void cargar(); }
+    return err;
+  };
+
+  const onSalir = async () => {
+    await salir();
+    setPerfil(null); setSession(null); setSesiones([]); setEjercicios([]); setResultado(null); setYaJugado(false);
+    setEnInicio(true); setMensaje(null); setEstado('sin_acceso');
+  };
 
   const actualizarProgreso = (p: Progreso) => {
     setProgreso(p);
@@ -145,7 +167,7 @@ export default function App() {
 
   // ---------- render ----------
   if (estado === 'cargando') return <Fondo><Cargando /></Fondo>;
-  if (estado === 'sin_acceso') return <Fondo><SinAcceso mensaje={mensaje} /></Fondo>;
+  if (estado === 'sin_acceso') return <Fondo><Login mensaje={mensaje} onEntrar={onEntrar} /></Fondo>;
   if (estado === 'error' || !perfil || !session) return <Fondo><ErrorPantalla mensaje={mensaje ?? 'Error desconocido'} onReintentar={cargar} /></Fondo>;
 
   const estadoReto: EstadoReto = resultado ? 'completado' : ejercicios.length ? 'en_curso' : 'nuevo';
@@ -156,11 +178,11 @@ export default function App() {
       <Inicio
         perfil={perfil} sesiones={sesiones} ejercicios={ejercicios} estadoReto={estadoReto}
         puntosHoy={resultado?.puntos ?? session.puntos}
-        onEmpezar={empezar} onVerResultado={() => setEnInicio(false)} cargando={ocupado}
+        onEmpezar={empezar} onVerResultado={() => setEnInicio(false)} cargando={ocupado} onSalir={onSalir}
       />
     );
   } else if (resultado) {
-    contenido = <Resumen perfil={perfil} resultado={resultado} yaJugado={yaJugado} onVolver={() => setEnInicio(true)} />;
+    contenido = <Resumen perfil={perfil} resultado={resultado} yaJugado={yaJugado} onVolver={() => setEnInicio(true)} onSalir={onSalir} />;
   } else if (progreso.fase >= ORDEN_FASES.length) {
     contenido = <Cargando texto="Calculando resultado…" />;
   } else {

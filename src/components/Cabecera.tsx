@@ -5,7 +5,7 @@ import { Avatar } from './Avatar';
 import { Icono } from './Icono';
 
 /** Cabecera de vidrio flotante: logo, indicador de nivel y avatar. */
-export function Cabecera({ perfil }: { perfil: Profile }) {
+export function Cabecera({ perfil, onSalir }: { perfil: Profile; onSalir?: () => void }) {
   const n = nivel(perfil.puntos_total);
   const { actual, meta } = progresoNivel(perfil.puntos_total);
   return (
@@ -32,6 +32,14 @@ export function Cabecera({ perfil }: { perfil: Profile }) {
           <Avatar nombre={perfil.nombre} url={perfil.avatar_url} size={38} />
           <span className="hidden sm:block font-semibold capitalize text-[14.5px]">{perfil.nombre}</span>
         </div>
+        {onSalir && (
+          <button
+            type="button" onClick={onSalir} title="Salir" aria-label="Salir"
+            className="w-10 h-10 rounded-[13px] grid place-items-center glass-fuerte border border-linea text-tinta-2 hover:text-tinta active:scale-95 transition"
+          >
+            <Icono nombre="salir" size={19} />
+          </button>
+        )}
       </div>
     </header>
   );

@@ -12,7 +12,7 @@ export const CONFIG = {
    */
   AUTH_EMAIL_DOMAIN: 'renzoramosdev.github.io',
   /** Usuario por defecto si el link no lleva ?u= */
-  USUARIO_POR_DEFECTO: 'hermano',
+  USUARIO_POR_DEFECTO: 'abel',
 } as const;
 
 export const ORDEN_FASES = ['suma', 'resta', 'mult', 'div'] as const;
