@@ -72,18 +72,18 @@ alter table heartbeat enable row level security;
 
 drop policy if exists "propio perfil" on profiles;
 create policy "propio perfil" on profiles
-  for select using (auth.uid() = id);
+  for select using ((select auth.uid()) = id);
 -- OJO: sin policy de UPDATE en profiles. Los puntos solo los toca la RPC.
 
 drop policy if exists "propias sesiones" on sessions;
 create policy "propias sesiones" on sessions
-  for all using (auth.uid() = user_id);
+  for all using ((select auth.uid()) = user_id);
 
 drop policy if exists "propios ejercicios" on exercises;
 create policy "propios ejercicios" on exercises
   for all using (
     exists (select 1 from sessions s
-            where s.id = exercises.session_id and s.user_id = auth.uid())
+            where s.id = exercises.session_id and s.user_id = (select auth.uid()))
   );
 
 drop policy if exists "heartbeat público" on heartbeat;
@@ -96,7 +96,7 @@ grant  update (respuesta, ms) on exercises to authenticated;
 
 -- ---------- Constantes de puntuación (espejo de src/config.ts) --------
 create or replace function cfg_tiempo_fase(p_op text) returns int
-language sql immutable as $$
+language sql immutable set search_path = public as $$
   select case p_op when 'suma' then 120 when 'resta' then 150
                    when 'mult' then 300 when 'div' then 270 else 0 end
 $$;
@@ -246,5 +246,14 @@ begin
     'fases', v_fases);
 end $$;
 
-revoke execute on function iniciar_sesion() from anon;
-revoke execute on function finalizar_sesion(uuid, jsonb) from anon;
+-- ---------- Permisos de ejecución ---------------------------------------
+-- Postgres concede EXECUTE a PUBLIC por defecto: hay que revocar de public,
+-- no solo de anon. Solo los usuarios autenticados llaman a las RPCs.
+revoke execute on function iniciar_sesion() from public, anon;
+revoke execute on function finalizar_sesion(uuid, jsonb) from public, anon;
+grant  execute on function iniciar_sesion() to authenticated;
+grant  execute on function finalizar_sesion(uuid, jsonb) to authenticated;
+
+-- Internas: el trigger y la constante corren como owner; fuera de la API.
+revoke execute on function handle_new_user() from public, anon, authenticated;
+revoke execute on function cfg_tiempo_fase(text) from public, anon, authenticated;
