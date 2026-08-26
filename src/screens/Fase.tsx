@@ -3,6 +3,7 @@ import { CONFIG, FASE_INFO } from '../config';
 import type { EjercicioDB, Op } from '../types';
 import { Keypad } from '../components/Keypad';
 import { Timer } from '../components/Timer';
+import { borrarDigito, teclear } from '../lib/entrada';
 
 interface Props {
   op: Op;
@@ -11,8 +12,6 @@ interface Props {
   onRespuesta: (id: string, respuesta: number, ms: number) => void;
   onTerminar: (segundosRestantes: number) => void;
 }
-
-const MAX_DIGITOS = 7;
 
 export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props) {
   const info = FASE_INFO[op];
@@ -87,8 +86,9 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
     if (idx < ejercicios.length - 1) setIdx(idx + 1);
   };
 
-  const digito = (d: string) => setBuffer((b) => (b.length >= MAX_DIGITOS ? b : b === '0' ? d : b + d));
-  const borrar = () => setBuffer((b) => b.slice(0, -1));
+  // Suma, resta y multiplicación se escriben como en papel: de derecha a izquierda (ver lib/entrada.ts)
+  const digito = (d: string) => setBuffer((b) => teclear(b, d, op));
+  const borrar = () => setBuffer((b) => borrarDigito(b, op));
 
   // Teclado físico
   useEffect(() => {
