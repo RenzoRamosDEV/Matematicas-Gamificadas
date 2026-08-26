@@ -11,11 +11,13 @@ interface Props {
   op: Op;
   numFase: number;                 // 1..4, para el título
   ejercicios: EjercicioDB[];       // solo los de esta fase, ordenados
+  inicio: number;                  // epoch ms en que se eligió la fase: el tiempo no se reinicia al salir o refrescar
   onRespuesta: (id: string, respuesta: number, ms: number) => void;
   onTerminar: (segundosRestantes: number) => void;
+  onInicio: () => void;            // volver al menú guardando lo que hay
 }
 
-export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props) {
+export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar, onInicio }: Props) {
   const info = FASE_INFO[op];
   const total: number = CONFIG.TIEMPOS[op];
   const rtl = escribeDerechaAIzquierda(op);
@@ -28,7 +30,7 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
   const [msAcum, setMsAcum] = useState<Record<string, number>>(
     () => Object.fromEntries(ejercicios.map((e) => [e.id, e.ms ?? 0])),
   );
-  const [restante, setRestante] = useState<number>(total);
+  const [restante, setRestante] = useState<number>(() => Math.max(0, total - Math.floor((Date.now() - inicio) / 1000)));
   const [confirmando, setConfirmando] = useState(false);
   const desdeRef = useRef(Date.now());
   const terminadoRef = useRef(false);
@@ -66,12 +68,14 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
     onTerminar(segs);
   }, [commit, onTerminar]);
 
-  // Timer de bloque
+  // Timer de bloque, anclado a la hora de inicio (no se desvía si la pestaña se duerme)
   useEffect(() => {
-    const t = setInterval(() => setRestante((s) => Math.max(0, s - 1)), 1000);
+    const t = setInterval(() => setRestante(Math.max(0, total - Math.floor((Date.now() - inicio) / 1000))), 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [total, inicio]);
   useEffect(() => { if (restante === 0) terminar(0); }, [restante, terminar]);
+
+  const volverAlInicio = () => { commit(); onInicio(); };
 
   const irA = (i: number) => {
     commit();
@@ -120,6 +124,10 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
       {/* Cabecera de la fase */}
       <header className="glass rounded-[22px] px-3 sm:px-4 h-[60px] flex items-center justify-between gap-3 in d1">
         <div className="flex items-center gap-2.5 min-w-0">
+          <button type="button" onClick={volverAlInicio} title="Volver al inicio (se guarda lo que llevas)" aria-label="Volver al inicio"
+            className="w-9 h-9 rounded-[12px] grid place-items-center glass-fuerte border border-linea text-tinta-2 hover:text-tinta active:scale-95 transition shrink-0">
+            <Icono nombre="chevLeft" size={18} />
+          </button>
           <span className={`tile tile-${info.acento} w-9 h-9 rounded-[12px] text-lg font-bold shrink-0`}>{info.simbolo}</span>
           <div className="leading-tight min-w-0">
             <div className="text-tinta-3 font-medium text-[11px]">Fase {numFase} de 4</div>

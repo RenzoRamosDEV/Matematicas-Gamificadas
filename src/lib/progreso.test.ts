@@ -9,13 +9,13 @@ describe('normalizarProgreso', () => {
   });
   it('migra el formato antiguo secuencial', () => {
     expect(normalizarProgreso({ fase: 0, pantalla: 'jugando', tiempos: {} }))
-      .toEqual({ hechas: [], actual: 'suma', pantalla: 'jugando', tiempos: {} });
+      .toEqual({ hechas: [], actual: 'suma', pantalla: 'jugando', tiempos: {}, inicios: {} });
     expect(normalizarProgreso({ fase: 1, pantalla: 'transicion', tiempos: { suma: 30, resta: 10 } }))
-      .toEqual({ hechas: ['suma', 'resta'], actual: 'resta', pantalla: 'transicion', tiempos: { suma: 30, resta: 10 } });
+      .toEqual({ hechas: ['suma', 'resta'], actual: 'resta', pantalla: 'transicion', tiempos: { suma: 30, resta: 10 }, inicios: {} });
     expect(normalizarProgreso({ fase: 4, pantalla: 'jugando', tiempos: {} }).pantalla).toBe('finalizando');
   });
   it('respeta el formato nuevo y corrige incoherencias', () => {
-    const p: Progreso = { hechas: ['div', 'suma'], actual: 'mult', pantalla: 'jugando', tiempos: { div: 5, suma: 0 } };
+    const p: Progreso = { hechas: ['div', 'suma'], actual: 'mult', pantalla: 'jugando', tiempos: { div: 5, suma: 0 }, inicios: { mult: 1700000000000 } };
     expect(normalizarProgreso(p)).toEqual(p);
     expect(normalizarProgreso({ hechas: ['div'], actual: null, pantalla: 'jugando' }).pantalla).toBe('eligiendo');
     expect(normalizarProgreso({ hechas: ['suma', 'resta', 'mult', 'div'], actual: null, pantalla: 'eligiendo' }).pantalla).toBe('finalizando');

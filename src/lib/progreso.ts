@@ -13,9 +13,10 @@ export interface Progreso {
   actual: Op | null;                  // fase en curso (o recién terminada, en 'transicion')
   pantalla: 'eligiendo' | 'jugando' | 'transicion' | 'finalizando';
   tiempos: Partial<Record<Op, number>>;   // segundos restantes al cerrar cada fase
+  inicios: Partial<Record<Op, number>>;   // cuándo se eligió cada fase (epoch ms): el cronómetro sobrevive a salir o refrescar
 }
 
-export const PROGRESO_INICIAL: Progreso = { hechas: [], actual: null, pantalla: 'eligiendo', tiempos: {} };
+export const PROGRESO_INICIAL: Progreso = { hechas: [], actual: null, pantalla: 'eligiendo', tiempos: {}, inicios: {} };
 
 export const pendientes = (p: Progreso): Op[] => ORDEN_FASES.filter((op) => !p.hechas.includes(op));
 
@@ -26,14 +27,15 @@ export function normalizarProgreso(raw: unknown): Progreso {
   if (!raw || typeof raw !== 'object') return PROGRESO_INICIAL;
   const r = raw as Record<string, unknown>;
   const tiempos = (r.tiempos && typeof r.tiempos === 'object' ? r.tiempos : {}) as Progreso['tiempos'];
+  const inicios = (r.inicios && typeof r.inicios === 'object' ? r.inicios : {}) as Progreso['inicios'];
 
   // Formato antiguo: índice secuencial en ORDEN_FASES
   if (typeof r.fase === 'number') {
     const n = Math.max(0, Math.min(ORDEN_FASES.length, r.fase));
     const hechas = [...ORDEN_FASES.slice(0, n)];
-    if (n >= ORDEN_FASES.length) return { hechas, actual: null, pantalla: 'finalizando', tiempos };
-    if (r.pantalla === 'transicion') return { hechas: [...hechas, ORDEN_FASES[n]], actual: ORDEN_FASES[n], pantalla: 'transicion', tiempos };
-    return { hechas, actual: ORDEN_FASES[n], pantalla: 'jugando', tiempos };
+    if (n >= ORDEN_FASES.length) return { hechas, actual: null, pantalla: 'finalizando', tiempos, inicios };
+    if (r.pantalla === 'transicion') return { hechas: [...hechas, ORDEN_FASES[n]], actual: ORDEN_FASES[n], pantalla: 'transicion', tiempos, inicios };
+    return { hechas, actual: ORDEN_FASES[n], pantalla: 'jugando', tiempos, inicios };
   }
 
   const hechas = Array.isArray(r.hechas) ? [...new Set(r.hechas.filter(esOp))] : [];
@@ -42,7 +44,7 @@ export function normalizarProgreso(raw: unknown): Progreso {
   let pantalla = pantallas.includes(r.pantalla as Progreso['pantalla']) ? (r.pantalla as Progreso['pantalla']) : 'eligiendo';
   if ((pantalla === 'jugando' || pantalla === 'transicion') && !actual) pantalla = 'eligiendo';
   if (hechas.length >= ORDEN_FASES.length) pantalla = pantalla === 'transicion' ? 'transicion' : 'finalizando';
-  return { hechas, actual, pantalla, tiempos };
+  return { hechas, actual, pantalla, tiempos, inicios };
 }
 
 const clave = (sessionId: string) => `reto:${sessionId}`;

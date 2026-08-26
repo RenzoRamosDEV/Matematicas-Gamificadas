@@ -142,7 +142,9 @@ export default function App() {
         setMensaje((e as Error).message); setEstado('error'); return;
       } finally { setOcupado(false); }
     }
-    actualizarProgreso({ ...progreso, actual: op, pantalla: 'jugando' });
+    // El cronómetro de la fase cuenta desde la primera vez que se eligió (sobrevive a salir al menú o refrescar)
+    const inicios = { ...progreso.inicios, [op]: progreso.inicios[op] ?? Date.now() };
+    actualizarProgreso({ ...progreso, actual: op, pantalla: 'jugando', inicios });
     setVista('reto');
   };
 
@@ -222,12 +224,12 @@ export default function App() {
       const aciertos = deFase.filter((e) => e.respuesta !== null && e.respuesta === e.sol).length;
       contenido = (
         <Transicion op={op} aciertos={aciertos} total={deFase.length} ejercicios={ejercicios} hechas={progreso.hechas}
-          onElegir={elegirFase} onVerResultado={verResultado} cargando={ocupado} />
+          onElegir={elegirFase} onVerResultado={verResultado} onInicio={() => setVista('inicio')} cargando={ocupado} />
       );
     } else {
       contenido = (
         <Fase key={op} op={op} numFase={Math.min(progreso.hechas.length + 1, ORDEN_FASES.length)} ejercicios={deFase}
-          onRespuesta={onRespuesta} onTerminar={onTerminarFase} />
+          inicio={progreso.inicios[op] ?? Date.now()} onRespuesta={onRespuesta} onTerminar={onTerminarFase} onInicio={() => setVista('inicio')} />
       );
     }
   }
