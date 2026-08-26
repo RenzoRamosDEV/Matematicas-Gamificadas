@@ -143,9 +143,9 @@ export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, on
           texto="Medallas por rachas y sesiones perfectas."
           chip={<span className="chip">{conseguidos} de {logros.length}</span>}
         >
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-1.5 flex-wrap">
             {logros.map((l) => (
-              <span key={l.id} title={`${l.nombre}: ${l.descripcion}`} className={`tile redondo ${l.conseguido ? `tile-${l.acento}` : 'tile-gris'} w-[34px] h-[34px]`}>
+              <span key={l.id} title={`${l.nombre}: ${l.descripcion}`} className={`tile redondo ${l.conseguido ? `tile-${l.acento}` : 'tile-gris'} w-[30px] h-[30px]`}>
                 <Icono nombre={l.icono} size={16} />
               </span>
             ))}
