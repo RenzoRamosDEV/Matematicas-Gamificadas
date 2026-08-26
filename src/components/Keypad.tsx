@@ -1,3 +1,5 @@
+import { Icono } from './Icono';
+
 interface Props {
   onDigito: (d: string) => void;
   onBorrar: () => void;
@@ -10,19 +12,11 @@ export function Keypad({ onDigito, onBorrar, onOk, okDisabled }: Props) {
   return (
     <div className="grid grid-cols-3 gap-2 w-full max-w-sm mx-auto">
       {teclas.map((t) => (
-        <button key={t} type="button" className="key" onClick={() => onDigito(t)} aria-label={t}>{t}</button>
+        <button key={t} type="button" className="tecla" onClick={() => onDigito(t)} aria-label={t}>{t}</button>
       ))}
-      <button type="button" className="key text-rose-300" onClick={onBorrar} aria-label="Borrar">⌫</button>
-      <button type="button" className="key" onClick={() => onDigito('0')} aria-label="0">0</button>
-      <button
-        type="button"
-        className="key bg-amber-400 text-slate-950 shadow-[0_5px_0_0_#b45309] disabled:opacity-40"
-        onClick={onOk}
-        disabled={okDisabled}
-        aria-label="Aceptar"
-      >
-        ✓
-      </button>
+      <button type="button" className="tecla text-rosa-2" onClick={onBorrar} aria-label="Borrar"><Icono nombre="backspace" size={26} /></button>
+      <button type="button" className="tecla" onClick={() => onDigito('0')} aria-label="0">0</button>
+      <button type="button" className="tecla tecla-ok" onClick={onOk} disabled={okDisabled} aria-label="Aceptar"><Icono nombre="check" size={26} /></button>
     </div>
   );
 }
