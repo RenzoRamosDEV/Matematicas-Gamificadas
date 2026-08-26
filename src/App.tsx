@@ -13,6 +13,7 @@ import { Fase } from './screens/Fase';
 import { Transicion } from './screens/Transicion';
 import { Resumen } from './screens/Resumen';
 import { Login } from './screens/Login';
+import { Logros } from './screens/Logros';
 import { Cargando, ErrorPantalla } from './screens/Estados';
 
 type Estado = 'cargando' | 'sin_acceso' | 'error' | 'listo';
@@ -40,6 +41,15 @@ export default function App() {
   const [aviso, setAviso] = useState<string | null>(null);
   // Siempre se aterriza en el inicio; desde ahí se empieza o se continúa el reto, o se ve el resultado del día
   const [enInicio, setEnInicio] = useState(true);
+  // La página de logros vive en #logros: así funciona el botón atrás y se puede enlazar
+  const [enLogros, setEnLogros] = useState(() => location.hash === '#logros');
+  useEffect(() => {
+    const sync = () => setEnLogros(location.hash === '#logros');
+    window.addEventListener('hashchange', sync);
+    return () => window.removeEventListener('hashchange', sync);
+  }, []);
+  const abrirLogros = () => { location.hash = 'logros'; };
+  const cerrarLogros = () => { history.replaceState(null, '', location.pathname + location.search); setEnLogros(false); };
 
   // Cola de escrituras a la DB: se encadenan para no perder ninguna y poder esperarlas antes de finalizar
   const cola = useRef<Promise<void>>(Promise.resolve());
@@ -99,7 +109,7 @@ export default function App() {
   const onSalir = async () => {
     await salir();
     setPerfil(null); setSession(null); setSesiones([]); setEjercicios([]); setResultado(null); setYaJugado(false);
-    setEnInicio(true); setMensaje(null); setEstado('sin_acceso');
+    setEnInicio(true); cerrarLogros(); setMensaje(null); setEstado('sin_acceso');
   };
 
   const actualizarProgreso = (p: Progreso) => {
@@ -173,12 +183,14 @@ export default function App() {
   const estadoReto: EstadoReto = resultado ? 'completado' : ejercicios.length ? 'en_curso' : 'nuevo';
 
   let contenido;
-  if (enInicio) {
+  if (enLogros) {
+    contenido = <Logros perfil={perfil} sesiones={sesiones} onVolver={cerrarLogros} onSalir={onSalir} />;
+  } else if (enInicio) {
     contenido = (
       <Inicio
         perfil={perfil} sesiones={sesiones} ejercicios={ejercicios} estadoReto={estadoReto}
         puntosHoy={resultado?.puntos ?? session.puntos}
-        onEmpezar={empezar} onVerResultado={() => setEnInicio(false)} cargando={ocupado} onSalir={onSalir}
+        onEmpezar={empezar} onVerResultado={() => setEnInicio(false)} onVerLogros={abrirLogros} cargando={ocupado} onSalir={onSalir}
       />
     );
   } else if (resultado) {

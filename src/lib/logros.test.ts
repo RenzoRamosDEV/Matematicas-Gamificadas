@@ -32,6 +32,13 @@ describe('logros', () => {
     expect(por.puntos_1000).toBe(true);
     expect(por.puntos_5000).toBe(false);
   });
+  it('cada medalla informa de su progreso, acotado a la meta', () => {
+    const por = Object.fromEntries(evaluarLogros({ perfil: perfil(620, 1), sesiones: [completada([fase(5, 5)])] }).map((l) => [l.id, l]));
+    expect([por.racha_3.actual, por.racha_3.meta]).toEqual([1, 3]);
+    expect([por.puntos_500.actual, por.puntos_500.meta]).toEqual([500, 500]);
+    expect([por.puntos_1000.actual, por.puntos_1000.meta]).toEqual([620, 1000]);
+    expect([por.primer_reto.actual, por.perfecta.actual]).toEqual([1, 1]);
+  });
   it('una sesión sin detalle no cuenta como perfecta', () => {
     expect(evaluarLogros({ perfil: perfil(0, 0), sesiones: [completada(null)] }).find((l) => l.id === 'perfecta')?.conseguido).toBe(false);
   });

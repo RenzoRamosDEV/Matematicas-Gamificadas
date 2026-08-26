@@ -18,11 +18,12 @@ interface Props {
   puntosHoy: number;
   onEmpezar: () => void;
   onVerResultado: () => void;
+  onVerLogros: () => void;
   cargando: boolean;
   onSalir?: () => void;
 }
 
-export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, onEmpezar, onVerResultado, cargando, onSalir }: Props) {
+export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, onEmpezar, onVerResultado, onVerLogros, cargando, onSalir }: Props) {
   const nombre = perfil.nombre.charAt(0).toUpperCase() + perfil.nombre.slice(1);
   const completado = estadoReto === 'completado';
 
@@ -140,9 +141,9 @@ export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, on
         </Tarjeta>
 
         <Tarjeta
-          acento="violeta" icono="medal" titulo="Mis logros" delay="d7"
+          acento="violeta" icono="medal" titulo="Mis logros" delay="d7" onClick={onVerLogros}
           texto="Medallas por rachas y sesiones perfectas."
-          chip={<span className="chip">{conseguidos} de {logros.length}</span>}
+          chip={<span className="chip">{conseguidos} de {logros.length}<Icono nombre="chev" size={13} /></span>}
         >
           <div className="flex gap-1.5 flex-wrap">
             {logros.map((l) => (

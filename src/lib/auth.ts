@@ -30,7 +30,7 @@ export async function entrarConToken(): Promise<string | null> {
   const usuario = params.get('u') ?? CONFIG.USUARIO_POR_DEFECTO;
   const { error } = await supabase.auth.signInWithPassword({ email: emailDe(usuario), password: token });
 
-  history.replaceState(null, '', location.pathname);
+  history.replaceState(null, '', location.pathname + location.hash);
   return error ? 'Ese link no funciona. Entra con tu usuario y contraseña.' : null;
 }
 
