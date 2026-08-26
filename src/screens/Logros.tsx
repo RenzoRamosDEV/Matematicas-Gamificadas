@@ -1,5 +1,5 @@
 import type { Profile, Session } from '../types';
-import { evaluarLogros } from '../lib/logros';
+import { CATEGORIAS, evaluarLogros, type LogroEvaluado } from '../lib/logros';
 import { Barra } from '../components/Barra';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
@@ -12,12 +12,11 @@ interface Props {
   onSalir?: () => void;
 }
 
-const DELAYS = ['d2', 'd3', 'd3', 'd4', 'd4', 'd5', 'd5', 'd6'];
-
-/** Página de insignias: las 8 medallas en grande, con su progreso real. */
+/** Página de insignias: todas las medallas en grande, por categoría y con su progreso real. */
 export function Logros({ perfil, sesiones, onVolver, onSalir }: Props) {
   const logros = evaluarLogros({ perfil, sesiones });
   const conseguidos = logros.filter((l) => l.conseguido).length;
+  const grupos = CATEGORIAS.map((cat) => ({ cat, items: logros.filter((l) => l.categoria === cat) })).filter((g) => g.items.length);
 
   return (
     <div className="min-h-dvh max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
@@ -29,7 +28,7 @@ export function Logros({ perfil, sesiones, onVolver, onSalir }: Props) {
             <Icono nombre="chevLeft" size={16} />Inicio
           </button>
           <h1 className="text-[36px] sm:text-5xl font-bold leading-[1.05] tracking-[-.03em]">Mis logros</h1>
-          <p className="text-tinta-2 text-[17px]">
+          <p className="text-tinta-2 text-[17px] text-pretty">
             {conseguidos === 0
               ? 'Todavía no tienes ninguna medalla. La primera cae al completar un reto.'
               : conseguidos === logros.length
@@ -46,37 +45,51 @@ export function Logros({ perfil, sesiones, onVolver, onSalir }: Props) {
         </div>
       </section>
 
-      <section className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
-        {logros.map((l, i) => (
-          <article
-            key={l.id}
-            className={`glass glass-raise rounded-[30px] p-5 sm:p-6 flex flex-col items-center text-center gap-4 in ${DELAYS[i]} ${l.conseguido ? '' : 'saturate-50'}`}
-            aria-label={`${l.nombre}: ${l.conseguido ? 'conseguida' : 'pendiente'}`}
-          >
-            <div className={`tile ${l.conseguido ? `tile-${l.acento}` : 'tile-gris'} w-[84px] h-[84px] sm:w-[96px] sm:h-[96px] rounded-[28px]`}>
-              <Icono nombre={l.conseguido ? l.icono : 'lock'} size={40} />
+      {grupos.map((g, gi) => {
+        const hechas = g.items.filter((l) => l.conseguido).length;
+        return (
+          <section key={g.cat} className={`mt-8 in ${gi < 7 ? `d${gi + 2}` : 'd8'}`}>
+            <div className="flex items-baseline justify-between px-1 mb-3">
+              <h2 className="text-[20px] sm:text-[22px] font-bold tracking-tight">{g.cat}</h2>
+              <span className="chip tabular-nums">{hechas} de {g.items.length}</span>
             </div>
-            <div className="flex flex-col gap-1">
-              <h2 className="text-[17px] sm:text-[19px] font-bold tracking-tight">{l.nombre}</h2>
-              <p className="text-[13.5px] sm:text-[14.5px] text-tinta-2 leading-snug text-pretty">{l.descripcion}</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+              {g.items.map((l) => <Insignia key={l.id} logro={l} />)}
             </div>
-            <div className="w-full mt-auto flex flex-col gap-2">
-              {l.conseguido ? (
-                <span className="chip chip-verde self-center"><Icono nombre="check" size={13} />Conseguida</span>
-              ) : (
-                <>
-                  <Barra valor={l.actual / l.meta} acento={l.acento} animada />
-                  <span className="text-xs text-tinta-3 tabular-nums">{l.actual.toLocaleString('es-ES')} de {l.meta.toLocaleString('es-ES')}</span>
-                </>
-              )}
-            </div>
-          </article>
-        ))}
-      </section>
+          </section>
+        );
+      })}
 
-      <div className="mt-8 flex justify-center in d7">
+      <div className="mt-10 flex justify-center">
         <Boton variante="glass" icono="chevLeft" onClick={onVolver}>Volver al inicio</Boton>
       </div>
     </div>
+  );
+}
+
+function Insignia({ logro: l }: { logro: LogroEvaluado }) {
+  return (
+    <article
+      className={`glass glass-raise rounded-[26px] p-4 sm:p-5 flex flex-col items-center text-center gap-3 ${l.conseguido ? '' : 'saturate-50'}`}
+      aria-label={`${l.nombre}: ${l.conseguido ? 'conseguida' : 'pendiente'}`}
+    >
+      <div className={`tile ${l.conseguido ? `tile-${l.acento}` : 'tile-gris'} w-[68px] h-[68px] sm:w-[80px] sm:h-[80px] rounded-[24px]`}>
+        <Icono nombre={l.conseguido ? l.icono : 'lock'} size={34} />
+      </div>
+      <div className="flex flex-col gap-0.5">
+        <h3 className="text-[15.5px] sm:text-[17px] font-bold tracking-tight text-balance">{l.nombre}</h3>
+        <p className="text-[12.5px] sm:text-[13.5px] text-tinta-2 leading-snug text-pretty">{l.descripcion}</p>
+      </div>
+      <div className="w-full mt-auto flex flex-col gap-1.5">
+        {l.conseguido ? (
+          <span className="chip chip-verde self-center"><Icono nombre="check" size={13} />Conseguida</span>
+        ) : (
+          <>
+            <Barra valor={l.actual / l.meta} acento={l.acento} animada />
+            <span className="text-[11px] text-tinta-3 tabular-nums">{l.actual.toLocaleString('es-ES')} de {l.meta.toLocaleString('es-ES')}</span>
+          </>
+        )}
+      </div>
+    </article>
   );
 }

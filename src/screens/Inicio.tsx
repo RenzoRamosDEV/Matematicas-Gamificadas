@@ -35,6 +35,8 @@ export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, on
   // Mis logros: medallas derivadas del perfil y del historial
   const logros = evaluarLogros({ perfil, sesiones });
   const conseguidos = logros.filter((l) => l.conseguido).length;
+  // En la tarjeta caben 7 + el contador: primero las conseguidas, luego las siguientes pendientes
+  const muestra = [...logros.filter((l) => l.conseguido), ...logros.filter((l) => !l.conseguido)].slice(0, 7);
 
   // Mis retos: fases hechas según los ejercicios de la sesión de hoy
   const fases = ORDEN_FASES.map((op) => {
@@ -142,15 +144,18 @@ export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, on
 
         <Tarjeta
           acento="violeta" icono="medal" titulo="Mis logros" delay="d7" onClick={onVerLogros}
-          texto="Medallas por rachas y sesiones perfectas."
+          texto="Medallas por retos, rachas, aciertos y velocidad."
           chip={<span className="chip">{conseguidos} de {logros.length}<Icono nombre="chev" size={13} /></span>}
         >
           <div className="flex gap-1.5 flex-wrap">
-            {logros.map((l) => (
+            {muestra.map((l) => (
               <span key={l.id} title={`${l.nombre}: ${l.descripcion}`} className={`tile redondo ${l.conseguido ? `tile-${l.acento}` : 'tile-gris'} w-[30px] h-[30px]`}>
                 <Icono nombre={l.icono} size={16} />
               </span>
             ))}
+            {logros.length > muestra.length && (
+              <span className="tile redondo tile-gris w-[30px] h-[30px] text-[11px] font-bold">+{logros.length - muestra.length}</span>
+            )}
           </div>
         </Tarjeta>
       </section>

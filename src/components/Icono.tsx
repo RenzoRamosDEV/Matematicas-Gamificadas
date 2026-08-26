@@ -21,6 +21,13 @@ const PATHS = {
   lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
   x: '<path d="m6 6 12 12"/><path d="m18 6-12 12"/>',
   salir: '<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M14 8l4 4-4 4"/><path d="M18 12H9"/>',
+  plus: '<path d="M12 6v12"/><path d="M6 12h12"/>',
+  minus: '<path d="M6 12h12"/>',
+  times: '<path d="m7 7 10 10"/><path d="m17 7-10 10"/>',
+  divide: '<path d="M6 12h12"/><circle cx="12" cy="7" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="17" r="1.3" fill="currentColor" stroke="none"/>',
+  zap: '<path d="M13 3 5 14h6l-1 7 9-11h-6z"/>',
+  trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v3"/><path d="M9 20h6"/><path d="M10 16h4v4h-4z"/>',
+  calendar: '<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/>',
 } as const;
 
 export type NombreIcono = keyof typeof PATHS;
