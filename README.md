@@ -13,6 +13,7 @@ Juego diario de aritmética para un niño de 10 años. Cuatro fases (sumas, rest
 | DB + Auth | Supabase (proyecto propio) |
 | Generación de ejercicios | Cliente, `src/lib/generador.ts` (determinista, sin IA) |
 | Corrección, puntos y racha | Postgres RPC `security definer` (`supabase/migrations/0001_init.sql`) |
+| Apuntes del calendario | Tabla `notas` (una por día y jugador, RLS) |
 
 Regla de oro: **el cliente nunca envía puntos, fechas ni el flag "correcta"**. Envía respuestas; la DB hace el resto.
 

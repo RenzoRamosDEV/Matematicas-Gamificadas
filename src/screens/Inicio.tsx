@@ -19,11 +19,12 @@ interface Props {
   onEmpezar: () => void;
   onVerResultado: () => void;
   onVerLogros: () => void;
+  onVerProgreso: () => void;
   cargando: boolean;
   onSalir?: () => void;
 }
 
-export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, onEmpezar, onVerResultado, onVerLogros, cargando, onSalir }: Props) {
+export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, onEmpezar, onVerResultado, onVerLogros, onVerProgreso, cargando, onSalir }: Props) {
   const nombre = perfil.nombre.charAt(0).toUpperCase() + perfil.nombre.slice(1);
   const completado = estadoReto === 'completado';
 
@@ -120,9 +121,9 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
         </Tarjeta>
 
         <Tarjeta
-          acento="verde" icono="chart" titulo="Mi progreso" delay="d6"
-          texto="Tus puntos y tu racha, semana a semana."
-          chip={<span className={`chip ${totalSemana > 0 ? 'chip-verde' : ''}`}>{totalSemana > 0 ? `+${totalSemana} esta semana` : 'Empieza hoy'}</span>}
+          acento="verde" icono="chart" titulo="Mi progreso" delay="d6" onClick={onVerProgreso}
+          texto="Tu calendario de retos y tus apuntes de cada día."
+          chip={<span className={`chip ${totalSemana > 0 ? 'chip-verde' : ''}`}>{totalSemana > 0 ? `+${totalSemana} esta semana` : 'Empieza hoy'}<Icono nombre="chev" size={13} /></span>}
         >
           <div>
             <div className="flex items-end justify-between gap-2 h-11 px-0.5">

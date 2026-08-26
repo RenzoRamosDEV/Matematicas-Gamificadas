@@ -55,3 +55,10 @@ export interface ResultadoFinal {
   comodin_usado: boolean;
   fases: FaseDetalle[];
 }
+
+/** Apunte del jugador en el calendario (tabla notas): una por día */
+export interface Nota {
+  fecha: string;
+  texto: string;
+  updated_at: string;
+}

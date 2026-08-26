@@ -15,11 +15,12 @@ import { Transicion } from './screens/Transicion';
 import { Resumen } from './screens/Resumen';
 import { Login } from './screens/Login';
 import { Logros } from './screens/Logros';
+import { Progreso as PaginaProgreso } from './screens/Progreso';
 import { Cargando, ErrorPantalla } from './screens/Estados';
 
 type Estado = 'cargando' | 'sin_acceso' | 'error' | 'listo';
 /** Qué se ve cuando el estado es 'listo': el inicio, el reto (elegir fase / jugar / resumen) o las insignias. */
-type Vista = 'inicio' | 'reto' | 'logros';
+type Vista = 'inicio' | 'reto' | 'logros' | 'progreso';
 
 /** Reconstruye el resultado de una sesión ya completada (para el "resumen del día"). */
 function resultadoDesdeSesion(s: Session, perfil: Profile): ResultadoFinal {
@@ -44,7 +45,10 @@ export default function App() {
   const [aviso, setAviso] = useState<string | null>(null);
   // Rutas por hash: '' = inicio, '#reto' = elegir fase / jugar / resumen, '#logros' = insignias.
   // Así el botón atrás del navegador funciona y un refresco a mitad de reto vuelve al reto.
-  const vistaDeHash = (): Vista => (location.hash === '#reto' ? 'reto' : location.hash === '#logros' ? 'logros' : 'inicio');
+  const vistaDeHash = (): Vista => {
+    const h = location.hash.slice(1);
+    return h === 'reto' || h === 'logros' || h === 'progreso' ? h : 'inicio';
+  };
   const [vista, setVistaLocal] = useState<Vista>(vistaDeHash);
   useEffect(() => {
     const sync = () => setVistaLocal(vistaDeHash());
@@ -200,12 +204,14 @@ export default function App() {
   let contenido;
   if (vista === 'logros') {
     contenido = <Logros perfil={perfil} sesiones={sesiones} onVolver={cerrarLogros} onSalir={onSalir} />;
+  } else if (vista === 'progreso') {
+    contenido = <PaginaProgreso perfil={perfil} sesiones={sesiones} onVolver={() => setVista('inicio')} onSalir={onSalir} onAviso={setAviso} />;
   } else if (vista === 'inicio') {
     contenido = (
       <Inicio
         perfil={perfil} sesiones={sesiones} estadoReto={estadoReto} fasesHechas={progreso.hechas}
         puntosHoy={resultado?.puntos ?? session.puntos}
-        onEmpezar={irAlReto} onVerResultado={() => setVista('reto')} onVerLogros={abrirLogros} cargando={ocupado} onSalir={onSalir}
+        onEmpezar={irAlReto} onVerResultado={() => setVista('reto')} onVerLogros={abrirLogros} onVerProgreso={() => setVista('progreso')} cargando={ocupado} onSalir={onSalir}
       />
     );
   } else if (resultado) {

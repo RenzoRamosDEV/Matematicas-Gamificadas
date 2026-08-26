@@ -43,6 +43,15 @@ create table if not exists exercises (
 );
 create index if not exists exercises_session_idx on exercises(session_id);
 
+-- Apuntes del jugador en el calendario: una nota por día. user_id lo pone la DB.
+create table if not exists notas (
+  user_id uuid not null default auth.uid() references profiles(id) on delete cascade,
+  fecha date not null,
+  texto text not null check (char_length(texto) between 1 and 500),
+  updated_at timestamptz not null default now(),
+  primary key (user_id, fecha)
+);
+
 -- tabla tonta solo para el keep-alive (workflow keep-alive.yml)
 create table if not exists heartbeat (id int primary key default 1, ts timestamptz default now());
 insert into heartbeat (id) values (1) on conflict do nothing;
@@ -85,6 +94,13 @@ create policy "propios ejercicios" on exercises
     exists (select 1 from sessions s
             where s.id = exercises.session_id and s.user_id = (select auth.uid()))
   );
+
+alter table notas enable row level security;
+drop policy if exists "propias notas" on notas;
+create policy "propias notas" on notas
+  for all using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
+revoke all on notas from anon;
+grant select, insert, update, delete on notas to authenticated;
 
 drop policy if exists "heartbeat público" on heartbeat;
 create policy "heartbeat público" on heartbeat for select using (true);
