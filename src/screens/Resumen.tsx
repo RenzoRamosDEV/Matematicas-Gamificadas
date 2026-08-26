@@ -1,64 +1,83 @@
-import { FASE_INFO } from '../config';
+import { FASE_INFO, type Acento } from '../config';
 import type { Profile, ResultadoFinal } from '../types';
+import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
+import { Icono, type NombreIcono } from '../components/Icono';
 
-export function Resumen({ perfil, resultado, yaJugado }: { perfil: Profile; resultado: ResultadoFinal; yaJugado: boolean }) {
+interface Props {
+  perfil: Profile;
+  resultado: ResultadoFinal;
+  yaJugado: boolean;
+  onVolver: () => void;
+}
+
+export function Resumen({ perfil, resultado, yaJugado, onVolver }: Props) {
+  const perfecta = resultado.sesion_perfecta;
   return (
-    <div className="min-h-full flex flex-col">
+    <div className="min-h-full max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
       <Cabecera perfil={perfil} />
-      <main className="flex-1 flex flex-col items-center gap-6 p-6 max-w-md mx-auto w-full">
-        <div className="text-center animate-pop">
-          <div className="text-6xl">{resultado.sesion_perfecta ? '👑' : yaJugado ? '✅' : '🎉'}</div>
-          <h1 className="text-3xl font-black mt-2">{yaJugado ? 'Ya has jugado hoy' : '¡Reto completado!'}</h1>
-          <p className="text-slate-400 mt-1">Vuelve mañana para seguir la racha 🔥</p>
+      <main className="max-w-md mx-auto w-full flex flex-col gap-5 mt-8">
+        <div className="text-center flex flex-col items-center gap-3 pop">
+          <div className={`tile ${perfecta ? 'tile-amarillo' : 'tile-verde'} w-20 h-20 rounded-[24px]`}>
+            <Icono nombre={perfecta ? 'medal' : 'check'} size={36} />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">{yaJugado ? 'Ya has jugado hoy' : '¡Reto completado!'}</h1>
+          <p className="text-tinta-2">Vuelve mañana para seguir la racha.</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 w-full">
-          <Stat label="Hoy" valor={`+${resultado.puntos}`} />
-          <Stat label="Total" valor={String(perfil.puntos_total)} icono="⭐" />
-          <Stat label="Racha" valor={String(resultado.racha)} icono="🔥" destacado={resultado.racha >= 3} />
+        <div className="grid grid-cols-3 gap-3 in d2">
+          <Stat label="Hoy" valor={`+${resultado.puntos}`} icono="target" acento="azul" />
+          <Stat label="Total" valor={perfil.puntos_total.toLocaleString('es-ES')} icono="star" acento="amarillo" />
+          <Stat label="Racha" valor={`${resultado.racha}`} icono="flame" acento="rosa" />
         </div>
 
-        {resultado.comodin_usado && (
-          <p className="text-amber-300 font-bold text-center text-sm">
-            🃏 Ayer no jugaste, pero has usado tu comodín: la racha sigue viva.
-          </p>
-        )}
-        {resultado.sesion_perfecta && (
-          <p className="text-emerald-400 font-bold text-center">¡Todo perfecto! +100 puntos extra</p>
+        {(resultado.comodin_usado || perfecta) && (
+          <div className="flex flex-col items-center gap-2 in d2">
+            {resultado.comodin_usado && <span className="chip chip-azul text-center">Ayer no jugaste, pero has usado tu comodín: la racha sigue viva</span>}
+            {perfecta && <span className="chip chip-verde">¡Todo perfecto! +100 puntos extra</span>}
+          </div>
         )}
 
-        <ul className="w-full space-y-2">
-          {resultado.fases.map((f) => (
-            <li key={f.op} className={`rounded-2xl bg-gradient-to-r ${FASE_INFO[f.op].color} p-4 flex items-center justify-between`}>
-              <div>
-                <div className="font-extrabold">{FASE_INFO[f.op].nombre}</div>
-                <div className="text-sm opacity-90 flex gap-2 flex-wrap">
-                  {f.bonus_perfecta > 0 && <span className="rounded-full bg-black/25 px-2">perfecta +{f.bonus_perfecta}</span>}
-                  {f.bonus_velocidad > 0 && <span className="rounded-full bg-black/25 px-2">⚡ rápido +{f.bonus_velocidad}</span>}
+        <ul className="flex flex-col gap-2.5 in d3">
+          {resultado.fases.map((f) => {
+            const info = FASE_INFO[f.op];
+            return (
+              <li key={f.op} className="glass rounded-[22px] p-3.5 flex items-center gap-3">
+                <div className={`tile tile-${info.acento} w-11 h-11 rounded-[14px] text-xl font-bold shrink-0`}>{info.simbolo}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold">{info.nombre}</div>
+                  {(f.bonus_perfecta > 0 || f.bonus_velocidad > 0) && (
+                    <div className="flex gap-1.5 flex-wrap mt-1">
+                      {f.bonus_perfecta > 0 && <span className="chip chip-verde">Perfecta +{f.bonus_perfecta}</span>}
+                      {f.bonus_velocidad > 0 && <span className="chip chip-azul"><Icono nombre="clock" size={12} />Rápido +{f.bonus_velocidad}</span>}
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-black">{f.aciertos}/{f.total}</div>
-                <div className="text-sm opacity-90">+{f.puntos} pts</div>
-              </div>
-            </li>
-          ))}
+                <div className="text-right">
+                  <div className="text-xl font-bold tabular-nums">{f.aciertos}/{f.total}</div>
+                  <div className="text-xs text-tinta-3">+{f.puntos} pts</div>
+                </div>
+              </li>
+            );
+          })}
         </ul>
 
         {perfil.racha_max > resultado.racha && (
-          <p className="text-slate-500 text-sm">Tu récord de racha: {perfil.racha_max} días</p>
+          <p className="text-tinta-3 text-sm text-center">Tu récord de racha: {perfil.racha_max} días</p>
         )}
+
+        <Boton variante="glass" icono="chevLeft" onClick={onVolver} className="self-center in d4">Volver al inicio</Boton>
       </main>
     </div>
   );
 }
 
-function Stat({ label, valor, icono, destacado }: { label: string; valor: string; icono?: string; destacado?: boolean }) {
+function Stat({ label, valor, icono, acento }: { label: string; valor: string; icono: NombreIcono; acento: Acento }) {
   return (
-    <div className={`rounded-2xl p-3 text-center ${destacado ? 'bg-amber-400 text-slate-950' : 'bg-slate-800'}`}>
-      <div className="text-xs font-bold uppercase opacity-70">{label}</div>
-      <div className="text-2xl font-black">{icono} {valor}</div>
+    <div className="glass rounded-[18px] p-3 flex flex-col items-center gap-1.5 text-center">
+      <span className={`tile tile-${acento} w-8 h-8 rounded-[10px]`}><Icono nombre={icono} size={16} /></span>
+      <b className="text-[17px] font-bold tabular-nums leading-none">{valor}</b>
+      <small className="text-[11px] text-tinta-3">{label}</small>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CONFIG, FASE_INFO } from '../config';
 import type { EjercicioDB, Op } from '../types';
+import { Boton } from '../components/Boton';
+import { Icono } from '../components/Icono';
 import { Keypad } from '../components/Keypad';
 import { Timer } from '../components/Timer';
 import { borrarDigito, teclear } from '../lib/entrada';
@@ -106,14 +108,19 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
   });
 
   const ancho = Math.max(String(actual.a).length, String(actual.b).length);
+  const pad = (s: string, n: number) => s.padStart(n, ' ').replaceAll(' ', ' ');
 
   return (
     <div className="min-h-full flex flex-col max-w-md mx-auto w-full px-4 pb-4 pt-3 gap-3">
-      <div className="flex items-center justify-between">
-        <h1 className="font-black text-xl">
-          <span className="text-slate-400 font-bold">Fase {numFase}/4 ·</span> {info.nombre}
+      <div className="flex items-center justify-between in d1">
+        <h1 className="flex items-center gap-2.5 font-bold text-lg tracking-tight">
+          <span className={`tile tile-${info.acento} w-9 h-9 rounded-[12px] text-lg`}>{info.simbolo}</span>
+          <span className="leading-tight">
+            <span className="block text-tinta-3 font-medium text-xs">Fase {numFase} de 4</span>
+            {info.nombre}
+          </span>
         </h1>
-        <span className="text-sm font-bold text-slate-400">{respondidas}/{ejercicios.length}</span>
+        <span className="chip tabular-nums">{respondidas}/{ejercicios.length}</span>
       </div>
 
       <Timer restante={restante} total={total} />
@@ -128,9 +135,9 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
               key={e.id}
               type="button"
               onClick={() => irA(i)}
-              className={`h-9 w-9 rounded-full font-extrabold text-sm transition
-                ${hecho ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300'}
-                ${activo ? 'ring-4 ring-amber-400 scale-110' : ''}`}
+              className={`h-9 w-9 rounded-[12px] text-sm font-bold transition-all duration-200
+                ${hecho ? `tile tile-${info.acento}` : 'glass-fuerte border border-linea text-tinta-2'}
+                ${activo ? 'ring-2 ring-tinta ring-offset-2 ring-offset-fondo scale-105' : ''}`}
               aria-label={`Ejercicio ${i + 1}${hecho ? ', respondido' : ''}`}
               aria-current={activo}
             >
@@ -140,17 +147,13 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
         })}
       </nav>
 
-      {/* Enunciado tipo papel */}
-      <section className={`flex-1 rounded-3xl bg-gradient-to-br ${info.color} p-5 flex flex-col items-center justify-center shadow-xl`}>
-        <div key={actual.id} className="animate-pop font-mono font-black text-5xl sm:text-6xl leading-tight tabular-nums text-right">
-          <div>{String(actual.a).padStart(ancho + 2, ' ').replaceAll(' ', ' ')}</div>
-          <div>
-            {info.simbolo}{String(actual.b).padStart(ancho + 1, ' ').replaceAll(' ', ' ')}
-          </div>
-          <div className="border-t-4 border-white/80 mt-1 pt-2 min-h-[1.2em]">
-            <span className={buffer === '' ? 'opacity-50' : ''}>
-              {(buffer === '' ? '?' : buffer).padStart(ancho + 2, ' ').replaceAll(' ', ' ')}
-            </span>
+      {/* Enunciado tipo papel, sobre vidrio con la luz del acento de la fase */}
+      <section className={`glass luz-${info.acento} rounded-[32px] flex-1 min-h-[240px] p-5 flex flex-col items-center justify-center`}>
+        <div key={actual.id} className="pop font-mono font-bold text-5xl sm:text-6xl leading-tight tabular-nums text-right text-tinta">
+          <div>{pad(String(actual.a), ancho + 2)}</div>
+          <div>{info.simbolo}{pad(String(actual.b), ancho + 1)}</div>
+          <div className="border-t-[3px] border-tinta/70 mt-1 pt-2 min-h-[1.2em]">
+            <span className={buffer === '' ? 'text-tinta-3' : ''}>{pad(buffer === '' ? '?' : buffer, ancho + 2)}</span>
           </div>
         </div>
       </section>
@@ -158,21 +161,17 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
       <Keypad onDigito={digito} onBorrar={borrar} onOk={siguienteSinResponder} okDisabled={buffer === ''} />
 
       <div className="flex items-center justify-between gap-3 pt-1">
-        <button type="button" className="btn btn-ghost py-3 px-4" onClick={() => irA(idx - 1)} aria-label="Anterior">←</button>
+        <Boton variante="glass" className="px-3.5" onClick={() => irA(idx - 1)} aria-label="Anterior"><Icono nombre="chevLeft" size={20} /></Boton>
         {todasHechas ? (
-          <button type="button" className="btn btn-primary flex-1" onClick={() => terminar(restante)}>
-            Terminar fase ✓
-          </button>
+          <Boton className="flex-1" icono="check" onClick={() => terminar(restante)}>Terminar fase</Boton>
         ) : confirmando ? (
-          <button type="button" className="btn bg-rose-500 text-white flex-1 py-3 text-base" onClick={() => terminar(restante)}>
-            ¿Seguro? Faltan {ejercicios.length - respondidas}
-          </button>
+          <Boton variante="peligro" className="flex-1" onClick={() => terminar(restante)}>¿Seguro? Faltan {ejercicios.length - respondidas}</Boton>
         ) : (
-          <button type="button" className="text-slate-500 font-bold text-sm underline flex-1" onClick={() => setConfirmando(true)}>
+          <button type="button" className="text-tinta-3 font-semibold text-sm underline flex-1" onClick={() => setConfirmando(true)}>
             Terminar sin acabar
           </button>
         )}
-        <button type="button" className="btn btn-ghost py-3 px-4" onClick={() => irA(idx + 1)} aria-label="Siguiente">→</button>
+        <Boton variante="glass" className="px-3.5" onClick={() => irA(idx + 1)} aria-label="Siguiente"><Icono nombre="chev" size={20} /></Boton>
       </div>
     </div>
   );
