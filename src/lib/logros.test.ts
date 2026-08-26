@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CATEGORIAS, evaluarLogros, LOGROS } from './logros';
+import { CATEGORIAS, esRetoValido, evaluarLogros, LOGROS } from './logros';
 import type { FaseDetalle, Op } from '../types';
 
 const fase = (op: Op, aciertos: number, total = 5, extra: Partial<FaseDetalle> = {}): FaseDetalle => ({
@@ -70,18 +70,29 @@ describe('perfección, velocidad y especiales', () => {
     expect(p.sesion_200.conseguido).toBe(true);
     expect([p.sesion_400.actual, p.sesion_400.meta]).toEqual([260, 400]);
   });
-  it('finde matemático detecta sábado o domingo', () => {
-    expect(por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [completada([], '2026-08-26')] })).finde.conseguido).toBe(false); // miércoles
-    expect(por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [completada([], '2026-08-29')] })).finde.conseguido).toBe(true);  // sábado
-    expect(por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [completada([], '2026-08-30')] })).finde.conseguido).toBe(true);  // domingo
+  it('finde matemático detecta sábado o domingo, y exige al menos la mitad bien', () => {
+    const bien = [fase('suma', 3), fase('resta', 3)];
+    expect(por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [completada(bien, '2026-08-26')] })).finde.conseguido).toBe(false); // miércoles
+    expect(por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [completada(bien, '2026-08-29')] })).finde.conseguido).toBe(true);  // sábado
+    expect(por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [completada(bien, '2026-08-30')] })).finde.conseguido).toBe(true);  // domingo
+    expect(por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [completada([fase('suma', 0)], '2026-08-29')] })).finde.conseguido).toBe(false); // sábado pero todo mal
+  });
+  it('un reto solo cuenta si tiene al menos la mitad de las cuentas bien', () => {
+    expect(esRetoValido(completada([fase('suma', 5), fase('resta', 0)]))).toBe(true);    // 5 de 10: justo la mitad
+    expect(esRetoValido(completada([fase('suma', 2), fase('resta', 2)]))).toBe(false);   // 4 de 10
+    expect(esRetoValido(completada([fase('suma', 0)]))).toBe(false);
+    expect(esRetoValido(completada(null))).toBe(false);
+    const p = por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [completada([fase('suma', 0), fase('resta', 1)])] }));
+    expect(p.primer_reto.conseguido).toBe(false);
+    expect(p.primer_reto.actual).toBe(0);
   });
   it('aciertos totales suman todas las operaciones', () => {
     const p = por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [completada(perfecta), completada(perfecta, '2026-08-25')] }));
     expect(p.aciertos_100.actual).toBe(40);
   });
-  it('una sesión sin detalle no rompe nada', () => {
+  it('una sesión sin detalle no rompe nada ni cuenta como reto', () => {
     const p = por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [completada(null)] }));
     expect(p.perfecta.conseguido).toBe(false);
-    expect(p.primer_reto.conseguido).toBe(true);
+    expect(p.primer_reto.conseguido).toBe(false);
   });
 });

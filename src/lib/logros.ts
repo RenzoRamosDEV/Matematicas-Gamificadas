@@ -29,8 +29,19 @@ export interface Logro {
 }
 
 // ---------- métricas derivadas del historial ------------------------------
+// Regla general: nada se regala. Los aciertos son aciertos reales corregidos por la DB; los puntos
+// solo salen de aciertos; y un reto "cuenta" solo si al menos la mitad de las cuentas están bien.
 const completadas = (c: ContextoLogros) => c.sesiones.filter((s) => s.estado === 'completada');
 const fases = (c: ContextoLogros): FaseDetalle[] => completadas(c).flatMap((s) => s.detalle ?? []);
+
+const aciertosDeSesion = (s: Pick<Session, 'detalle'>) => (s.detalle ?? []).reduce((n, f) => n + f.aciertos, 0);
+const totalDeSesion = (s: Pick<Session, 'detalle'>) => (s.detalle ?? []).reduce((n, f) => n + f.total, 0);
+/** Reto que cuenta para las insignias: completado y con al menos la mitad de las cuentas bien. */
+export const esRetoValido = (s: Pick<Session, 'estado' | 'detalle'>) => {
+  const total = totalDeSesion(s);
+  return s.estado === 'completada' && total > 0 && aciertosDeSesion(s) * 2 >= total;
+};
+const retosValidos = (c: ContextoLogros) => c.sesiones.filter(esRetoValido);
 
 const esPerfecta = (s: Pick<Session, 'detalle'>) => {
   const f = s.detalle ?? [];
@@ -38,7 +49,7 @@ const esPerfecta = (s: Pick<Session, 'detalle'>) => {
   return total > 0 && f.every((x) => x.aciertos === x.total);
 };
 
-const retos = (c: ContextoLogros) => completadas(c).length;
+const retos = (c: ContextoLogros) => retosValidos(c).length;
 const rachaMax = (c: ContextoLogros) => c.perfil.racha_max;
 const puntosTotal = (c: ContextoLogros) => c.perfil.puntos_total;
 const aciertosDe = (op: Op) => (c: ContextoLogros) => fases(c).filter((f) => f.op === op).reduce((n, f) => n + f.aciertos, 0);
@@ -49,7 +60,7 @@ const fasesRapidas = (c: ContextoLogros) => fases(c).filter((f) => f.bonus_veloc
 const sesionesPerfectas = (c: ContextoLogros) => completadas(c).filter(esPerfecta).length;
 const mejorSesion = (c: ContextoLogros) => completadas(c).reduce((m, s) => Math.max(m, s.puntos), 0);
 const esFinde = (fecha: string) => { const d = new Date(`${fecha}T00:00:00Z`).getUTCDay(); return d === 0 || d === 6; };
-const retosEnFinde = (c: ContextoLogros) => completadas(c).filter((s) => esFinde(s.fecha)).length;
+const retosEnFinde = (c: ContextoLogros) => retosValidos(c).filter((s) => esFinde(s.fecha)).length;
 
 // ---------- constructor: "alcanza `objetivo` en `valor`" -------------------
 const logro = (
@@ -77,11 +88,11 @@ const porOperacion: Logro[] = OPS.flatMap(({ op, cat, icono, acento, plural, niv
 
 export const LOGROS: Logro[] = [
   // Retos
-  logro('primer_reto', 'Retos', 'Primer reto', 'Completa tu primer reto del día', 'target', 'azul', retos, 1),
-  logro('retos_5',   'Retos', 'Cinco retos',    'Completa 5 retos',   'target', 'azul', retos, 5),
-  logro('retos_10',  'Retos', 'Diez retos',     'Completa 10 retos',  'target', 'verde', retos, 10),
-  logro('retos_30',  'Retos', 'Treinta retos',  'Completa 30 retos',  'target', 'violeta', retos, 30),
-  logro('retos_100', 'Retos', 'Cien retos',     'Completa 100 retos', 'trophy', 'amarillo', retos, 100),
+  logro('primer_reto', 'Retos', 'Primer reto', 'Completa un reto con al menos la mitad bien', 'target', 'azul', retos, 1),
+  logro('retos_5',   'Retos', 'Cinco retos',    'Cinco retos con al menos la mitad bien',   'target', 'azul', retos, 5),
+  logro('retos_10',  'Retos', 'Diez retos',     'Diez retos con al menos la mitad bien',  'target', 'verde', retos, 10),
+  logro('retos_30',  'Retos', 'Treinta retos',  'Treinta retos con al menos la mitad bien',  'target', 'violeta', retos, 30),
+  logro('retos_100', 'Retos', 'Cien retos',     'Cien retos con al menos la mitad bien', 'trophy', 'amarillo', retos, 100),
   // Racha
   logro('racha_3',   'Racha', 'Tres seguidos', 'Racha de 3 días',   'flame', 'rosa', rachaMax, 3),
   logro('racha_7',   'Racha', 'Una semana',    'Racha de 7 días',   'flame', 'rosa', rachaMax, 7),
@@ -109,7 +120,7 @@ export const LOGROS: Logro[] = [
   logro('aciertos_1000', 'Especiales', 'Mil aciertos',  'Acierta 1.000 cuentas en total', 'trophy', 'amarillo', aciertosTotales, 1000),
   logro('sesion_200',    'Especiales', 'Gran día',      'Consigue 200 puntos en un solo reto', 'spark', 'rosa', mejorSesion, 200),
   logro('sesion_400',    'Especiales', 'Día redondo',   'Consigue 400 puntos en un solo reto', 'spark', 'amarillo', mejorSesion, 400),
-  logro('finde',         'Especiales', 'Finde matemático', 'Completa un reto en sábado o domingo', 'calendar', 'verde', retosEnFinde, 1),
+  logro('finde',         'Especiales', 'Finde matemático', 'Un reto con al menos la mitad bien en sábado o domingo', 'calendar', 'verde', retosEnFinde, 1),
 ];
 
 export type LogroEvaluado = Logro & { conseguido: boolean; actual: number; meta: number };
