@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FASE_INFO, type Acento } from '../config';
 import type { Nota, Profile, Session } from '../types';
-import { borrarNota, cargarNotas, crearNota } from '../lib/api';
+import { borrarNota, cargarNotas, crearNota, reintentar } from '../lib/api';
 import { mesDe, mesVecino, nombreDia, type Mes } from '../lib/calendario';
 import { hoyMadrid } from '../lib/semana';
 import { Boton } from '../components/Boton';
@@ -35,7 +35,7 @@ export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso }: Props
   const delMes = [...porFecha.values()].filter((s) => s.fecha.startsWith(mes));
 
   useEffect(() => {
-    cargarNotas().then(setNotas).catch((e: Error) => onAviso(`Apuntes no disponibles: ${e.message}`));
+    reintentar(cargarNotas).then(setNotas).catch((e: Error) => onAviso(`Apuntes no disponibles: ${e.message}`));
   }, [onAviso]);
 
   const seleccionar = (fecha: string) => { setSeleccion(fecha); setMes(mesDe(fecha)); };

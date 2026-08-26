@@ -83,3 +83,16 @@ export async function borrarNota(id: string): Promise<void> {
   const { error } = await supabase.from('notas').delete().eq('id', id);
   fail('borrar apunte', error);
 }
+
+/**
+ * Reintenta una lectura que puede fallar por un desfase de reloj justo tras iniciar sesión
+ * ("JWT issued at future") o por un corte breve de red.
+ */
+export async function reintentar<T>(fn: () => Promise<T>, veces = 2, esperaMs = 1500): Promise<T> {
+  let ultimo: unknown;
+  for (let i = 0; i <= veces; i++) {
+    try { return await fn(); }
+    catch (e) { ultimo = e; if (i < veces) await new Promise((r) => setTimeout(r, esperaMs)); }
+  }
+  throw ultimo;
+}

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CONFIG, ORDEN_FASES } from './config';
 import type { EjercicioDB, Op, Profile, ResultadoFinal, Session } from './types';
 import { entrar, entrarConToken, haySesion, salir } from './lib/auth';
-import { cargarPerfil, cargarSesiones, finalizarSesion, guardarRespuesta, iniciarSesion, insertarEjercicios } from './lib/api';
+import { cargarPerfil, cargarSesiones, finalizarSesion, guardarRespuesta, iniciarSesion, insertarEjercicios, reintentar } from './lib/api';
 import { genSesion } from './lib/generador';
 import { borrarProgreso, guardarProgreso, leerProgreso, PROGRESO_INICIAL, type Progreso } from './lib/progreso';
 import { supabaseConfigurado } from './lib/supabase';
@@ -71,7 +71,7 @@ export default function App() {
 
   /** El historial no es imprescindible para jugar: si falla, se avisa y se sigue con lo que haya. */
   const cargarHistorial = useCallback(async (previo: Session[]) => {
-    try { return await cargarSesiones(); }
+    try { return await reintentar(cargarSesiones); }
     catch (e) { setAviso(`Historial no disponible: ${(e as Error).message}`); return previo; }
   }, []);
 
