@@ -48,7 +48,7 @@ create table if not exists heartbeat (id int primary key default 1, ts timestamp
 insert into heartbeat (id) values (1) on conflict do nothing;
 
 -- ---------- Perfil automático al crear el usuario en el dashboard -----
--- nombre = parte local del email (hermano@juego.local → "hermano"),
+-- nombre = parte local del email (hermano@renzoramosdev.github.io → "hermano"),
 -- o raw_user_meta_data.nombre si se indicó.
 create or replace function handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$

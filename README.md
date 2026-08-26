@@ -46,9 +46,10 @@ scripts/token.mjs                   ← genera token + link para un jugador
 3. Authentication → Providers → Email: desactiva **"Allow new users to sign up"**. Deja "Confirm email" desactivado o marca "Auto Confirm" al crear usuarios.
 4. Crea el jugador:
    ```bash
-   node scripts/token.mjs hermano https://TU-USUARIO.github.io/ejercicio-gamificados/
+   node scripts/token.mjs hermano https://renzoramosdev.github.io/Matematicas-Gamificadas/
    ```
-   Te imprime email, contraseña (token) y el link. En Authentication → Users → **Add user** crea `hermano@juego.local` con ese token como contraseña (marca *Auto Confirm User*).
+   Te imprime email, contraseña (token) y el link. En Authentication → Users → **Add user** crea `hermano@renzoramosdev.github.io` con ese token como contraseña (marca *Auto Confirm User*).
+   El dominio del email es el de GitHub Pages porque Supabase Auth rechaza dominios reservados (`.local`, `.test`, `example.com`); se cambia en `CONFIG.AUTH_EMAIL_DOMAIN`.
    El perfil en `profiles` se crea solo (trigger `on_auth_user_created`) con `nombre = hermano`.
 5. Project Settings → API: copia **Project URL** y **anon public key**.
 
@@ -64,14 +65,14 @@ Más jugadores: repite el paso 4 con otro nombre (`primo`). Cada uno tiene su fi
 
 ### 3. Mándale el link
 
-`https://TU-USUARIO.github.io/ejercicio-gamificados/?u=hermano&t=<token>` — lo abre una vez, la sesión queda en `localStorage`, la URL se limpia y a partir de ahí entra directo desde favoritos.
+`https://renzoramosdev.github.io/Matematicas-Gamificadas/?u=hermano&t=<token>` — lo abre una vez, la sesión queda en `localStorage`, la URL se limpia y a partir de ahí entra directo desde favoritos.
 
 ## Desarrollo local
 
 ```bash
 cp .env.example .env.local   # rellena URL y anon key
 npm install
-npm run dev                  # http://localhost:5173/ejercicio-gamificados/?u=hermano&t=<token>
+npm run dev                  # http://localhost:5173/Matematicas-Gamificadas/?u=hermano&t=<token>
 npm test                     # tests de los generadores
 npm run build
 ```

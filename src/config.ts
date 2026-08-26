@@ -6,8 +6,11 @@ export const CONFIG = {
   BONUS_VELOCIDAD_ALTA: 20,      // >40% del tiempo restante
   BONUS_VELOCIDAD_MEDIA: 10,     // >20% del tiempo restante
   BONUS_SESION_PERFECTA: 100,
-  /** Dominio de los emails ficticios de los jugadores: <usuario>@juego.local */
-  AUTH_EMAIL_DOMAIN: 'juego.local',
+  /**
+   * Dominio de los emails ficticios de los jugadores: <usuario>@renzoramosdev.github.io
+   * (Supabase Auth rechaza dominios reservados como .local; el de Pages es real y nuestro.)
+   */
+  AUTH_EMAIL_DOMAIN: 'renzoramosdev.github.io',
   /** Usuario por defecto si el link no lleva ?u= */
   USUARIO_POR_DEFECTO: 'hermano',
 } as const;

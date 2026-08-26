@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 
 /**
  * Canjea el link único: https://.../juego/?u=hermano&t=<token>
- * El token es la contraseña del usuario <u>@juego.local. Tras entrar, se limpia
+ * El token es la contraseña del usuario <u>@<AUTH_EMAIL_DOMAIN>. Tras entrar, se limpia
  * la URL para que el token no acabe en el historial, capturas o portapapeles.
  * Devuelve un mensaje de error si el link no vale; null si todo fue bien o no había token.
  */

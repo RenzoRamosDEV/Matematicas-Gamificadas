@@ -6,5 +6,5 @@ import { defineConfig } from 'vite'
 // coincidir con el nombre del repo. El workflow lo inyecta vía VITE_BASE.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: process.env.VITE_BASE ?? '/ejercicio-gamificados/',
+  base: process.env.VITE_BASE ?? '/Matematicas-Gamificadas/',
 })
