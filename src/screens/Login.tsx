@@ -26,7 +26,7 @@ export function Login({ mensaje, onEntrar }: Props) {
   };
 
   return (
-    <main className="min-h-full grid place-items-center p-6">
+    <main className="min-h-dvh grid place-items-center p-6">
       <form className="glass rounded-[32px] p-7 sm:p-8 max-w-sm w-full flex flex-col gap-5 pop" onSubmit={enviar} noValidate>
         <div className="flex flex-col items-center gap-1 text-center">
           <Mascota size={110} />

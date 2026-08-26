@@ -111,7 +111,7 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
   const pad = (s: string, n: number) => s.padStart(n, ' ').replaceAll(' ', ' ');
 
   return (
-    <div className="min-h-full flex flex-col max-w-md mx-auto w-full px-4 pb-4 pt-3 gap-3">
+    <div className="min-h-dvh flex flex-col max-w-md mx-auto w-full px-4 pb-4 pt-3 gap-3">
       <div className="flex items-center justify-between in d1">
         <h1 className="flex items-center gap-2.5 font-bold text-lg tracking-tight">
           <span className={`tile tile-${info.acento} w-9 h-9 rounded-[12px] text-lg`}>{info.simbolo}</span>

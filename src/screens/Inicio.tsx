@@ -46,7 +46,7 @@ export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, on
   const accionReto = completado ? onVerResultado : onEmpezar;
 
   return (
-    <div className="min-h-full max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
+    <div className="min-h-dvh max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
       <Cabecera perfil={perfil} onSalir={onSalir} />
 
       {/* ---- Hero ---- */}

@@ -25,7 +25,7 @@ export function Transicion({ op, aciertos, total, siguiente, onSiguiente, cargan
   const [texto, icono] = mensaje(aciertos, total);
   const { acento, nombre } = FASE_INFO[op];
   return (
-    <main className="min-h-full flex flex-col items-center justify-center p-6">
+    <main className="min-h-dvh flex flex-col items-center justify-center p-6">
       <div className="glass rounded-[36px] p-8 sm:p-10 max-w-md w-full flex flex-col items-center gap-5 text-center pop">
         <div className={`tile tile-${acento} w-20 h-20 rounded-[24px]`}><Icono nombre={icono} size={36} /></div>
         <h1 className="text-3xl font-bold tracking-tight text-balance">{texto}</h1>
