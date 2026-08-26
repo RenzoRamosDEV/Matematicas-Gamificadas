@@ -100,6 +100,6 @@ Lo único que el cliente manda que afecta a los puntos es el tiempo restante por
 
 - ✅ `profiles` solo tiene policy de SELECT: nadie puede hacer `update profiles set puntos_total = 999999`. Solo la RPC (security definer) escribe puntos y racha.
 - ✅ `unique (user_id, fecha)` en `sessions`: una sesión por día. `estado = 'en_curso'` impide finalizar dos veces.
-- ✅ El cliente solo puede hacer UPDATE de `respuesta` y `ms` en `exercises` (grant por columnas).
+- ✅ El cliente solo puede leer `sessions` y `profiles`; en `exercises` solo inserta el enunciado (`op, a, b, sol`) y actualiza `respuesta` y `ms` (grants por columna). Nada de lo que alimenta puntos, calendario e insignias es escribible desde el cliente.
 - ⚠️ El cliente inserta los ejercicios, incluido `sol`. Alguien podría insertar `1+1=2` veinte veces. Se deja así a propósito (§6.3 del spec): cerrarlo exige mover los generadores a plpgsql. Si hace falta, la vía es una función `generar_ejercicios(session_id)`.
 - ❌ Nunca metas la `service_role` key en el front.

@@ -100,15 +100,23 @@ alter table notas enable row level security;
 drop policy if exists "propias notas" on notas;
 create policy "propias notas" on notas
   for all using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-revoke all on notas from anon;
-grant select, insert, update, delete on notas to authenticated;
+revoke all on notas from authenticated, anon;
+grant select, insert, delete on notas to authenticated;
 
 drop policy if exists "heartbeat público" on heartbeat;
 create policy "heartbeat público" on heartbeat for select using (true);
 
--- Endurecimiento barato: el cliente solo puede modificar respuesta y ms.
--- (sol, correcta, a, b, op quedan fuera de su alcance vía UPDATE).
-revoke update on exercises from authenticated, anon;
+-- Permisos mínimos para el cliente (rol authenticated). Las RPCs son security definer y no los necesitan.
+-- sessions: solo lectura (crear y finalizar lo hace la RPC). profiles: solo lectura.
+-- exercises: leer, insertar solo el enunciado (nunca respuesta/correcta/ms) y actualizar solo respuesta y ms.
+-- notas: leer, crear y borrar las propias.
+revoke all on sessions  from authenticated, anon;
+grant  select on sessions to authenticated;
+revoke all on profiles  from authenticated, anon;
+grant  select on profiles to authenticated;
+revoke all on exercises from authenticated, anon;
+grant  select on exercises to authenticated;
+grant  insert (session_id, orden, op, a, b, sol) on exercises to authenticated;
 grant  update (respuesta, ms) on exercises to authenticated;
 
 -- ---------- Constantes de puntuación (espejo de src/config.ts) --------
