@@ -51,6 +51,9 @@ export function Transicion({ op, aciertos, total, ejercicios, hechas, onElegir, 
             <div className="text-center flex flex-col gap-1 in d2">
               <h2 className="text-[24px] sm:text-[28px] font-bold tracking-tight">¿Cuál va ahora?</h2>
               <p className="text-tinta-3 text-sm">Respira. El tiempo no corre hasta que elijas.</p>
+              <p className="text-tinta-3 text-sm inline-flex items-center justify-center gap-1.5">
+                <Icono nombre="star" size={14} />{quedan === 1 ? 'Una más y se suman los puntos y la racha.' : `Te ${quedan === 1 ? 'queda' : 'quedan'} ${quedan}: los puntos y la racha se suman al terminar las cuatro.`}
+              </p>
             </div>
             <SelectorFases ejercicios={ejercicios} hechas={hechas} actual={null} onElegir={onElegir} cargando={cargando} />
           </>

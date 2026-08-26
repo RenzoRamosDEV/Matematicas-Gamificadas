@@ -29,6 +29,9 @@ export function ElegirFase({ ejercicios, hechas, actual, onElegir, onVolver, car
               ? 'Elige tú el orden. El tiempo de cada fase empieza cuando la eliges.'
               : `Te ${quedan === 1 ? 'queda' : 'quedan'} ${quedan} ${quedan === 1 ? 'fase' : 'fases'}. El tiempo empieza al elegir.`}
           </p>
+          <p className="text-tinta-3 text-sm inline-flex items-center justify-center gap-1.5">
+            <Icono nombre="star" size={14} />Los puntos y la racha se suman al terminar las cuatro fases.
+          </p>
         </div>
         <SelectorFases ejercicios={ejercicios} hechas={hechas} actual={actual} onElegir={onElegir} cargando={cargando} />
         {cargando && <p className="text-center text-tinta-3 font-semibold animate-pulse">Preparando las cuentas…</p>}
