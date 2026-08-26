@@ -1,0 +1,14 @@
+# Supabase pausa los proyectos gratis tras 7 días sin actividad de DB.
+# Cada 3 días hacemos una query real para que no pase.
+# OJO: GitHub desactiva los crons tras 60 días sin commits en el repo.
+name: keep-alive
+on:
+  schedule: [{ cron: '0 6 */3 * *' }]
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -sSf "${{ secrets.VITE_SUPABASE_URL }}/rest/v1/heartbeat?select=id&limit=1" \
+            -H "apikey: ${{ secrets.VITE_SUPABASE_ANON_KEY }}"
