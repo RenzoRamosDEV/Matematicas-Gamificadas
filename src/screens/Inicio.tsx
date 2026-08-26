@@ -4,7 +4,7 @@ import { Cabecera } from '../components/Cabecera';
 
 const minutosTotales = Math.round(Object.values(CONFIG.TIEMPOS).reduce((a, b) => a + b, 0) / 60);
 
-export function Inicio({ perfil, onEmpezar, cargando }: { perfil: Profile; onEmpezar: () => void; cargando: boolean }) {
+export function Inicio({ perfil, onEmpezar, cargando, enCurso }: { perfil: Profile; onEmpezar: () => void; cargando: boolean; enCurso?: boolean }) {
   const saludo = perfil.racha_actual > 0 ? `¡Llevas ${perfil.racha_actual} día${perfil.racha_actual === 1 ? '' : 's'} seguidos!` : '¡Hoy empieza tu racha!';
   return (
     <div className="min-h-full flex flex-col">
@@ -26,10 +26,10 @@ export function Inicio({ perfil, onEmpezar, cargando }: { perfil: Profile; onEmp
           ))}
         </ul>
 
-        <p className="text-slate-400">Unos {minutosTotales} minutos como mucho. Papel y lápiz a mano 📝</p>
+        <p className="text-slate-400">{enCurso ? 'Tienes un reto a medias: sigues donde lo dejaste.' : `Unos ${minutosTotales} minutos como mucho. Papel y lápiz a mano 📝`}</p>
 
         <button className="btn btn-primary text-2xl px-10" onClick={onEmpezar} disabled={cargando}>
-          {cargando ? 'Preparando…' : '¡Empezar!'}
+          {cargando ? 'Preparando…' : enCurso ? '¡Continuar!' : '¡Empezar!'}
         </button>
       </main>
     </div>

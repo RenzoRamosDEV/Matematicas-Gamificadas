@@ -34,6 +34,8 @@ export default function App() {
   const [yaJugado, setYaJugado] = useState(false);
   const [ocupado, setOcupado] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
+  // Siempre se aterriza en el inicio; desde ahí se empieza o se continúa el reto en curso
+  const [enInicio, setEnInicio] = useState(true);
 
   // Cola de escrituras a la DB: se encadenan para no perder ninguna y poder esperarlas antes de finalizar
   const cola = useRef<Promise<void>>(Promise.resolve());
@@ -77,11 +79,13 @@ export default function App() {
 
   const empezar = async () => {
     if (!session) return;
+    if (ejercicios.length) { setEnInicio(false); return; }   // reto a medias: continuar donde estaba
     setOcupado(true);
     try {
       const filas = await insertarEjercicios(session.id, genSesion(CONFIG.EJERCICIOS_POR_FASE));
       setEjercicios(filas);
       actualizarProgreso({ fase: 0, pantalla: 'jugando', tiempos: {} });
+      setEnInicio(false);
     } catch (e) {
       setMensaje((e as Error).message); setEstado('error');
     } finally { setOcupado(false); }
@@ -138,8 +142,8 @@ export default function App() {
   let contenido;
   if (resultado) {
     contenido = <Resumen perfil={perfil} resultado={resultado} yaJugado={yaJugado} />;
-  } else if (ejercicios.length === 0) {
-    contenido = <Inicio perfil={perfil} onEmpezar={empezar} cargando={ocupado} />;
+  } else if (enInicio) {
+    contenido = <Inicio perfil={perfil} onEmpezar={empezar} cargando={ocupado} enCurso={ejercicios.length > 0} />;
   } else if (progreso.fase >= ORDEN_FASES.length) {
     contenido = <Pantalla>Calculando resultado…</Pantalla>;
   } else {
