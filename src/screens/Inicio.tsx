@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { CONFIG, ORDEN_FASES, type Acento } from '../config';
-import type { EjercicioDB, Profile, Session } from '../types';
+import type { Op, Profile, Session } from '../types';
 import { evaluarLogros } from '../lib/logros';
 import { hoyMadrid, puntosSemana, semanaActual } from '../lib/semana';
 import { Boton } from '../components/Boton';
@@ -13,7 +13,7 @@ export type EstadoReto = 'nuevo' | 'en_curso' | 'completado';
 interface Props {
   perfil: Profile;
   sesiones: Session[];
-  ejercicios: EjercicioDB[];
+  fasesHechas: Op[];
   estadoReto: EstadoReto;
   puntosHoy: number;
   onEmpezar: () => void;
@@ -23,7 +23,7 @@ interface Props {
   onSalir?: () => void;
 }
 
-export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, onEmpezar, onVerResultado, onVerLogros, cargando, onSalir }: Props) {
+export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, onEmpezar, onVerResultado, onVerLogros, cargando, onSalir }: Props) {
   const nombre = perfil.nombre.charAt(0).toUpperCase() + perfil.nombre.slice(1);
   const completado = estadoReto === 'completado';
 
@@ -38,11 +38,8 @@ export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, on
   // En la tarjeta caben 7 + el contador: primero las conseguidas, luego las siguientes pendientes
   const muestra = [...logros.filter((l) => l.conseguido), ...logros.filter((l) => !l.conseguido)].slice(0, 7);
 
-  // Mis retos: fases hechas según los ejercicios de la sesión de hoy
-  const fases = ORDEN_FASES.map((op) => {
-    const deFase = ejercicios.filter((e) => e.op === op);
-    return { op, hecha: completado || (deFase.length > 0 && deFase.every((e) => e.respuesta !== null)) };
-  });
+  // Mis retos: fases terminadas hoy (el jugador elige el orden)
+  const fases = ORDEN_FASES.map((op) => ({ op, hecha: completado || fasesHechas.includes(op) }));
   const hechas = fases.filter((f) => f.hecha).length;
   const minRestantes = Math.round(fases.filter((f) => !f.hecha).reduce((n, f) => n + CONFIG.TIEMPOS[f.op], 0) / 60);
 
@@ -104,13 +101,15 @@ export function Inicio({ perfil, sesiones, ejercicios, estadoReto, puntosHoy, on
       <section className="grid md:grid-cols-3 gap-3.5 sm:gap-5">
         <Tarjeta
           acento="azul" icono="target" titulo="Mis retos" delay="d5" onClick={accionReto}
-          texto={`Sumas, restas, multiplicaciones y divisiones. ${CONFIG.EJERCICIOS_POR_FASE} cuentas por fase.`}
-          chip={<span className="chip"><Icono nombre="clock" size={13} />{completado ? 'Hecho' : 'Hoy'}</span>}
+          texto={completado
+            ? `Sumas, restas, multiplicaciones y divisiones. ${CONFIG.EJERCICIOS_POR_FASE} cuentas por fase.`
+            : `Cuatro fases de ${CONFIG.EJERCICIOS_POR_FASE} cuentas. Tú eliges el orden.`}
+          chip={<span className="chip"><Icono nombre={completado ? 'check' : 'chev'} size={13} />{completado ? 'Hecho' : estadoReto === 'en_curso' ? 'Continuar' : 'Empezar'}</span>}
         >
           <div className="flex flex-col gap-2">
             <div className="flex justify-between text-[12.5px] text-tinta-3">
               <b className="text-tinta-2 font-semibold">
-                {completado ? `+${puntosHoy} puntos hoy` : estadoReto === 'en_curso' ? `Fase ${Math.min(hechas + 1, 4)} de 4` : '4 fases'}
+                {completado ? `+${puntosHoy} puntos hoy` : estadoReto === 'en_curso' ? `${hechas} de 4 fases hechas` : '¿Con cuál empiezas?'}
               </b>
               <span>{completado ? 'Completado' : `~${minRestantes} min`}</span>
             </div>

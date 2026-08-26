@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CONFIG, ORDEN_FASES } from './config';
-import type { EjercicioDB, Profile, ResultadoFinal, Session } from './types';
+import type { EjercicioDB, Op, Profile, ResultadoFinal, Session } from './types';
 import { entrar, entrarConToken, haySesion, salir } from './lib/auth';
 import { cargarPerfil, cargarSesiones, finalizarSesion, guardarRespuesta, iniciarSesion, insertarEjercicios } from './lib/api';
 import { genSesion } from './lib/generador';
-import { borrarProgreso, guardarProgreso, leerProgreso, type Progreso } from './lib/progreso';
+import { borrarProgreso, guardarProgreso, leerProgreso, PROGRESO_INICIAL, type Progreso } from './lib/progreso';
 import { supabaseConfigurado } from './lib/supabase';
 import { Fondo } from './components/Fondo';
 import { Icono } from './components/Icono';
 import { Inicio, type EstadoReto } from './screens/Inicio';
+import { ElegirFase } from './screens/ElegirFase';
 import { Fase } from './screens/Fase';
 import { Transicion } from './screens/Transicion';
 import { Resumen } from './screens/Resumen';
@@ -17,6 +18,8 @@ import { Logros } from './screens/Logros';
 import { Cargando, ErrorPantalla } from './screens/Estados';
 
 type Estado = 'cargando' | 'sin_acceso' | 'error' | 'listo';
+/** Qué se ve cuando el estado es 'listo': el inicio, el reto (elegir fase / jugar / resumen) o las insignias. */
+type Vista = 'inicio' | 'reto' | 'logros';
 
 /** Reconstruye el resultado de una sesión ya completada (para el "resumen del día"). */
 function resultadoDesdeSesion(s: Session, perfil: Profile): ResultadoFinal {
@@ -34,22 +37,27 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [sesiones, setSesiones] = useState<Session[]>([]);
   const [ejercicios, setEjercicios] = useState<EjercicioDB[]>([]);
-  const [progreso, setProgreso] = useState<Progreso>({ fase: 0, pantalla: 'jugando', tiempos: {} });
+  const [progreso, setProgreso] = useState<Progreso>(PROGRESO_INICIAL);
   const [resultado, setResultado] = useState<ResultadoFinal | null>(null);
   const [yaJugado, setYaJugado] = useState(false);
   const [ocupado, setOcupado] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
-  // Siempre se aterriza en el inicio; desde ahí se empieza o se continúa el reto, o se ve el resultado del día
-  const [enInicio, setEnInicio] = useState(true);
-  // La página de logros vive en #logros: así funciona el botón atrás y se puede enlazar
-  const [enLogros, setEnLogros] = useState(() => location.hash === '#logros');
+  // Rutas por hash: '' = inicio, '#reto' = elegir fase / jugar / resumen, '#logros' = insignias.
+  // Así el botón atrás del navegador funciona y un refresco a mitad de reto vuelve al reto.
+  const vistaDeHash = (): Vista => (location.hash === '#reto' ? 'reto' : location.hash === '#logros' ? 'logros' : 'inicio');
+  const [vista, setVistaLocal] = useState<Vista>(vistaDeHash);
   useEffect(() => {
-    const sync = () => setEnLogros(location.hash === '#logros');
+    const sync = () => setVistaLocal(vistaDeHash());
     window.addEventListener('hashchange', sync);
     return () => window.removeEventListener('hashchange', sync);
   }, []);
-  const abrirLogros = () => { location.hash = 'logros'; };
-  const cerrarLogros = () => { history.replaceState(null, '', location.pathname + location.search); setEnLogros(false); };
+  const setVista = (v: Vista) => {
+    if (v === 'inicio') history.replaceState(null, '', location.pathname + location.search);
+    else location.hash = v;
+    setVistaLocal(v);
+  };
+  const abrirLogros = () => setVista('logros');
+  const cerrarLogros = () => setVista('inicio');
 
   // Cola de escrituras a la DB: se encadenan para no perder ninguna y poder esperarlas antes de finalizar
   const cola = useRef<Promise<void>>(Promise.resolve());
@@ -80,7 +88,7 @@ export default function App() {
         setYaJugado(true);
         borrarProgreso(s.id);
       } else {
-        setProgreso(ej.length ? leerProgreso(s.id) : { fase: 0, pantalla: 'jugando', tiempos: {} });
+        setProgreso(ej.length ? leerProgreso(s.id) : PROGRESO_INICIAL);
       }
       setEstado('listo');
     } catch (e) {
@@ -102,14 +110,14 @@ export default function App() {
   /** Login con usuario y contraseña: si entra, carga todo y aterriza en el inicio. */
   const onEntrar = async (usuario: string, password: string) => {
     const err = await entrar(usuario, password);
-    if (!err) { setEnInicio(true); void cargar(); }
+    if (!err) { setVista('inicio'); void cargar(); }
     return err;
   };
 
   const onSalir = async () => {
     await salir();
     setPerfil(null); setSession(null); setSesiones([]); setEjercicios([]); setResultado(null); setYaJugado(false);
-    setEnInicio(true); cerrarLogros(); setMensaje(null); setEstado('sin_acceso');
+    setProgreso(PROGRESO_INICIAL); setVista('inicio'); cerrarLogros(); setMensaje(null); setEstado('sin_acceso');
   };
 
   const actualizarProgreso = (p: Progreso) => {
@@ -117,18 +125,25 @@ export default function App() {
     if (session) guardarProgreso(session.id, p);
   };
 
-  const empezar = async () => {
+  /** Desde el inicio: al selector de fase (o al resumen si el reto de hoy ya está hecho). Si había una fase a medias, se vuelve a elegir. */
+  const irAlReto = () => {
+    if (!resultado && progreso.pantalla === 'jugando') actualizarProgreso({ ...progreso, pantalla: 'eligiendo' });
+    setVista('reto');
+  };
+
+  /** El jugador elige la fase. La primera vez se crean las cuentas de las cuatro fases. */
+  const elegirFase = async (op: Op) => {
     if (!session) return;
-    if (ejercicios.length) { setEnInicio(false); return; }   // reto a medias: continuar donde estaba
-    setOcupado(true);
-    try {
-      const filas = await insertarEjercicios(session.id, genSesion(CONFIG.EJERCICIOS_POR_FASE));
-      setEjercicios(filas);
-      actualizarProgreso({ fase: 0, pantalla: 'jugando', tiempos: {} });
-      setEnInicio(false);
-    } catch (e) {
-      setMensaje((e as Error).message); setEstado('error');
-    } finally { setOcupado(false); }
+    if (!ejercicios.length) {
+      setOcupado(true);
+      try {
+        setEjercicios(await insertarEjercicios(session.id, genSesion(CONFIG.EJERCICIOS_POR_FASE)));
+      } catch (e) {
+        setMensaje((e as Error).message); setEstado('error'); return;
+      } finally { setOcupado(false); }
+    }
+    actualizarProgreso({ ...progreso, actual: op, pantalla: 'jugando' });
+    setVista('reto');
   };
 
   const onRespuesta = useCallback((id: string, respuesta: number, ms: number) => {
@@ -137,8 +152,14 @@ export default function App() {
   }, []);
 
   const onTerminarFase = useCallback((segs: number) => {
-    const op = ORDEN_FASES[progreso.fase];
-    actualizarProgreso({ ...progreso, pantalla: 'transicion', tiempos: { ...progreso.tiempos, [op]: segs } });
+    const op = progreso.actual;
+    if (!op) return;
+    actualizarProgreso({
+      ...progreso,
+      hechas: progreso.hechas.includes(op) ? progreso.hechas : [...progreso.hechas, op],
+      tiempos: { ...progreso.tiempos, [op]: segs },
+      pantalla: 'transicion',
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progreso, session]);
 
@@ -157,23 +178,15 @@ export default function App() {
     } finally { setOcupado(false); }
   };
 
-  const onSiguiente = () => {
-    const siguiente = progreso.fase + 1;
-    if (siguiente >= ORDEN_FASES.length) {
-      actualizarProgreso({ ...progreso, fase: siguiente });
-      void finalizar(progreso.tiempos);
-    } else {
-      actualizarProgreso({ ...progreso, fase: siguiente, pantalla: 'jugando' });
-    }
-  };
+  /** Tras la última fase: marcamos 'finalizando' y el efecto de abajo llama a la RPC (una sola vez). */
+  const verResultado = () => actualizarProgreso({ ...progreso, actual: null, pantalla: 'finalizando' });
 
-  // Si se refrescó justo antes de finalizar (todas las fases hechas), finalizamos ahora
   useEffect(() => {
-    if (estado === 'listo' && !resultado && ejercicios.length && progreso.fase >= ORDEN_FASES.length && !ocupado) {
+    if (estado === 'listo' && !resultado && ejercicios.length && progreso.pantalla === 'finalizando' && !ocupado) {
       void finalizar(progreso.tiempos);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [estado, progreso.fase]);
+  }, [estado, progreso.pantalla]);
 
   // ---------- render ----------
   if (estado === 'cargando') return <Fondo><Cargando /></Fondo>;
@@ -183,32 +196,37 @@ export default function App() {
   const estadoReto: EstadoReto = resultado ? 'completado' : ejercicios.length ? 'en_curso' : 'nuevo';
 
   let contenido;
-  if (enLogros) {
+  if (vista === 'logros') {
     contenido = <Logros perfil={perfil} sesiones={sesiones} onVolver={cerrarLogros} onSalir={onSalir} />;
-  } else if (enInicio) {
+  } else if (vista === 'inicio') {
     contenido = (
       <Inicio
-        perfil={perfil} sesiones={sesiones} ejercicios={ejercicios} estadoReto={estadoReto}
+        perfil={perfil} sesiones={sesiones} estadoReto={estadoReto} fasesHechas={progreso.hechas}
         puntosHoy={resultado?.puntos ?? session.puntos}
-        onEmpezar={empezar} onVerResultado={() => setEnInicio(false)} onVerLogros={abrirLogros} cargando={ocupado} onSalir={onSalir}
+        onEmpezar={irAlReto} onVerResultado={() => setVista('reto')} onVerLogros={abrirLogros} cargando={ocupado} onSalir={onSalir}
       />
     );
   } else if (resultado) {
-    contenido = <Resumen perfil={perfil} resultado={resultado} yaJugado={yaJugado} onVolver={() => setEnInicio(true)} onSalir={onSalir} />;
-  } else if (progreso.fase >= ORDEN_FASES.length) {
+    contenido = <Resumen perfil={perfil} resultado={resultado} yaJugado={yaJugado} onVolver={() => setVista('inicio')} onSalir={onSalir} />;
+  } else if (progreso.pantalla === 'finalizando') {
     contenido = <Cargando texto="Calculando resultado…" />;
+  } else if (progreso.pantalla === 'eligiendo' || !progreso.actual) {
+    contenido = (
+      <ElegirFase ejercicios={ejercicios} hechas={progreso.hechas} actual={progreso.actual}
+        onElegir={elegirFase} onVolver={() => setVista('inicio')} cargando={ocupado} />
+    );
   } else {
-    const op = ORDEN_FASES[progreso.fase];
+    const op = progreso.actual;
     const deFase = ejercicios.filter((e) => e.op === op);
     if (progreso.pantalla === 'transicion') {
       const aciertos = deFase.filter((e) => e.respuesta !== null && e.respuesta === e.sol).length;
       contenido = (
-        <Transicion op={op} aciertos={aciertos} total={deFase.length}
-          siguiente={ORDEN_FASES[progreso.fase + 1] ?? null} onSiguiente={onSiguiente} cargando={ocupado} />
+        <Transicion op={op} aciertos={aciertos} total={deFase.length} ejercicios={ejercicios} hechas={progreso.hechas}
+          onElegir={elegirFase} onVerResultado={verResultado} cargando={ocupado} />
       );
     } else {
       contenido = (
-        <Fase key={op} op={op} numFase={progreso.fase + 1} ejercicios={deFase}
+        <Fase key={op} op={op} numFase={Math.min(progreso.hechas.length + 1, ORDEN_FASES.length)} ejercicios={deFase}
           onRespuesta={onRespuesta} onTerminar={onTerminarFase} />
       );
     }

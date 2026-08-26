@@ -4,8 +4,8 @@ import type { EjercicioDB, Op } from '../types';
 import { Boton } from '../components/Boton';
 import { Icono } from '../components/Icono';
 import { Keypad } from '../components/Keypad';
-import { Timer } from '../components/Timer';
-import { borrarDigito, teclear } from '../lib/entrada';
+import { Barra } from '../components/Barra';
+import { borrarDigito, escribeDerechaAIzquierda, teclear } from '../lib/entrada';
 
 interface Props {
   op: Op;
@@ -18,6 +18,7 @@ interface Props {
 export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props) {
   const info = FASE_INFO[op];
   const total: number = CONFIG.TIEMPOS[op];
+  const rtl = escribeDerechaAIzquierda(op);
 
   const [idx, setIdx] = useState(() => Math.max(0, ejercicios.findIndex((e) => e.respuesta === null)));
   const [buffer, setBuffer] = useState('');
@@ -107,72 +108,102 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
     return () => window.removeEventListener('keydown', h);
   });
 
-  const ancho = Math.max(String(actual.a).length, String(actual.b).length);
-  const pad = (s: string, n: number) => s.padStart(n, ' ').replaceAll(' ', ' ');
+  const m = Math.floor(restante / 60);
+  const s = String(restante % 60).padStart(2, '0');
+  const urgente = restante <= 20;
+  const digitosA = String(actual.a).split('');
+  const digitosB = String(actual.b).split('');
+  const digitosR = buffer.split('');
 
   return (
-    <div className="min-h-dvh flex flex-col max-w-md mx-auto w-full px-4 pb-4 pt-3 gap-3">
-      <div className="flex items-center justify-between in d1">
-        <h1 className="flex items-center gap-2.5 font-bold text-lg tracking-tight">
-          <span className={`tile tile-${info.acento} w-9 h-9 rounded-[12px] text-lg`}>{info.simbolo}</span>
-          <span className="leading-tight">
-            <span className="block text-tinta-3 font-medium text-xs">Fase {numFase} de 4</span>
-            {info.nombre}
-          </span>
-        </h1>
-        <span className="chip tabular-nums">{respondidas}/{ejercicios.length}</span>
-      </div>
-
-      <Timer restante={restante} total={total} />
-
-      {/* Navegación por ejercicios */}
-      <nav className="flex justify-center gap-2 py-1" aria-label="Ejercicios">
-        {ejercicios.map((e, i) => {
-          const hecho = respuestas[e.id] !== null;
-          const activo = i === idx;
-          return (
-            <button
-              key={e.id}
-              type="button"
-              onClick={() => irA(i)}
-              className={`h-9 w-9 rounded-[12px] text-sm font-bold transition-all duration-200
-                ${hecho ? `tile tile-${info.acento}` : 'glass-fuerte border border-linea text-tinta-2'}
-                ${activo ? 'ring-2 ring-tinta ring-offset-2 ring-offset-fondo scale-105' : ''}`}
-              aria-label={`Ejercicio ${i + 1}${hecho ? ', respondido' : ''}`}
-              aria-current={activo}
-            >
-              {i + 1}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Enunciado tipo papel, sobre vidrio con la luz del acento de la fase */}
-      <section className={`glass luz-${info.acento} rounded-[32px] flex-1 min-h-[240px] p-5 flex flex-col items-center justify-center`}>
-        <div key={actual.id} className="pop font-mono font-bold text-5xl sm:text-6xl leading-tight tabular-nums text-right text-tinta">
-          <div>{pad(String(actual.a), ancho + 2)}</div>
-          <div>{info.simbolo}{pad(String(actual.b), ancho + 1)}</div>
-          <div className="border-t-[3px] border-tinta/70 mt-1 pt-2 min-h-[1.2em]">
-            <span className={buffer === '' ? 'text-tinta-3' : ''}>{pad(buffer === '' ? '?' : buffer, ancho + 2)}</span>
+    <div className="min-h-dvh max-w-5xl mx-auto w-full px-4 sm:px-8 pt-3 sm:pt-5 pb-4 flex flex-col gap-3 sm:gap-4">
+      {/* Cabecera de la fase */}
+      <header className="glass rounded-[22px] px-3 sm:px-4 h-[60px] flex items-center justify-between gap-3 in d1">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className={`tile tile-${info.acento} w-9 h-9 rounded-[12px] text-lg font-bold shrink-0`}>{info.simbolo}</span>
+          <div className="leading-tight min-w-0">
+            <div className="text-tinta-3 font-medium text-[11px]">Fase {numFase} de 4</div>
+            <div className="font-bold tracking-tight truncate">{info.nombre}</div>
           </div>
         </div>
-      </section>
+        <div className="flex items-center gap-2">
+          <span className="chip tabular-nums"><Icono nombre="check" size={12} />{respondidas}/{ejercicios.length}</span>
+          <span className={`chip tabular-nums font-mono ${urgente ? 'chip-rosa animate-pulse' : ''}`}><Icono nombre="clock" size={12} />{m}:{s}</span>
+        </div>
+      </header>
+      <Barra valor={restante / total} acento={urgente ? 'rosa' : info.acento} />
 
-      <Keypad onDigito={digito} onBorrar={borrar} onOk={siguienteSinResponder} okDisabled={buffer === ''} />
+      <div className="grid lg:grid-cols-[1.15fr_.85fr] gap-3 sm:gap-5 items-start">
+        {/* Pizarra: la cuenta en columna, como en papel */}
+        <section className={`glass luz-${info.acento} rounded-[32px] sm:rounded-[36px] p-4 sm:p-8 flex flex-col gap-4 min-h-[380px] lg:min-h-[520px] in d2`}>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-tinta-2 text-sm font-semibold">Cuenta {idx + 1} de {ejercicios.length}</span>
+            <nav className="flex gap-1.5" aria-label="Cuentas">
+              {ejercicios.map((e, i) => {
+                const hecho = respuestas[e.id] !== null;
+                const activo = i === idx;
+                return (
+                  <button
+                    key={e.id} type="button" onClick={() => irA(i)}
+                    aria-label={`Cuenta ${i + 1}${hecho ? ', respondida' : ''}`} aria-current={activo}
+                    className={`h-7 min-w-7 px-2 rounded-full text-[11px] font-bold transition-all duration-200
+                      ${hecho ? `tile tile-${info.acento}` : 'glass-fuerte border border-linea text-tinta-2'}
+                      ${activo ? 'ring-2 ring-tinta ring-offset-2 ring-offset-fondo' : ''}`}
+                  >
+                    {i + 1}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
 
-      <div className="flex items-center justify-between gap-3 pt-1">
-        <Boton variante="glass" className="px-3.5" onClick={() => irA(idx - 1)} aria-label="Anterior"><Icono nombre="chevLeft" size={20} /></Boton>
-        {todasHechas ? (
-          <Boton className="flex-1" icono="check" onClick={() => terminar(restante)}>Terminar fase</Boton>
-        ) : confirmando ? (
-          <Boton variante="peligro" className="flex-1" onClick={() => terminar(restante)}>¿Seguro? Faltan {ejercicios.length - respondidas}</Boton>
-        ) : (
-          <button type="button" className="text-tinta-3 font-semibold text-sm underline flex-1" onClick={() => setConfirmando(true)}>
-            Terminar sin acabar
-          </button>
-        )}
-        <Boton variante="glass" className="px-3.5" onClick={() => irA(idx + 1)} aria-label="Siguiente"><Icono nombre="chev" size={20} /></Boton>
+          <div key={actual.id} className="flex-1 flex flex-col items-center justify-center py-2 pop">
+            <div className="flex flex-col items-end gap-1.5 sm:gap-2 font-mono tabular-nums">
+              <div className="flex">{digitosA.map((d, i) => <Celda key={i}>{d}</Celda>)}</div>
+              <div className="flex">
+                <Celda className="text-tinta-2">{info.simbolo}</Celda>
+                {digitosB.map((d, i) => <Celda key={i}>{d}</Celda>)}
+              </div>
+              <div className="h-[3px] w-full rounded-full bg-tinta/70 my-1" />
+              <div className="flex gap-1 sm:gap-1.5" aria-live="polite" aria-label={buffer ? `Respuesta ${buffer}` : 'Sin respuesta'}>
+                {rtl && <Cursor />}
+                {digitosR.map((d, i) => <Celda key={i} respuesta>{d}</Celda>)}
+                {!rtl && <Cursor />}
+              </div>
+            </div>
+            <p className="mt-4 text-[12.5px] text-tinta-3">
+              {rtl ? 'Escribe empezando por las unidades, como en el papel.' : 'Escribe el cociente de izquierda a derecha.'}
+            </p>
+          </div>
+        </section>
+
+        {/* Teclado y acciones */}
+        <aside className="flex flex-col gap-3 lg:sticky lg:top-5 in d3">
+          <Keypad onDigito={digito} onBorrar={borrar} onOk={siguienteSinResponder} okDisabled={buffer === ''} />
+          <div className="flex items-center justify-between gap-3">
+            <Boton variante="glass" className="px-3.5" onClick={() => irA(idx - 1)} aria-label="Anterior"><Icono nombre="chevLeft" size={20} /></Boton>
+            {todasHechas ? (
+              <Boton className="flex-1" icono="check" onClick={() => terminar(restante)}>Terminar fase</Boton>
+            ) : confirmando ? (
+              <Boton variante="peligro" className="flex-1" onClick={() => terminar(restante)}>¿Seguro? Faltan {ejercicios.length - respondidas}</Boton>
+            ) : (
+              <button type="button" className="text-tinta-3 font-semibold text-sm underline flex-1" onClick={() => setConfirmando(true)}>
+                Terminar sin acabar
+              </button>
+            )}
+            <Boton variante="glass" className="px-3.5" onClick={() => irA(idx + 1)} aria-label="Siguiente"><Icono nombre="chev" size={20} /></Boton>
+          </div>
+        </aside>
       </div>
     </div>
   );
+}
+
+/** Una columna de la cuenta: los dígitos de arriba van sin caja; los de la respuesta, en caja de vidrio. */
+function Celda({ children, respuesta, className = '' }: { children: React.ReactNode; respuesta?: boolean; className?: string }) {
+  return <span className={`celda ${respuesta ? 'celda-respuesta' : ''} ${className}`}>{children}</span>;
+}
+
+function Cursor() {
+  return <span className="celda celda-cursor" aria-hidden="true"><i /></span>;
 }
