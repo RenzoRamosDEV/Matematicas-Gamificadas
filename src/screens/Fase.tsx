@@ -116,7 +116,7 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
   const digitosR = buffer.split('');
 
   return (
-    <div className="min-h-dvh max-w-5xl mx-auto w-full px-4 sm:px-8 pt-3 sm:pt-5 pb-4 flex flex-col gap-3 sm:gap-4">
+    <div className="min-h-dvh max-w-5xl mx-auto w-full px-4 sm:px-8 py-3 sm:py-5 flex flex-col justify-center gap-3 sm:gap-4">
       {/* Cabecera de la fase */}
       <header className="glass rounded-[22px] px-3 sm:px-4 h-[60px] flex items-center justify-between gap-3 in d1">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -133,9 +133,9 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
       </header>
       <Barra valor={restante / total} acento={urgente ? 'rosa' : info.acento} />
 
-      <div className="grid lg:grid-cols-[1.15fr_.85fr] gap-3 sm:gap-5 items-start">
+      <div className="grid lg:grid-cols-[1.15fr_.85fr] gap-3 sm:gap-5 items-center">
         {/* Pizarra: la cuenta en columna, como en papel */}
-        <section className={`glass luz-${info.acento} rounded-[32px] sm:rounded-[36px] p-4 sm:p-8 flex flex-col gap-4 min-h-[380px] lg:min-h-[520px] in d2`}>
+        <section className={`glass luz-${info.acento} rounded-[32px] sm:rounded-[36px] p-4 sm:p-8 flex flex-col gap-4 min-h-[380px] lg:min-h-[480px] in d2`}>
           <div className="flex items-center justify-between gap-3">
             <span className="text-tinta-2 text-sm font-semibold">Cuenta {idx + 1} de {ejercicios.length}</span>
             <nav className="flex gap-1.5" aria-label="Cuentas">
@@ -178,7 +178,7 @@ export function Fase({ op, numFase, ejercicios, onRespuesta, onTerminar }: Props
         </section>
 
         {/* Teclado y acciones */}
-        <aside className="flex flex-col gap-3 lg:sticky lg:top-5 in d3">
+        <aside className="flex flex-col gap-3 in d3">
           <Keypad onDigito={digito} onBorrar={borrar} onOk={siguienteSinResponder} okDisabled={buffer === ''} />
           <div className="flex items-center justify-between gap-3">
             <Boton variante="glass" className="px-3.5" onClick={() => irA(idx - 1)} aria-label="Anterior"><Icono nombre="chevLeft" size={20} /></Boton>
