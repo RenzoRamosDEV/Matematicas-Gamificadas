@@ -64,7 +64,7 @@ export function Calendario({ mes, hoy, seleccion, sesiones, conNota, onSeleccion
               aria-label={`${c.fecha}${color ? `, ${TEXTO_BOLA[color]}` : ''}${s ? `, ${s.puntos} puntos` : ''}${nota ? ', con apunte' : ''}`}
               aria-pressed={sel}
               className={`relative aspect-square rounded-[12px] sm:rounded-[14px] flex flex-col items-center justify-center gap-1 text-sm font-semibold transition
-                ${sel ? 'bg-tinta text-white shadow-[0_10px_24px_-12px_rgba(16,19,35,.6)]' : 'glass-fuerte border border-linea hover:bg-white'}
+                ${sel ? 'bg-tinta text-fondo shadow-[0_10px_24px_-12px_rgba(16,19,35,.4)]' : 'glass-fuerte border border-linea hover:bg-tinta/5'}
                 ${!c.enMes ? 'opacity-35' : ''} ${futuro && !sel ? 'text-tinta-3' : ''}
                 ${esHoy && !sel ? 'ring-2 ring-azul-2 ring-offset-2 ring-offset-fondo' : ''}`}
             >
@@ -72,12 +72,12 @@ export function Calendario({ mes, hoy, seleccion, sesiones, conNota, onSeleccion
               {color ? (
                 <span className="flex items-center gap-1 leading-none">
                   <i className={`w-2 h-2 rounded-full ${BOLA[color]}`} aria-hidden="true" />
-                  {s && <span className={`text-[10px] font-bold tabular-nums ${sel ? 'text-white/80' : 'text-tinta-2'}`}>+{s.puntos}</span>}
+                  {s && <span className={`text-[10px] font-bold tabular-nums ${sel ? 'text-fondo/80' : 'text-tinta-2'}`}>+{s.puntos}</span>}
                 </span>
               ) : (
                 <span className="h-2" aria-hidden="true" />
               )}
-              {nota && <Icono nombre="pencil" size={10} className={`absolute top-1 right-1 ${sel ? 'text-white/80' : 'text-tinta-3'}`} />}
+              {nota && <Icono nombre="pencil" size={10} className={`absolute top-1 right-1 ${sel ? 'text-fondo/80' : 'text-tinta-3'}`} />}
             </button>
           );
         })}

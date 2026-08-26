@@ -81,7 +81,7 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
         </div>
 
         <div className="glass rounded-[40px] relative h-[260px] sm:h-[420px] grid place-items-center overflow-hidden in d3">
-          <div className="absolute inset-4 rounded-[24px] pointer-events-none bg-gradient-to-br from-white/35 to-transparent" aria-hidden="true" />
+          <div className="absolute inset-4 rounded-[24px] pointer-events-none brillo-escena" aria-hidden="true" />
           {/* Órbita: una bolita por fase; se enciende con el color de la operación al completarla hoy */}
           <div className="orbita-fases w-[230px] h-[230px] sm:w-[340px] sm:h-[340px]" aria-label={`${hechas} de 4 fases completadas hoy`} role="img">
             {fases.map((f, i) => (

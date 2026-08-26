@@ -146,7 +146,7 @@ export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso }: Props
                     </div>
                     <button
                       type="button" onClick={() => borrar(n.id)} disabled={borrando === n.id} aria-label="Borrar apunte" title="Borrar apunte"
-                      className="w-8 h-8 rounded-[10px] grid place-items-center text-tinta-3 hover:text-rosa-2 hover:bg-white active:scale-95 transition shrink-0 disabled:opacity-40"
+                      className="w-8 h-8 rounded-[10px] grid place-items-center text-tinta-3 hover:text-rosa-2 hover:bg-tinta/5 active:scale-95 transition shrink-0 disabled:opacity-40"
                     >
                       <Icono nombre="x" size={16} />
                     </button>
