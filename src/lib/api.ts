@@ -52,11 +52,15 @@ export async function finalizarSesion(
   return data as ResultadoFinal;
 }
 
-/** Últimas sesiones completadas del jugador (RLS solo devuelve las suyas). */
-export async function cargarSesiones(limite = 30): Promise<Session[]> {
+/**
+ * Historial completo de sesiones completadas del jugador (RLS solo devuelve las suyas).
+ * Se trae entero porque los logros acumulan aciertos y retos de toda la historia;
+ * a una sesión por día son unas 365 filas pequeñas al año.
+ */
+export async function cargarSesiones(): Promise<Session[]> {
   const { data, error } = await supabase
     .from('sessions').select('id, fecha, estado, puntos, detalle')
-    .eq('estado', 'completada').order('fecha', { ascending: false }).limit(limite);
+    .eq('estado', 'completada').order('fecha', { ascending: false }).limit(5000);
   fail('historial', error);
   return (data ?? []) as Session[];
 }
