@@ -1,3 +1,4 @@
+import type { Session } from '../types';
 import { sumarDias } from './semana';
 
 /** Mes en formato YYYY-MM. */
@@ -50,3 +51,18 @@ export function semanasDelMes(mes: Mes): CeldaMes[][] {
   }
   return semanas;
 }
+
+/** Cómo fue el día: verde todo bien, amarillo algún fallo, rojo todo mal, gris sin reto (pasado), nada si es futuro. */
+export type ColorDia = 'verde' | 'amarillo' | 'rojo' | 'gris' | null;
+
+export function colorDelDia(sesion: Session | undefined, fecha: string, hoy: string): ColorDia {
+  if (!sesion) return fecha < hoy ? 'gris' : null;
+  const fases = sesion.detalle ?? [];
+  const total = fases.reduce((n, f) => n + f.total, 0);
+  const aciertos = fases.reduce((n, f) => n + f.aciertos, 0);
+  if (total === 0) return 'gris';
+  if (aciertos === total) return 'verde';
+  if (aciertos === 0) return 'rojo';
+  return 'amarillo';
+}
+

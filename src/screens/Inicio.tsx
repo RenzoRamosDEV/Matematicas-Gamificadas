@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { CONFIG, ORDEN_FASES, type Acento } from '../config';
+import { CONFIG, FASE_INFO, ORDEN_FASES, type Acento } from '../config';
 import type { Op, Profile, Session } from '../types';
 import { evaluarLogros } from '../lib/logros';
 import { hoyMadrid, puntosSemana, semanaActual } from '../lib/semana';
@@ -82,10 +82,16 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
 
         <div className="glass rounded-[40px] relative h-[260px] sm:h-[420px] grid place-items-center overflow-hidden in d3">
           <div className="absolute inset-4 rounded-[24px] pointer-events-none bg-gradient-to-br from-white/35 to-transparent" aria-hidden="true" />
-          <div className="orbita w-[230px] h-[230px] sm:w-[340px] sm:h-[340px]" aria-hidden="true" />
+          {/* Órbita: una bolita por fase; se enciende con el color de la operación al completarla hoy */}
+          <div className="orbita-fases w-[230px] h-[230px] sm:w-[340px] sm:h-[340px]" aria-label={`${hechas} de 4 fases completadas hoy`} role="img">
+            {fases.map((f, i) => (
+              <i key={f.op} className={`orbita-punto ${f.hecha ? `tile-${FASE_INFO[f.op].acento} orbita-punto-on` : ''}`} style={{ '--i': i } as React.CSSProperties} title={`${FASE_INFO[f.op].nombre}: ${f.hecha ? 'hecha' : 'pendiente'}`} />
+            ))}
+          </div>
           <Mascota size={200} className="scale-[.72] sm:scale-100" />
-          <div className="glass flota absolute top-4 right-4 sm:top-10 sm:right-10 rounded-[14px] flex items-center gap-2 pl-2 pr-3 py-2 text-[12.5px] font-semibold" style={{ animationDelay: '-2s' }}>
-            <span className="tile tile-amarillo w-6 h-6 rounded-[8px]"><Icono nombre="star" size={14} /></span>+10 por acierto
+          <div className="glass flota absolute top-4 right-4 sm:top-10 sm:right-10 rounded-[14px] flex items-center gap-2 pl-2 pr-3 py-2 text-[12.5px] font-semibold tabular-nums" style={{ animationDelay: '-2s' }}>
+            <span className={`tile ${completado ? 'tile-verde' : 'tile-amarillo'} w-6 h-6 rounded-[8px]`}><Icono nombre={completado ? 'check' : 'star'} size={14} /></span>
+            {completado ? `+${puntosHoy} puntos hoy` : hechas > 0 ? `${hechas} de 4 fases hoy` : '+10 por acierto'}
           </div>
           {perfil.comodines_disponibles > 0 && (
             <div className="glass flota absolute bottom-4 left-4 sm:bottom-10 sm:left-10 rounded-[14px] flex items-center gap-2 pl-2 pr-3 py-2 text-[12.5px] font-semibold" style={{ animationDelay: '-4s' }}>

@@ -1,4 +1,4 @@
-import { nombreMes, semanasDelMes, type Mes } from '../lib/calendario';
+import { colorDelDia, nombreMes, semanasDelMes, type ColorDia, type Mes } from '../lib/calendario';
 import type { Session } from '../types';
 import { Icono } from './Icono';
 
@@ -14,7 +14,15 @@ interface Props {
 
 const DIAS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
-/** Calendario mensual: retos completados con sus puntos, apuntes y el día seleccionado. */
+const BOLA: Record<Exclude<ColorDia, null>, string> = {
+  verde: 'bg-verde-2 shadow-[0_0_8px_-1px_var(--color-verde-2)]',
+  amarillo: 'bg-amarillo-2 shadow-[0_0_8px_-1px_var(--color-amarillo-2)]',
+  rojo: 'bg-rojo-2 shadow-[0_0_8px_-1px_var(--color-rojo-2)]',
+  gris: 'bg-gris',
+};
+const TEXTO_BOLA: Record<Exclude<ColorDia, null>, string> = { verde: 'Todo bien', amarillo: 'Algún fallo', rojo: 'Todo mal', gris: 'Sin reto' };
+
+/** Calendario mensual: una bolita por día según cómo fue el reto, los puntos, los apuntes y el día seleccionado. */
 export function Calendario({ mes, hoy, seleccion, sesiones, conNota, onSeleccionar, onCambiarMes }: Props) {
   const semanas = semanasDelMes(mes);
   const esMesActual = mes === hoy.slice(0, 7);
@@ -43,6 +51,7 @@ export function Calendario({ mes, hoy, seleccion, sesiones, conNota, onSeleccion
         ))}
         {semanas.flat().map((c) => {
           const s = sesiones.get(c.fecha);
+          const color = colorDelDia(s, c.fecha, hoy);
           const esHoy = c.fecha === hoy;
           const sel = c.fecha === seleccion;
           const futuro = c.fecha > hoy;
@@ -52,27 +61,35 @@ export function Calendario({ mes, hoy, seleccion, sesiones, conNota, onSeleccion
               key={c.fecha}
               type="button"
               onClick={() => onSeleccionar(c.fecha)}
-              aria-label={`${c.fecha}${s ? `, reto completado, ${s.puntos} puntos` : ''}${nota ? ', con apunte' : ''}`}
+              aria-label={`${c.fecha}${color ? `, ${TEXTO_BOLA[color]}` : ''}${s ? `, ${s.puntos} puntos` : ''}${nota ? ', con apunte' : ''}`}
               aria-pressed={sel}
-              className={`relative aspect-square rounded-[12px] sm:rounded-[14px] flex flex-col items-center justify-center gap-0.5 text-sm font-semibold transition
-                ${sel ? 'bg-tinta text-white shadow-[0_10px_24px_-12px_rgba(16,19,35,.6)]'
-                  : s ? 'tile tile-verde text-white'
-                  : 'glass-fuerte border border-linea hover:bg-white'}
+              className={`relative aspect-square rounded-[12px] sm:rounded-[14px] flex flex-col items-center justify-center gap-1 text-sm font-semibold transition
+                ${sel ? 'bg-tinta text-white shadow-[0_10px_24px_-12px_rgba(16,19,35,.6)]' : 'glass-fuerte border border-linea hover:bg-white'}
                 ${!c.enMes ? 'opacity-35' : ''} ${futuro && !sel ? 'text-tinta-3' : ''}
                 ${esHoy && !sel ? 'ring-2 ring-azul-2 ring-offset-2 ring-offset-fondo' : ''}`}
             >
               <span className="tabular-nums leading-none">{c.dia}</span>
-              {s && <span className={`text-[10px] font-bold leading-none tabular-nums ${sel ? 'text-white/80' : 'text-white/90'}`}>+{s.puntos}</span>}
-              {nota && <i className={`absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${sel ? 'bg-amarillo' : 'bg-amarillo-2'}`} aria-hidden="true" />}
+              {color ? (
+                <span className="flex items-center gap-1 leading-none">
+                  <i className={`w-2 h-2 rounded-full ${BOLA[color]}`} aria-hidden="true" />
+                  {s && <span className={`text-[10px] font-bold tabular-nums ${sel ? 'text-white/80' : 'text-tinta-2'}`}>+{s.puntos}</span>}
+                </span>
+              ) : (
+                <span className="h-2" aria-hidden="true" />
+              )}
+              {nota && <Icono nombre="pencil" size={10} className={`absolute top-1 right-1 ${sel ? 'text-white/80' : 'text-tinta-3'}`} />}
             </button>
           );
         })}
       </div>
 
-      <div className="flex flex-wrap gap-3 text-[12px] text-tinta-3 font-medium">
-        <span className="inline-flex items-center gap-1.5"><i className="w-3 h-3 rounded-[4px] tile tile-verde" />Reto completado</span>
+      <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[12px] text-tinta-3 font-medium">
+        <span className="inline-flex items-center gap-1.5"><i className={`w-2 h-2 rounded-full ${BOLA.verde}`} />Todo bien</span>
+        <span className="inline-flex items-center gap-1.5"><i className={`w-2 h-2 rounded-full ${BOLA.amarillo}`} />Algún fallo</span>
+        <span className="inline-flex items-center gap-1.5"><i className={`w-2 h-2 rounded-full ${BOLA.rojo}`} />Todo mal</span>
+        <span className="inline-flex items-center gap-1.5"><i className={`w-2 h-2 rounded-full ${BOLA.gris}`} />Sin reto</span>
         <span className="inline-flex items-center gap-1.5"><i className="w-3 h-3 rounded-full ring-2 ring-azul-2 ring-offset-1 ring-offset-fondo" />Hoy</span>
-        <span className="inline-flex items-center gap-1.5"><i className="w-1.5 h-1.5 rounded-full bg-amarillo-2" />Con apunte</span>
+        <span className="inline-flex items-center gap-1.5"><Icono nombre="pencil" size={11} />Con apunte</span>
       </div>
     </div>
   );
