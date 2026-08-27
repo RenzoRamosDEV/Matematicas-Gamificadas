@@ -45,7 +45,7 @@ export function MenuPerfil({ perfil, onIr, onSalir }: Props) {
       </button>
 
       {abierto && (
-        <div role="menu" className="glass absolute right-0 top-[calc(100%+8px)] z-30 min-w-[210px] rounded-[18px] p-1.5 flex flex-col pop" style={{ background: 'var(--vidrio-opaco)' }}>
+        <div role="menu" className="menu-flotante absolute right-0 top-[calc(100%+8px)] z-30 min-w-[210px] rounded-[18px] p-1.5 flex flex-col pop">
           {OPCIONES.map((o) => (
             <button key={o.destino} type="button" role="menuitem" onClick={() => elegir(() => onIr?.(o.destino))}
               className="flex items-center gap-2.5 px-3 h-11 rounded-[12px] text-[14.5px] font-semibold text-left hover:bg-tinta/5 transition">

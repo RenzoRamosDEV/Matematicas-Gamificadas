@@ -31,6 +31,7 @@
   --vidrio: rgba(255,255,255,.58);
   --vidrio-fuerte: rgba(255,255,255,.78);
   --vidrio-opaco: rgba(255,255,255,.9);
+  --menu-fondo: #ffffff;                        /* menús flotantes: opacos del todo */
   --vidrio-brillo: rgba(255,255,255,.85);       /* borde superior iluminado */
   --vidrio-brillo-inset: rgba(255,255,255,.9);  /* línea interior */
   --vidrio-sombra: 0 1px 0 var(--vidrio-brillo-inset) inset, 0 18px 50px -18px rgba(30,40,80,.22), 0 2px 6px -2px rgba(30,40,80,.08);
@@ -60,6 +61,7 @@
     --vidrio: rgba(255,255,255,.055);
     --vidrio-fuerte: rgba(255,255,255,.09);
     --vidrio-opaco: rgba(20,23,35,.92);
+    --menu-fondo: #171a26;
     --vidrio-brillo: rgba(255,255,255,.14);
     --vidrio-brillo-inset: rgba(255,255,255,.08);
     --vidrio-sombra: 0 1px 0 var(--vidrio-brillo-inset) inset, 0 24px 60px -20px rgba(0,0,0,.6);
@@ -112,6 +114,7 @@ body {
   .glass-raise:hover { transform: translateY(-4px); background: var(--vidrio-fuerte); box-shadow: var(--vidrio-sombra-hover); }
   @supports not (backdrop-filter: blur(1px)) { .glass { background: var(--vidrio-opaco); } }
   .redondo { corner-shape: round; border-radius: 50%; }
+  .menu-flotante { background: var(--menu-fondo); -webkit-backdrop-filter: none; backdrop-filter: none; border: 1px solid var(--color-linea); corner-shape: superellipse(1.5); box-shadow: var(--vidrio-sombra-hover); }
   .brillo-escena { background: linear-gradient(160deg, var(--escena-brillo), transparent 60%); }
 
   /* Luz ambiental del acento dentro de un panel de vidrio (enunciado de la fase) */
