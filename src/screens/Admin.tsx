@@ -150,22 +150,6 @@ export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: 
                 <Barras titulo="Aciertos por divisor" unidad=" %" max={100} datos={barrasGrupo(debiles.divisores).map((d) => ({ ...d, color: colorOp('div') }))} />
               </Panel>
             </div>
-            <Panel titulo={`Las ${debiles.masFalladas.length} cuentas más falladas`}>
-              {debiles.masFalladas.length === 0 ? <p className="text-sm text-tinta-3">Ningún fallo todavía.</p> : (
-                <ol className="grid md:grid-cols-2 gap-2">
-                  {debiles.masFalladas.map((f) => (
-                    <li key={`${f.op}${f.a}${f.b}`} className="glass-fuerte border border-linea rounded-[14px] px-3 py-2 flex items-center gap-3 text-sm">
-                      <span className={`tile tile-${FASE_INFO[f.op].acento} w-7 h-7 rounded-[9px] text-sm font-bold shrink-0`}>{FASE_INFO[f.op].simbolo}</span>
-                      <span className="font-mono tabular-nums font-semibold">{f.a} {FASE_INFO[f.op].simbolo} {f.b} = <span className="text-verde-2">{f.sol}</span></span>
-                      <span className="ml-auto text-right">
-                        <b className="tabular-nums text-rojo-2">{f.fallos} {f.fallos === 1 ? 'fallo' : 'fallos'}</b>
-                        <span className="block text-[11px] text-tinta-3">de {f.intentos} · puso {f.respuestas.map((r) => r ?? '—').join(', ')}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </Panel>
           </Seccion>
 
           {/* 4. Tiempo por cuenta */}
@@ -190,26 +174,44 @@ export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: 
                     <p className="text-sm text-tinta-2 -mt-1">
                       <b className="font-semibold">{delDia.filter(esCorrecta).length}</b> de {delDia.length} bien · {porFecha.get(dia)?.puntos ?? 0} puntos
                     </p>
-                    <ol className="flex flex-col gap-1.5">
-                      {delDia.map((c) => {
-                        const ok = esCorrecta(c);
-                        const info = FASE_INFO[c.op];
+                    <div className="flex flex-col gap-2">
+                      {ORDEN_FASES.map((op) => {
+                        const cs = delDia.filter((c) => c.op === op);
+                        if (cs.length === 0) return null;
+                        const info = FASE_INFO[op];
+                        const ok = cs.filter(esCorrecta).length;
+                        const todo = ok === cs.length;
                         return (
-                          <li key={c.id} className="glass-fuerte border border-linea rounded-[14px] px-3 py-2 flex items-center gap-3 text-[15px]">
-                            <span className={`tile ${ok ? 'tile-verde' : 'tile-rojo'} w-7 h-7 rounded-[9px] shrink-0`}><Icono nombre={ok ? 'check' : 'x'} size={15} /></span>
-                            <span className="font-mono tabular-nums font-semibold whitespace-nowrap">{c.a} {info.simbolo} {c.b} <span className="text-tinta-3">=</span></span>
-                            {ok ? <span className="font-mono tabular-nums font-bold text-verde-2">{c.sol}</span> : (
-                              <span className="flex items-center gap-2 flex-wrap">
-                                <span className="font-mono tabular-nums font-bold text-rojo-2 line-through decoration-2">{c.respuesta ?? '—'}</span>
-                                <Icono nombre="arrow" size={14} className="text-tinta-3" />
-                                <span className="font-mono tabular-nums font-bold text-verde-2">{c.sol}</span>
-                              </span>
-                            )}
-                            <span className="ml-auto chip tabular-nums"><Icono nombre="clock" size={12} />{c.segundos === null ? '—' : `${c.segundos.toFixed(1).replace('.', ',')} s`}</span>
-                          </li>
+                          <details key={op} className="glass-fuerte border border-linea rounded-[16px] overflow-hidden group" open={dia === hoy}>
+                            <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer list-none select-none">
+                              <span className={`tile tile-${info.acento} w-8 h-8 rounded-[10px] text-base font-bold shrink-0`}>{info.simbolo}</span>
+                              <span className="font-semibold">{info.nombre}</span>
+                              <span className={`chip ml-auto tabular-nums ${todo ? 'chip-verde' : ''}`}>{ok}/{cs.length}</span>
+                              <Icono nombre="chev" size={16} className="text-tinta-3 transition-transform group-open:rotate-90" />
+                            </summary>
+                            <ol className="flex flex-col gap-1.5 px-3 pb-3">
+                              {cs.map((c) => {
+                                const bien = esCorrecta(c);
+                                return (
+                                  <li key={c.id} className="rounded-[12px] bg-tinta/[.03] px-3 py-2 flex items-center gap-3 text-[15px]">
+                                    <span className={`tile ${bien ? 'tile-verde' : 'tile-rojo'} w-6 h-6 rounded-[8px] shrink-0`}><Icono nombre={bien ? 'check' : 'x'} size={13} /></span>
+                                    <span className="font-mono tabular-nums font-semibold whitespace-nowrap">{c.a} {info.simbolo} {c.b} <span className="text-tinta-3">=</span></span>
+                                    {bien ? <span className="font-mono tabular-nums font-bold text-verde-2">{c.sol}</span> : (
+                                      <span className="flex items-center gap-2 flex-wrap">
+                                        <span className="font-mono tabular-nums font-bold text-rojo-2 line-through decoration-2">{c.respuesta ?? '—'}</span>
+                                        <Icono nombre="arrow" size={14} className="text-tinta-3" />
+                                        <span className="font-mono tabular-nums font-bold text-verde-2">{c.sol}</span>
+                                      </span>
+                                    )}
+                                    <span className="ml-auto chip tabular-nums"><Icono nombre="clock" size={12} />{c.segundos === null ? '—' : `${c.segundos.toFixed(1).replace('.', ',')} s`}</span>
+                                  </li>
+                                );
+                              })}
+                            </ol>
+                          </details>
                         );
                       })}
-                    </ol>
+                    </div>
                   </>
                 )}
               </Panel>
