@@ -1,4 +1,19 @@
+import { useEffect, useRef, useState } from 'react';
 import { paleta, usePrefiereOscuro } from '../lib/paletaGraficas';
+
+/** Ancho real del contenedor (px), actualizado al redimensionar: la gráfica ocupa todo el espacio disponible. */
+function useAncho<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [ancho, setAncho] = useState(0);
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    const medir = () => setAncho(el.clientWidth);
+    medir();
+    const ro = new ResizeObserver(medir); ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return { ref, ancho };
+}
 
 export interface DatoBarra { etiqueta: string; corto?: string; valor: number | null; color?: string; detalle?: string }
 
@@ -18,22 +33,24 @@ const fmt = (v: number | null, unidad: string) => (v === null ? '—' : `${Numbe
  */
 export function Barras({ datos, max, unidad = '', titulo, alto = 170 }: PropsBarras) {
   const p = paleta(usePrefiereOscuro());
+  const { ref, ancho: disponible } = useAncho<HTMLElement>();
   const n = Math.max(datos.length, 1);
-  // el hueco de cada barra crece con la etiqueta más larga para que no se pisen
+  // cada barra ocupa una fracción del ancho real; mínimo según la etiqueta más larga para que no se pisen
   const maxChars = Math.max(1, ...datos.map((d) => (d.corto ?? d.etiqueta).length));
-  const slot = Math.max(44, Math.min(120, Math.round(maxChars * 7.2) + 12)), ancho = Math.max(n * slot, 200), margen = { arriba: 22, abajo: 34, izq: 4 };
+  const slotMin = Math.max(44, Math.round(maxChars * 7.2) + 12);
+  const slot = Math.max(slotMin, Math.floor((disponible || 600) / n)), ancho = n * slot, margen = { arriba: 22, abajo: 34, izq: 4 };
   const techo = max ?? Math.max(1, ...datos.map((d) => d.valor ?? 0)) * 1.15;
   const hPlot = alto - margen.arriba - margen.abajo;
   const y = (v: number) => margen.arriba + hPlot - (Math.min(v, techo) / techo) * hPlot;
-  const barW = Math.round(slot * 0.56);
+  const barW = Math.min(64, Math.round(slot * 0.56));   // marcas finas aunque haya mucho espacio
   const etiquetasDirectas = n <= 8;
   const pasos = [0.25, 0.5, 0.75, 1];
 
   if (datos.length === 0) return <p className="text-sm text-tinta-3">Sin datos todavía.</p>;
 
   return (
-    <figure className="m-0 w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${ancho} ${alto}`} width="100%" height={alto} role="img" aria-label={titulo} style={{ minWidth: Math.min(ancho, 640), fontFamily: 'inherit' }}>
+    <figure ref={ref} className="m-0 w-full overflow-x-auto">
+      <svg viewBox={`0 0 ${ancho} ${alto}`} width={ancho} height={alto} role="img" aria-label={titulo} style={{ display: 'block', fontFamily: 'inherit' }}>
         <title>{titulo}</title>
         {pasos.map((f) => (
           <line key={f} x1={margen.izq} x2={ancho} y1={y(techo * f)} y2={y(techo * f)} stroke={p.rejilla} strokeWidth={1} />
@@ -75,18 +92,19 @@ interface PropsLinea { datos: PuntoLinea[]; unidad?: string; titulo: string; alt
 /** Línea de 2px con marcadores de 8px y tooltip por punto; para evolución en el tiempo. */
 export function Linea({ datos, unidad = '', titulo, alto = 170 }: PropsLinea) {
   const p = paleta(usePrefiereOscuro());
+  const { ref, ancho: disponible } = useAncho<HTMLElement>();
   const puntos = datos.filter((d) => d.valor !== null) as (PuntoLinea & { valor: number })[];
+  const n = Math.max(datos.length, 1);
+  const slot = Math.max(44, Math.floor((disponible || 600) / n)), ancho = n * slot, margen = { arriba: 22, abajo: 34 };
   if (puntos.length === 0) return <p className="text-sm text-tinta-3">Sin datos todavía.</p>;
-  const n = datos.length;
-  const slot = Math.max(44, Math.min(90, 560 / n)), ancho = Math.max(n * slot, 220), margen = { arriba: 22, abajo: 34 };
   const techo = Math.max(1, ...puntos.map((d) => d.valor)) * 1.2;
   const hPlot = alto - margen.arriba - margen.abajo;
   const x = (i: number) => i * slot + slot / 2;
   const y = (v: number) => margen.arriba + hPlot - (v / techo) * hPlot;
   const d = datos.map((pt, i) => (pt.valor === null ? null : `${x(i)},${y(pt.valor)}`)).filter(Boolean).join(' L');
   return (
-    <figure className="m-0 w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${ancho} ${alto}`} width="100%" height={alto} role="img" aria-label={titulo} style={{ minWidth: Math.min(ancho, 640), fontFamily: 'inherit' }}>
+    <figure ref={ref} className="m-0 w-full overflow-x-auto">
+      <svg viewBox={`0 0 ${ancho} ${alto}`} width={ancho} height={alto} role="img" aria-label={titulo} style={{ display: 'block', fontFamily: 'inherit' }}>
         <title>{titulo}</title>
         {[0.25, 0.5, 0.75, 1].map((f) => <line key={f} x1={0} x2={ancho} y1={y(techo * f)} y2={y(techo * f)} stroke={p.rejilla} strokeWidth={1} />)}
         <line x1={0} x2={ancho} y1={y(0)} y2={y(0)} stroke={p.eje} strokeWidth={1} />
