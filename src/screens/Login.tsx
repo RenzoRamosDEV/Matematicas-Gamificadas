@@ -26,7 +26,7 @@ export function Login({ mensaje, onEntrar }: Props) {
   };
 
   return (
-    <main className="min-h-dvh grid place-items-center p-6">
+    <main className="min-h-dvh flex flex-col items-center justify-center p-6">
       <form className="glass rounded-[32px] p-7 sm:p-8 max-w-sm w-full flex flex-col gap-5 pop" onSubmit={enviar} noValidate>
         <div className="flex flex-col items-center gap-1 text-center">
           <Mascota size={110} />
@@ -57,6 +57,15 @@ export function Login({ mensaje, onEntrar }: Props) {
           {ocupado ? 'Entrando…' : 'Entrar'}
         </Boton>
       </form>
+
+      {/* Texto descriptivo visible para personas y rastreadores: qué es la app */}
+      <footer className="mt-6 max-w-md text-center text-[12.5px] leading-snug text-tinta-3 text-pretty in d3">
+        <p>
+          <strong className="text-tinta-2 font-semibold">Reto</strong> es un juego gratuito de cálculo mental diario para niños de 8 a 12 años:
+          sumas, restas, multiplicaciones y divisiones en cuatro fases, con puntos, racha e insignias.
+          {' '}<a className="underline hover:text-tinta" href="https://github.com/RenzoRamosDEV/Matematicas-Gamificadas" rel="noopener" target="_blank">Código abierto</a>.
+        </p>
+      </footer>
     </main>
   );
 }

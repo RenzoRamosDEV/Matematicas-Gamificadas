@@ -1,18 +1,125 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2384a7ff'/%3E%3Cstop offset='1' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='18' fill='url(%23g)'/%3E%3Cg fill='none' stroke='white' stroke-width='4.5' stroke-linecap='round'%3E%3Cpath d='M32 14v9M32 41v9M14 32h9M41 32h9M19.3 19.3l6.4 6.4M38.3 38.3l6.4 6.4M19.3 44.7l6.4-6.4M38.3 25.7l6.4-6.4'/%3E%3C/g%3E%3C/svg%3E" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- Identidad -->
+    <title>Reto — Cálculo mental diario para niños (sumas, restas, multiplicaciones y divisiones)</title>
+    <meta name="description" content="Un reto de cálculo mental al día para niños de 8 a 12 años: 4 fases de sumas, restas, multiplicaciones y divisiones con cronómetro, puntos, racha con comodín, 42 insignias y calendario de progreso. Gratis, sin anuncios y en español." />
+    <meta name="keywords" content="cálculo mental, matemáticas para niños, juego de matemáticas, sumas, restas, multiplicaciones, divisiones, tablas de multiplicar, práctica diaria, primaria, gamificación, racha, insignias" />
+    <meta name="author" content="Renzo Ramos" />
+    <link rel="canonical" href="https://renzoramosdev.github.io/Matematicas-Gamificadas/" />
+    <link rel="alternate" hreflang="es" href="https://renzoramosdev.github.io/Matematicas-Gamificadas/" />
+    <link rel="alternate" hreflang="x-default" href="https://renzoramosdev.github.io/Matematicas-Gamificadas/" />
+
+    <!-- Rastreadores (Google y LLMs) -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <link rel="help" href="/llms.txt" type="text/plain" title="Resumen para modelos de lenguaje (llms.txt)" />
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Reto" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:url" content="https://renzoramosdev.github.io/Matematicas-Gamificadas/" />
+    <meta property="og:title" content="Reto — Cálculo mental diario para niños" />
+    <meta property="og:description" content="Un reto al día: sumas, restas, multiplicaciones y divisiones con puntos, racha e insignias. Para niños de 8 a 12 años. Gratis y sin anuncios." />
+    <meta property="og:image" content="https://renzoramosdev.github.io/Matematicas-Gamificadas/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Reto: cálculo mental diario para niños. Sumas, restas, tablas y divisiones." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Reto — Cálculo mental diario para niños" />
+    <meta name="twitter:description" content="Un reto al día: sumas, restas, multiplicaciones y divisiones con puntos, racha e insignias. Gratis y sin anuncios." />
+    <meta name="twitter:image" content="https://renzoramosdev.github.io/Matematicas-Gamificadas/og.png" />
+
+    <!-- App / PWA -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2384a7ff'/%3E%3Cstop offset='1' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='18' fill='url(%23g)'/%3E%3Cg fill='none' stroke='white' stroke-width='4.5' stroke-linecap='round'%3E%3Cpath d='M32 14v9M32 41v9M14 32h9M41 32h9M19.3 19.3l6.4 6.4M38.3 38.3l6.4 6.4M19.3 44.7l6.4-6.4M38.3 25.7l6.4-6.4'/%3E%3C/g%3E%3C/svg%3E" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="application-name" content="Reto" />
+    <meta name="apple-mobile-web-app-title" content="Reto" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f6fa" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0d15" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Tipografía -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <title>Reto</title>
+
+    <!-- Datos estructurados -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://renzoramosdev.github.io/Matematicas-Gamificadas/#app",
+          "name": "Reto",
+          "alternateName": "Matemáticas Gamificadas",
+          "url": "https://renzoramosdev.github.io/Matematicas-Gamificadas/",
+          "description": "Juego web gratuito de cálculo mental diario para niños de 8 a 12 años: cuatro fases de sumas, restas, multiplicaciones y divisiones con cronómetro, puntos, racha con comodín, insignias y calendario de progreso.",
+          "applicationCategory": "EducationalApplication",
+          "applicationSubCategory": "Matemáticas",
+          "operatingSystem": "Web",
+          "browserRequirements": "Requiere JavaScript",
+          "inLanguage": "es",
+          "isAccessibleForFree": true,
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+          "image": "https://renzoramosdev.github.io/Matematicas-Gamificadas/og.png",
+          "screenshot": "https://renzoramosdev.github.io/Matematicas-Gamificadas/og.png",
+          "audience": { "@type": "EducationalAudience", "educationalRole": "student", "audienceType": "niños de 8 a 12 años" },
+          "educationalUse": ["práctica", "repaso"],
+          "learningResourceType": "juego educativo",
+          "teaches": ["suma", "resta", "multiplicación", "división", "cálculo mental"],
+          "featureList": [
+            "Un reto por día con cuatro fases: sumas, restas, multiplicaciones y divisiones",
+            "Escritura de la respuesta como en papel, de derecha a izquierda",
+            "Puntos, racha diaria con comodín y 42 insignias",
+            "Calendario de progreso con apuntes por día",
+            "Modo claro y oscuro automático"
+          ],
+          "author": { "@id": "https://renzoramosdev.github.io/Matematicas-Gamificadas/#autor" },
+          "codeRepository": "https://github.com/RenzoRamosDEV/Matematicas-Gamificadas",
+          "license": "https://opensource.org/licenses/MIT"
+        },
+        {
+          "@type": "Person",
+          "@id": "https://renzoramosdev.github.io/Matematicas-Gamificadas/#autor",
+          "name": "Renzo Ramos",
+          "url": "https://github.com/RenzoRamosDEV"
+        },
+        {
+          "@type": "WebSite",
+          "url": "https://renzoramosdev.github.io/Matematicas-Gamificadas/",
+          "name": "Reto — Matemáticas Gamificadas",
+          "inLanguage": "es",
+          "publisher": { "@id": "https://renzoramosdev.github.io/Matematicas-Gamificadas/#autor" }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Contenido estático para rastreadores sin JavaScript; React lo sustituye al montar. -->
+    <div id="root">
+      <main style="font-family: system-ui, sans-serif; max-width: 42rem; margin: 3rem auto; padding: 0 1.25rem; color: #101323">
+        <h1>Reto: cálculo mental diario para niños</h1>
+        <p>Un reto al día para niños de 8 a 12 años: cuatro fases de <strong>sumas, restas, multiplicaciones y divisiones</strong> con cronómetro, puntos, racha con comodín, 42 insignias y un calendario de progreso con apuntes. Gratis, sin anuncios y en español.</p>
+        <h2>Cómo funciona</h2>
+        <ul>
+          <li>Cada día se generan 20 cuentas nuevas (5 por operación). El niño elige el orden de las fases y escribe la respuesta como en papel, empezando por las unidades.</li>
+          <li>+10 puntos por acierto, +25 por fase perfecta, bonus de velocidad solo si la fase es perfecta y +100 por un reto sin fallos. Los puntos y la racha se suman al completar las cuatro fases.</li>
+          <li>La racha se mantiene jugando cada día; un comodín cubre un día perdido y se recarga cada 30 días.</li>
+          <li>Las insignias se ganan acertando: retos, racha, puntos, aciertos por operación, perfección y velocidad.</li>
+        </ul>
+        <p>Código abierto en <a href="https://github.com/RenzoRamosDEV/Matematicas-Gamificadas">GitHub</a>. Para jugar hace falta JavaScript.</p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

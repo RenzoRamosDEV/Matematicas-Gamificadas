@@ -1,0 +1,33 @@
+# Reto — cálculo mental diario para niños. Todo el contenido público puede rastrearse e indexarse.
+User-agent: *
+Allow: /
+
+# Rastreadores de IA / LLMs: bienvenidos (ver llms.txt)
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: CCBot
+Allow: /
+User-agent: Bytespider
+Allow: /
+User-agent: Amazonbot
+Allow: /
+User-agent: meta-externalagent
+Allow: /
+
+Sitemap: https://renzoramosdev.github.io/Matematicas-Gamificadas/sitemap.xml
