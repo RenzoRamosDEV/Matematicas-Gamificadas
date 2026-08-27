@@ -19,7 +19,9 @@ const fmt = (v: number | null, unidad: string) => (v === null ? '—' : `${Numbe
 export function Barras({ datos, max, unidad = '', titulo, alto = 170 }: PropsBarras) {
   const p = paleta(usePrefiereOscuro());
   const n = Math.max(datos.length, 1);
-  const slot = 44, ancho = Math.max(n * slot, 200), margen = { arriba: 22, abajo: 34, izq: 4 };
+  // el hueco de cada barra crece con la etiqueta más larga para que no se pisen
+  const maxChars = Math.max(1, ...datos.map((d) => (d.corto ?? d.etiqueta).length));
+  const slot = Math.max(44, Math.min(120, Math.round(maxChars * 7.2) + 12)), ancho = Math.max(n * slot, 200), margen = { arriba: 22, abajo: 34, izq: 4 };
   const techo = max ?? Math.max(1, ...datos.map((d) => d.valor ?? 0)) * 1.15;
   const hPlot = alto - margen.arriba - margen.abajo;
   const y = (v: number) => margen.arriba + hPlot - (Math.min(v, techo) / techo) * hPlot;

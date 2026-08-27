@@ -56,7 +56,8 @@ export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: 
   const cargando = cuentas === null;
   const vacio = !cargando && resumen.retos === 0;
   const colorOp = (op: keyof typeof p.serie) => p.serie[op];
-  const barrasGrupo = (gs: Grupo[]) => gs.map((g) => ({ etiqueta: g.etiqueta, corto: g.etiqueta.replace(/^(Tabla del |Entre )/, ''), valor: g.porcentaje, detalle: `${g.aciertos} de ${g.cuentas} cuentas` }));
+  const corto = (e: string) => e.replace(/^(Tabla del |Entre )/, '').replace('llevadas', 'llev.').replace('préstamos', 'prést.');
+  const barrasGrupo = (gs: Grupo[]) => gs.map((g) => ({ etiqueta: g.etiqueta, corto: corto(g.etiqueta), valor: g.porcentaje, detalle: `${g.aciertos} de ${g.cuentas} cuentas` }));
 
   return (
     <div className="min-h-dvh max-w-[1200px] mx-auto px-4 sm:px-12 pb-16">
