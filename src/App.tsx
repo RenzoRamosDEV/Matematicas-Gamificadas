@@ -22,10 +22,8 @@ import { adminDesbloqueado, bloquearAdmin, desbloquearAdmin } from './lib/pin';
 import { Cargando, ErrorPantalla } from './screens/Estados';
 
 type Estado = 'cargando' | 'sin_acceso' | 'error' | 'listo';
-/** Qué se ve cuando el estado es 'listo': el inicio, el reto (elegir fase / jugar / resumen) o las insignias. */
 type Vista = 'inicio' | 'reto' | 'logros' | 'progreso' | 'admin';
 
-/** Reconstruye el resultado de una sesión ya completada (para el "resumen del día"). */
 function resultadoDesdeSesion(s: Session, perfil: Profile): ResultadoFinal {
   const fases = s.detalle ?? [];
   const aciertos = fases.reduce((n, f) => n + f.aciertos, 0);
@@ -46,8 +44,6 @@ export default function App() {
   const [yaJugado, setYaJugado] = useState(false);
   const [ocupado, setOcupado] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
-  // Rutas por hash: '' = inicio, '#reto' = elegir fase / jugar / resumen, '#logros' = insignias.
-  // Así el botón atrás del navegador funciona y un refresco a mitad de reto vuelve al reto.
   const vistaDeHash = (): Vista => {
     const h = location.hash.slice(1);
     return h === 'reto' || h === 'logros' || h === 'progreso' || h === 'admin' ? h : 'inicio';
@@ -65,18 +61,15 @@ export default function App() {
   };
   const abrirLogros = () => setVista('logros');
   const cerrarLogros = () => setVista('inicio');
-  // Modo admin: PIN de familia; el desbloqueo dura lo que dure la pestaña
   const [adminOk, setAdminOk] = useState(adminDesbloqueado);
   const desbloquear = () => { desbloquearAdmin(); setAdminOk(true); };
   const bloquear = () => { bloquearAdmin(); setAdminOk(false); setVista('inicio'); };
 
-  // Cola de escrituras a la DB: se encadenan para no perder ninguna y poder esperarlas antes de finalizar
   const cola = useRef<Promise<void>>(Promise.resolve());
   const encolar = (fn: () => Promise<void>) => {
     cola.current = cola.current.then(fn).catch((e: Error) => setAviso(`Sin conexión: ${e.message}`));
   };
 
-  /** El historial no es imprescindible para jugar: si falla, se avisa y se sigue con lo que haya. */
   const cargarHistorial = useCallback(async (previo: Session[]) => {
     try { return await reintentar(cargarSesiones); }
     catch (e) { setAviso(`Historial no disponible: ${(e as Error).message}`); return previo; }
@@ -104,7 +97,6 @@ export default function App() {
       setEstado('listo');
     } catch (e) {
       const msg = (e as Error).message;
-      // Sesión guardada de un usuario que ya no existe (borrado en Supabase): fuera y al login
       if (msg.startsWith('perfil')) {
         await salir();
         setMensaje('Tu sesión ya no es válida. Entra de nuevo.');
@@ -118,7 +110,6 @@ export default function App() {
 
   useEffect(() => { void cargar(); }, [cargar]);
 
-  /** Login con usuario y contraseña: si entra, carga todo y aterriza en el inicio. */
   const onEntrar = async (usuario: string, password: string) => {
     const err = await entrar(usuario, password);
     if (!err) { setVista('inicio'); void cargar(); }
@@ -137,13 +128,11 @@ export default function App() {
     if (session) guardarProgreso(session.id, p);
   };
 
-  /** Desde el inicio: al selector de fase (o al resumen si el reto de hoy ya está hecho). Si había una fase a medias, se vuelve a elegir. */
   const irAlReto = () => {
     if (!resultado && progreso.pantalla === 'jugando') actualizarProgreso({ ...progreso, pantalla: 'eligiendo' });
     setVista('reto');
   };
 
-  /** El jugador elige la fase. La primera vez se crean las cuentas de las cuatro fases. */
   const elegirFase = async (op: Op) => {
     if (!session) return;
     if (!ejercicios.length) {
@@ -154,7 +143,6 @@ export default function App() {
         setMensaje((e as Error).message); setEstado('error'); return;
       } finally { setOcupado(false); }
     }
-    // El cronómetro de la fase cuenta desde la primera vez que se eligió (sobrevive a salir al menú o refrescar)
     const inicios = { ...progreso.inicios, [op]: progreso.inicios[op] ?? Date.now() };
     actualizarProgreso({ ...progreso, actual: op, pantalla: 'jugando', inicios });
     setVista('reto');
@@ -181,7 +169,7 @@ export default function App() {
     if (!session) return;
     setOcupado(true);
     try {
-      await cola.current;                       // que todas las respuestas estén en la DB
+      await cola.current;
       const res = await finalizarSesion(session.id, tiempos);
       const [p, hist] = await Promise.all([cargarPerfil(), cargarHistorial(sesiones)]);
       setPerfil(p); setSesiones(hist); setResultado(res); setYaJugado(false);
@@ -192,7 +180,6 @@ export default function App() {
     } finally { setOcupado(false); }
   };
 
-  /** Tras la última fase: marcamos 'finalizando' y el efecto de abajo llama a la RPC (una sola vez). */
   const verResultado = () => actualizarProgreso({ ...progreso, actual: null, pantalla: 'finalizando' });
 
   useEffect(() => {
@@ -202,7 +189,6 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [estado, progreso.pantalla]);
 
-  // ---------- render ----------
   if (estado === 'cargando') return <Fondo><Cargando /></Fondo>;
   if (estado === 'sin_acceso') return <Fondo><Login mensaje={mensaje} onEntrar={onEntrar} /></Fondo>;
   if (estado === 'error' || !perfil || !session) return <Fondo><ErrorPantalla mensaje={mensaje ?? 'Error desconocido'} onReintentar={cargar} /></Fondo>;

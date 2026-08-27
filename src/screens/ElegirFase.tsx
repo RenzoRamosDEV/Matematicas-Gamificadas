@@ -11,7 +11,6 @@ interface Props {
   cargando: boolean;
 }
 
-/** Pantalla previa a jugar: el jugador elige con qué operación seguir. */
 export function ElegirFase({ ejercicios, hechas, actual, onElegir, onVolver, cargando }: Props) {
   const quedan = 4 - hechas.length;
   return (

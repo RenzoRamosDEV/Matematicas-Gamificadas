@@ -8,7 +8,6 @@ interface Props {
   onVolver: () => void;
 }
 
-/** Puerta del modo admin: PIN de 8 dígitos con el teclado del juego. */
 export function Pin({ onDesbloquear, onVolver }: Props) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);

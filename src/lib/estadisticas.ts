@@ -5,7 +5,6 @@ import { tieneLlevadas, tienePrestamos } from './generador';
 import { lunesDe } from './semana';
 import { nombreMes } from './calendario';
 
-/** Todo lo que necesita el panel: las sesiones del jugador y todas sus cuentas. */
 export interface Datos {
   sesiones: Pick<Session, 'id' | 'fecha' | 'estado' | 'puntos'>[];
   cuentas: EjercicioDB[];
@@ -15,13 +14,11 @@ export interface CuentaConFecha extends EjercicioDB { fecha: string }
 
 const media = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
 const pct = (aciertos: number, total: number) => (total ? Math.round((aciertos / total) * 1000) / 10 : null);
-/** Tiempo medio por cuenta en segundos (1 decimal), solo de cuentas respondidas con tiempo registrado. */
 const tiempoMedio = (cs: Pick<EjercicioDB, 'ms' | 'respuesta'>[]) => {
   const t = media(cs.filter((c) => c.respuesta !== null && c.ms !== null && c.ms > 0).map((c) => c.ms as number));
   return t === null ? null : Math.round(t / 100) / 10;
 };
 
-/** Solo cuentan las sesiones completadas: sus cuentas están corregidas por la DB. */
 export function cuentasCompletadas(d: Datos): CuentaConFecha[] {
   const fechaDe = new Map(d.sesiones.filter((s) => s.estado === 'completada').map((s) => [s.id, s.fecha]));
   return d.cuentas
@@ -30,7 +27,6 @@ export function cuentasCompletadas(d: Datos): CuentaConFecha[] {
     .sort((a, b) => (a.fecha === b.fecha ? a.orden - b.orden : a.fecha < b.fecha ? -1 : 1));
 }
 
-// ---------- Resumen general ---------------------------------------------------
 export interface Resumen {
   retos: number; cuentas: number; aciertos: number; fallos: number;
   porcentaje: number | null; promedioPorReto: number | null; tiempoMedio: number | null; puntos: number;
@@ -49,7 +45,6 @@ export function resumenGeneral(d: Datos): Resumen {
   };
 }
 
-// ---------- Por periodo -------------------------------------------------------
 export type Granularidad = 'dia' | 'semana' | 'mes' | 'anio';
 
 export interface Periodo {
@@ -96,7 +91,6 @@ export function porPeriodo(d: Datos, g: Granularidad): Periodo[] {
     });
 }
 
-// ---------- Por operación y puntos débiles ------------------------------------
 export interface Grupo { etiqueta: string; cuentas: number; aciertos: number; porcentaje: number | null; tiempoMedio: number | null }
 
 const grupoDe = (etiqueta: string, cs: CuentaConFecha[]): Grupo => {
@@ -142,7 +136,6 @@ export function puntosDebiles(d: Datos, topN = 10): PuntosDebiles {
   };
 }
 
-// ---------- Tiempos -----------------------------------------------------------
 export interface PuntoTiempo { clave: string; etiqueta: string; tiempoMedio: number | null; cuentas: number }
 export interface Tiempos {
   general: number | null;
@@ -168,7 +161,6 @@ export function tiempos(d: Datos): Tiempos {
   };
 }
 
-// ---------- Día a día ---------------------------------------------------------
 export function cuentasDelDia(d: Datos, fecha: string): (CuentaConFecha & { segundos: number | null })[] {
   return cuentasCompletadas(d).filter((c) => c.fecha === fecha)
     .map((c) => ({ ...c, segundos: c.ms !== null && c.ms > 0 ? Math.round(c.ms / 100) / 10 : null }));

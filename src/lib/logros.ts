@@ -24,19 +24,14 @@ export interface Logro {
   acento: Acento;
   categoria: CategoriaLogro;
   condicion: (ctx: ContextoLogros) => boolean;
-  /** Cuánto lleva hacia la medalla (para la página de logros). */
   progreso: (ctx: ContextoLogros) => { actual: number; meta: number };
 }
 
-// ---------- métricas derivadas del historial ------------------------------
-// Regla general: nada se regala. Los aciertos son aciertos reales corregidos por la DB; los puntos
-// solo salen de aciertos; y un reto "cuenta" solo si al menos la mitad de las cuentas están bien.
 const completadas = (c: ContextoLogros) => c.sesiones.filter((s) => s.estado === 'completada');
 const fases = (c: ContextoLogros): FaseDetalle[] => completadas(c).flatMap((s) => s.detalle ?? []);
 
 const aciertosDeSesion = (s: Pick<Session, 'detalle'>) => (s.detalle ?? []).reduce((n, f) => n + f.aciertos, 0);
 const totalDeSesion = (s: Pick<Session, 'detalle'>) => (s.detalle ?? []).reduce((n, f) => n + f.total, 0);
-/** Reto que cuenta para las insignias: completado y con al menos la mitad de las cuentas bien. */
 export const esRetoValido = (s: Pick<Session, 'estado' | 'detalle'>) => {
   const total = totalDeSesion(s);
   return s.estado === 'completada' && total > 0 && aciertosDeSesion(s) * 2 >= total;
@@ -62,7 +57,6 @@ const mejorSesion = (c: ContextoLogros) => completadas(c).reduce((m, s) => Math.
 const esFinde = (fecha: string) => { const d = new Date(`${fecha}T00:00:00Z`).getUTCDay(); return d === 0 || d === 6; };
 const retosEnFinde = (c: ContextoLogros) => retosValidos(c).filter((s) => esFinde(s.fecha)).length;
 
-// ---------- constructor: "alcanza `objetivo` en `valor`" -------------------
 const logro = (
   id: string, categoria: CategoriaLogro, nombre: string, descripcion: string,
   icono: NombreIcono, acento: Acento, valor: (c: ContextoLogros) => number, objetivo: number,
@@ -87,34 +81,27 @@ const porOperacion: Logro[] = OPS.flatMap(({ op, cat, icono, acento, plural, niv
 ]);
 
 export const LOGROS: Logro[] = [
-  // Retos
   logro('primer_reto', 'Retos', 'Primer reto', 'Completa un reto con al menos la mitad bien', 'target', 'azul', retos, 1),
   logro('retos_5',   'Retos', 'Cinco retos',    'Cinco retos con al menos la mitad bien',   'target', 'azul', retos, 5),
   logro('retos_10',  'Retos', 'Diez retos',     'Diez retos con al menos la mitad bien',  'target', 'verde', retos, 10),
   logro('retos_30',  'Retos', 'Treinta retos',  'Treinta retos con al menos la mitad bien',  'target', 'violeta', retos, 30),
   logro('retos_100', 'Retos', 'Cien retos',     'Cien retos con al menos la mitad bien', 'trophy', 'amarillo', retos, 100),
-  // Racha
   logro('racha_3',   'Racha', 'Tres seguidos', 'Racha de 3 días',   'flame', 'rosa', rachaMax, 3),
   logro('racha_7',   'Racha', 'Una semana',    'Racha de 7 días',   'flame', 'rosa', rachaMax, 7),
   logro('racha_14',  'Racha', 'Dos semanas',   'Racha de 14 días',  'flame', 'amarillo', rachaMax, 14),
   logro('racha_30',  'Racha', 'Un mes',        'Racha de 30 días',  'flame', 'violeta', rachaMax, 30),
   logro('racha_100', 'Racha', 'Cien días',     'Racha de 100 días', 'trophy', 'amarillo', rachaMax, 100),
-  // Puntos
   logro('puntos_500',   'Puntos', '500 puntos',    'Acumula 500 puntos',    'star', 'amarillo', puntosTotal, 500),
   logro('puntos_1000',  'Puntos', '1.000 puntos',  'Acumula 1.000 puntos',  'star', 'verde', puntosTotal, 1000),
   logro('puntos_2500',  'Puntos', '2.500 puntos',  'Acumula 2.500 puntos',  'star', 'azul', puntosTotal, 2500),
   logro('puntos_5000',  'Puntos', '5.000 puntos',  'Acumula 5.000 puntos',  'star', 'violeta', puntosTotal, 5000),
   logro('puntos_10000', 'Puntos', '10.000 puntos', 'Acumula 10.000 puntos', 'trophy', 'amarillo', puntosTotal, 10000),
-  // Por operación
   ...porOperacion,
-  // Perfección
   logro('fases_perfectas_10', 'Perfección', 'Diez perfectas',   'Diez fases con todo bien',            'medal', 'amarillo', fasesPerfectas, 10),
   logro('perfecta',           'Perfección', 'Sesión perfecta',  'Todo bien en las 4 fases de un reto', 'medal', 'amarillo', sesionesPerfectas, 1),
   logro('perfectas_5',        'Perfección', 'Cinco perfectas',  'Cinco retos sin ningún fallo',        'trophy', 'violeta', sesionesPerfectas, 5),
-  // Velocidad
   logro('rapido_1',  'Velocidad', 'Rayo',       'Una fase perfecta con bonus de velocidad',   'zap', 'azul', fasesRapidas, 1),
   logro('rapido_10', 'Velocidad', 'Relámpago',  'Diez fases perfectas con bonus de velocidad', 'zap', 'violeta', fasesRapidas, 10),
-  // Especiales
   logro('aciertos_100',  'Especiales', 'Cien aciertos', 'Acierta 100 cuentas en total',   'check', 'verde', aciertosTotales, 100),
   logro('aciertos_500',  'Especiales', 'Quinientos',    'Acierta 500 cuentas en total',   'check', 'azul', aciertosTotales, 500),
   logro('aciertos_1000', 'Especiales', 'Mil aciertos',  'Acierta 1.000 cuentas en total', 'trophy', 'amarillo', aciertosTotales, 1000),

@@ -11,7 +11,6 @@ export async function cargarPerfil(): Promise<Profile> {
   return data as Profile;
 }
 
-/** Devuelve la sesión de hoy (o la crea) y sus ejercicios, ordenados. */
 export async function iniciarSesion(): Promise<{ session: Session; ejercicios: EjercicioDB[] }> {
   const { data: id, error } = await supabase.rpc('iniciar_sesion');
   fail('iniciar_sesion', error);
@@ -52,11 +51,6 @@ export async function finalizarSesion(
   return data as ResultadoFinal;
 }
 
-/**
- * Historial completo de sesiones completadas del jugador (RLS solo devuelve las suyas).
- * Se trae entero porque los logros acumulan aciertos y retos de toda la historia;
- * a una sesión por día son unas 365 filas pequeñas al año.
- */
 export async function cargarSesiones(): Promise<Session[]> {
   const { data, error } = await supabase
     .from('sessions').select('id, fecha, estado, puntos, detalle')
@@ -65,14 +59,12 @@ export async function cargarSesiones(): Promise<Session[]> {
   return (data ?? []) as Session[];
 }
 
-// ---------- Apuntes del calendario ----------------------------------------
 export async function cargarNotas(): Promise<Nota[]> {
   const { data, error } = await supabase.from('notas').select('id, fecha, texto, created_at').order('created_at');
   fail('notas', error);
   return (data ?? []) as Nota[];
 }
 
-/** Añade un apunte a un día. user_id lo pone la DB (auth.uid()). */
 export async function crearNota(fecha: string, texto: string): Promise<Nota> {
   const { data, error } = await supabase.from('notas').insert({ fecha, texto }).select('id, fecha, texto, created_at').single();
   fail('guardar apunte', error);
@@ -84,10 +76,6 @@ export async function borrarNota(id: string): Promise<void> {
   fail('borrar apunte', error);
 }
 
-/**
- * Reintenta una lectura que puede fallar por un desfase de reloj justo tras iniciar sesión
- * ("JWT issued at future") o por un corte breve de red.
- */
 export async function reintentar<T>(fn: () => Promise<T>, veces = 2, esperaMs = 1500): Promise<T> {
   let ultimo: unknown;
   for (let i = 0; i <= veces; i++) {
@@ -97,14 +85,12 @@ export async function reintentar<T>(fn: () => Promise<T>, veces = 2, esperaMs = 
   throw ultimo;
 }
 
-/** Cuentas de una sesión (propia) para revisar aciertos y fallos, ordenadas. */
 export async function cargarEjercicios(sessionId: string): Promise<EjercicioDB[]> {
   const { data, error } = await supabase.from('exercises').select('*').eq('session_id', sessionId).order('orden');
   fail('cuentas', error);
   return (data ?? []) as EjercicioDB[];
 }
 
-/** Todas las cuentas del jugador (todas sus sesiones), para el panel de estadísticas. RLS limita a las propias. */
 export async function cargarTodasLasCuentas(): Promise<EjercicioDB[]> {
   const { data, error } = await supabase.from('exercises').select('*').order('session_id').order('orden').limit(20000);
   fail('cuentas', error);

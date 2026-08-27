@@ -24,16 +24,15 @@ interface Props {
 const MAX_NOTA = 500;
 const fmtHora = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
 
-/** Página de progreso: calendario con los retos completados y los apuntes del jugador (varios por día). */
 export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso, onIr }: Props) {
   const hoy = hoyMadrid();
   const [mes, setMes] = useState<Mes>(mesDe(hoy));
   const [seleccion, setSeleccion] = useState(hoy);
   const [notas, setNotas] = useState<Nota[]>([]);
-  const [borradores, setBorradores] = useState<Record<string, string>>({});   // apunte en edición por fecha
+  const [borradores, setBorradores] = useState<Record<string, string>>({});
   const [guardando, setGuardando] = useState(false);
   const [borrando, setBorrando] = useState<string | null>(null);
-  const [cuentas, setCuentas] = useState<Record<string, EjercicioDB[] | 'cargando'>>({});   // por id de sesión
+  const [cuentas, setCuentas] = useState<Record<string, EjercicioDB[] | 'cargando'>>({});
 
   const porFecha = useMemo(() => new Map(sesiones.filter((s) => s.estado === 'completada').map((s) => [s.fecha, s])), [sesiones]);
   const completadas = porFecha.size;

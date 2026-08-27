@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 
-/** La luz ambiental sigue al puntero: escribe --mx/--my en <html>. Los paneles de vidrio la dejan pasar. */
 export function useLuzCursor() {
   useEffect(() => {
     const raiz = document.documentElement;

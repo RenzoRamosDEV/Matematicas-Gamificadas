@@ -1,19 +1,12 @@
 import { ORDEN_FASES } from '../config';
 import type { Op } from '../types';
 
-/**
- * Progreso de la sesión en curso, en localStorage. Sirve para que un refresco
- * a mitad de partida vuelva al punto correcto (los ejercicios y respuestas ya
- * están en la DB). El timer de la fase en curso se reinicia: aceptable.
- *
- * Las fases se hacen en el orden que elija el jugador.
- */
 export interface Progreso {
-  hechas: Op[];                       // fases terminadas, en el orden en que se jugaron
-  actual: Op | null;                  // fase en curso (o recién terminada, en 'transicion')
+  hechas: Op[];
+  actual: Op | null;
   pantalla: 'eligiendo' | 'jugando' | 'transicion' | 'finalizando';
-  tiempos: Partial<Record<Op, number>>;   // segundos restantes al cerrar cada fase
-  inicios: Partial<Record<Op, number>>;   // cuándo se eligió cada fase (epoch ms): el cronómetro sobrevive a salir o refrescar
+  tiempos: Partial<Record<Op, number>>;
+  inicios: Partial<Record<Op, number>>;
 }
 
 export const PROGRESO_INICIAL: Progreso = { hechas: [], actual: null, pantalla: 'eligiendo', tiempos: {}, inicios: {} };
@@ -22,14 +15,12 @@ export const pendientes = (p: Progreso): Op[] => ORDEN_FASES.filter((op) => !p.h
 
 const esOp = (x: unknown): x is Op => typeof x === 'string' && (ORDEN_FASES as readonly string[]).includes(x);
 
-/** Acepta el formato actual y el antiguo ({ fase: n, pantalla }) y devuelve siempre un Progreso válido. */
 export function normalizarProgreso(raw: unknown): Progreso {
   if (!raw || typeof raw !== 'object') return PROGRESO_INICIAL;
   const r = raw as Record<string, unknown>;
   const tiempos = (r.tiempos && typeof r.tiempos === 'object' ? r.tiempos : {}) as Progreso['tiempos'];
   const inicios = (r.inicios && typeof r.inicios === 'object' ? r.inicios : {}) as Progreso['inicios'];
 
-  // Formato antiguo: índice secuencial en ORDEN_FASES
   if (typeof r.fase === 'number') {
     const n = Math.max(0, Math.min(ORDEN_FASES.length, r.fase));
     const hechas = [...ORDEN_FASES.slice(0, n)];
@@ -53,14 +44,14 @@ export function leerProgreso(sessionId: string): Progreso {
   try {
     const raw = localStorage.getItem(clave(sessionId));
     if (raw) return normalizarProgreso(JSON.parse(raw));
-  } catch { /* localStorage no disponible o corrupto: empezamos de cero */ }
+  } catch {}
   return PROGRESO_INICIAL;
 }
 
 export function guardarProgreso(sessionId: string, p: Progreso) {
-  try { localStorage.setItem(clave(sessionId), JSON.stringify(p)); } catch { /* ignorar */ }
+  try { localStorage.setItem(clave(sessionId), JSON.stringify(p)); } catch {}
 }
 
 export function borrarProgreso(sessionId: string) {
-  try { localStorage.removeItem(clave(sessionId)); } catch { /* ignorar */ }
+  try { localStorage.removeItem(clave(sessionId)); } catch {}
 }

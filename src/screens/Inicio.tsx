@@ -31,21 +31,17 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
   const nombre = perfil.nombre.charAt(0).toUpperCase() + perfil.nombre.slice(1);
   const completado = estadoReto === 'completado';
 
-  // Mi progreso: puntos por día de esta semana (Europe/Madrid, como las RPCs)
   const hoy = hoyMadrid();
   const dias = semanaActual(sesiones, hoy);
-  const comodines = comodinesDisponibles(perfil, hoy);   // anticipa la recarga de 30 días que la DB aplica al finalizar
-  const racha = estadoRacha(perfil, hoy);                 // viva / en juego (el comodín la salvará) / perdida
+  const comodines = comodinesDisponibles(perfil, hoy);
+  const racha = estadoRacha(perfil, hoy);
   const totalSemana = puntosSemana(dias);
   const maxPuntos = Math.max(1, ...dias.map((d) => d.puntos));
 
-  // Mis logros: medallas derivadas del perfil y del historial
   const logros = evaluarLogros({ perfil, sesiones });
   const conseguidos = logros.filter((l) => l.conseguido).length;
-  // En la tarjeta caben 7 + el contador: primero las conseguidas, luego las siguientes pendientes
   const muestra = [...logros.filter((l) => l.conseguido), ...logros.filter((l) => !l.conseguido)].slice(0, 7);
 
-  // Mis retos: fases terminadas hoy (el jugador elige el orden)
   const fases = ORDEN_FASES.map((op) => ({ op, hecha: completado || fasesHechas.includes(op) }));
   const hechas = fases.filter((f) => f.hecha).length;
   const minRestantes = Math.round(fases.filter((f) => !f.hecha).reduce((n, f) => n + CONFIG.TIEMPOS[f.op], 0) / 60);
@@ -56,7 +52,6 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
     <div className="min-h-dvh max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
       <Cabecera perfil={perfil} onIr={onIr} onSalir={onSalir} />
 
-      {/* ---- Hero ---- */}
       <section className="mt-6 sm:mt-10 grid lg:grid-cols-[1.1fr_.9fr] gap-5 sm:gap-8 items-center">
         <div className="flex flex-col gap-4 sm:gap-5 px-1 sm:py-6">
           <span className={`chip self-start in d2 ${completado ? 'chip-azul' : ''}`}>
@@ -89,7 +84,6 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
 
         <div className="glass rounded-[40px] relative h-[260px] sm:h-[420px] grid place-items-center overflow-hidden in d3">
           <div className="absolute inset-4 rounded-[24px] pointer-events-none brillo-escena" aria-hidden="true" />
-          {/* Órbita: una bolita por fase; se enciende con el color de la operación al completarla hoy */}
           <div className="orbita-fases w-[230px] h-[230px] sm:w-[340px] sm:h-[340px]" aria-label={`${hechas} de 4 fases completadas hoy`} role="img">
             {fases.map((f, i) => (
               <i key={f.op} className={`orbita-punto ${f.hecha ? `tile-${FASE_INFO[f.op].acento} orbita-punto-on` : ''}`} style={{ '--i': i } as React.CSSProperties} title={`${FASE_INFO[f.op].nombre}: ${f.hecha ? 'hecha' : 'pendiente'}`} />
@@ -109,7 +103,6 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
         </div>
       </section>
 
-      {/* ---- Módulos ---- */}
       <div className="flex items-baseline justify-between mt-10 sm:mt-14 mb-4 px-1 in d4">
         <h2 className="text-[22px] sm:text-[26px] font-bold tracking-tight">¿Por dónde empezamos?</h2>
       </div>

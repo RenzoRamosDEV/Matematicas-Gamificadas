@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { useLuzCursor } from '../hooks/useLuzCursor';
 
-/** Capas ambientales (glows, grano y luz que sigue al cursor) bajo el contenido. */
 export function Fondo({ children }: { children: ReactNode }) {
   useLuzCursor();
   return (

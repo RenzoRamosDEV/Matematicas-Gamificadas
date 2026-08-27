@@ -2,7 +2,6 @@ import type { Session } from '../types';
 
 const fmtMadrid = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit' });
 
-/** Fecha de hoy (YYYY-MM-DD) en la zona del juego: la misma que usan las RPCs. */
 export const hoyMadrid = (ahora: Date = new Date()) => fmtMadrid.format(ahora);
 
 const aUTC = (f: string) => { const [y, m, d] = f.split('-').map(Number); return Date.UTC(y, m - 1, d); };
@@ -10,9 +9,8 @@ const deUTC = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
 export const sumarDias = (fecha: string, n: number) => deUTC(aUTC(fecha) + n * 86_400_000);
 
-/** Lunes de la semana de `fecha` (lunes = primer día). */
 export const lunesDe = (fecha: string) => {
-  const dow = new Date(aUTC(fecha)).getUTCDay();          // 0 = domingo
+  const dow = new Date(aUTC(fecha)).getUTCDay();
   return sumarDias(fecha, -((dow + 6) % 7));
 };
 

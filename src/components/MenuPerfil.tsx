@@ -17,7 +17,6 @@ const OPCIONES: { destino: Destino; texto: string; icono: NombreIcono }[] = [
   { destino: 'admin', texto: 'Modo admin', icono: 'lock' },
 ];
 
-/** Avatar + nombre como botón con menú: progreso, logros, modo admin y salir. */
 export function MenuPerfil({ perfil, onIr, onSalir }: Props) {
   const [abierto, setAbierto] = useState(false);
   const ref = useRef<HTMLDivElement>(null);

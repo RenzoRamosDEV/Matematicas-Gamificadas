@@ -5,11 +5,9 @@ import { Icono } from './Icono';
 
 interface Props {
   ejercicios: EjercicioDB[];
-  /** Con varias operaciones, agrupa con una cabecera por fase. Con una sola, lista directa. */
   className?: string;
 }
 
-/** Lista de cuentas corregidas: enunciado, respuesta del jugador y, si falló, la correcta. */
 export function Correccion({ ejercicios, className = '' }: Props) {
   const grupos = agruparPorOperacion(ejercicios);
   if (grupos.length === 0) return <p className={`text-sm text-tinta-3 ${className}`}>No hay cuentas guardadas de este reto.</p>;

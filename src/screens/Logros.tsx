@@ -14,7 +14,6 @@ interface Props {
   onIr: (destino: Destino) => void;
 }
 
-/** Página de insignias: todas las medallas en grande, por categoría y con su progreso real. */
 export function Logros({ perfil, sesiones, onVolver, onSalir, onIr }: Props) {
   const logros = evaluarLogros({ perfil, sesiones });
   const conseguidos = logros.filter((l) => l.conseguido).length;

@@ -9,12 +9,12 @@ import { borrarDigito, escribeDerechaAIzquierda, teclear } from '../lib/entrada'
 
 interface Props {
   op: Op;
-  numFase: number;                 // 1..4, para el título
-  ejercicios: EjercicioDB[];       // solo los de esta fase, ordenados
-  inicio: number;                  // epoch ms en que se eligió la fase: el tiempo no se reinicia al salir o refrescar
+  numFase: number;
+  ejercicios: EjercicioDB[];
+  inicio: number;
   onRespuesta: (id: string, respuesta: number, ms: number) => void;
   onTerminar: (segundosRestantes: number) => void;
-  onInicio: () => void;            // volver al menú guardando lo que hay
+  onInicio: () => void;
 }
 
 export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar, onInicio }: Props) {
@@ -39,7 +39,6 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
   const respondidas = Object.values(respuestas).filter((v) => v !== null).length;
   const todasHechas = respondidas === ejercicios.length;
 
-  // Al cambiar de ejercicio: cargar su respuesta en el buffer y reiniciar el cronómetro por ejercicio
   useEffect(() => {
     const prev = respuestas[actual.id];
     setBuffer(prev === null || prev === undefined ? '' : String(prev));
@@ -48,7 +47,6 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx]);
 
-  /** Guarda lo que hay en el buffer (si hay algo y cambió). Devuelve true si guardó. */
   const commit = useCallback(() => {
     if (buffer === '') return false;
     const valor = Number(buffer);
@@ -68,7 +66,6 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
     onTerminar(segs);
   }, [commit, onTerminar]);
 
-  // Timer de bloque, anclado a la hora de inicio (no se desvía si la pestaña se duerme)
   useEffect(() => {
     const t = setInterval(() => setRestante(Math.max(0, total - Math.floor((Date.now() - inicio) / 1000))), 1000);
     return () => clearInterval(t);
@@ -84,7 +81,6 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
 
   const siguienteSinResponder = () => {
     const guardadoAhora = commit();
-    // buscamos la siguiente sin responder, contando la actual como respondida si acabamos de guardarla
     for (let k = 1; k <= ejercicios.length; k++) {
       const j = (idx + k) % ejercicios.length;
       const e = ejercicios[j];
@@ -93,11 +89,9 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
     if (idx < ejercicios.length - 1) setIdx(idx + 1);
   };
 
-  // Suma, resta y multiplicación se escriben como en papel: de derecha a izquierda (ver lib/entrada.ts)
   const digito = (d: string) => setBuffer((b) => teclear(b, d, op));
   const borrar = () => setBuffer((b) => borrarDigito(b, op));
 
-  // Teclado físico
   useEffect(() => {
     const h = (ev: KeyboardEvent) => {
       if (/^[0-9]$/.test(ev.key)) digito(ev.key);
@@ -121,7 +115,6 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
 
   return (
     <div className="min-h-dvh max-w-5xl mx-auto w-full px-4 sm:px-8 py-3 sm:py-5 flex flex-col justify-center gap-3 sm:gap-4">
-      {/* Cabecera de la fase */}
       <header className="glass rounded-[22px] px-3 sm:px-4 h-[60px] flex items-center justify-between gap-3 in d1">
         <div className="flex items-center gap-2.5 min-w-0">
           <button type="button" onClick={volverAlInicio} title="Volver al inicio (se guarda lo que llevas)" aria-label="Volver al inicio"
@@ -142,7 +135,6 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
       <Barra valor={restante / total} acento={urgente ? 'rosa' : info.acento} />
 
       <div className="grid lg:grid-cols-[1.15fr_.85fr] gap-3 sm:gap-5 items-center">
-        {/* Pizarra: la cuenta en columna, como en papel */}
         <section className={`glass luz-${info.acento} rounded-[32px] sm:rounded-[36px] p-4 sm:p-8 flex flex-col gap-4 min-h-[380px] lg:min-h-[480px] in d2`}>
           <div className="flex items-center justify-between gap-3">
             <span className="text-tinta-2 text-sm font-semibold">Cuenta {idx + 1} de {ejercicios.length}</span>
@@ -185,7 +177,6 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
           </div>
         </section>
 
-        {/* Teclado y acciones */}
         <aside className="flex flex-col gap-3 in d3">
           <Keypad onDigito={digito} onBorrar={borrar} onOk={siguienteSinResponder} okDisabled={buffer === ''} />
           <div className="flex items-center justify-between gap-3">
@@ -207,7 +198,6 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
   );
 }
 
-/** Una columna de la cuenta: los dígitos de arriba van sin caja; los de la respuesta, en caja de vidrio. */
 function Celda({ children, respuesta, className = '' }: { children: React.ReactNode; respuesta?: boolean; className?: string }) {
   return <span className={`celda ${respuesta ? 'celda-respuesta' : ''} ${className}`}>{children}</span>;
 }

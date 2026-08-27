@@ -1,7 +1,6 @@
 import type { Session } from '../types';
 import { sumarDias } from './semana';
 
-/** Mes en formato YYYY-MM. */
 export type Mes = string;
 
 export const mesDe = (fecha: string): Mes => fecha.slice(0, 7);
@@ -29,15 +28,14 @@ export function nombreDia(fecha: string): string {
 export interface CeldaMes {
   fecha: string;
   dia: number;
-  enMes: boolean;   // false para los días de relleno del mes anterior/siguiente
+  enMes: boolean;
 }
 
-/** Semanas completas (lunes a domingo) que cubren el mes. Siempre 5 o 6 filas de 7. */
 export function semanasDelMes(mes: Mes): CeldaMes[][] {
   const [y, m] = mes.split('-').map(Number);
   const primero = `${mes}-01`;
-  const dow = new Date(Date.UTC(y, m - 1, 1)).getUTCDay();      // 0 = domingo
-  const inicio = sumarDias(primero, -((dow + 6) % 7));           // lunes de la primera semana
+  const dow = new Date(Date.UTC(y, m - 1, 1)).getUTCDay();
+  const inicio = sumarDias(primero, -((dow + 6) % 7));
   const diasEnMes = new Date(Date.UTC(y, m, 0)).getUTCDate();
   const filas = Math.ceil((((dow + 6) % 7) + diasEnMes) / 7);
   const semanas: CeldaMes[][] = [];
@@ -52,7 +50,6 @@ export function semanasDelMes(mes: Mes): CeldaMes[][] {
   return semanas;
 }
 
-/** Cómo fue el día: verde todo bien, amarillo algún fallo, rojo todo mal, gris sin reto (pasado), nada si es futuro. */
 export type ColorDia = 'verde' | 'amarillo' | 'rojo' | 'gris' | null;
 
 export function colorDelDia(sesion: Session | undefined, fecha: string, hoy: string): ColorDia {

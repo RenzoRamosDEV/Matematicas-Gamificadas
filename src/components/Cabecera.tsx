@@ -10,7 +10,6 @@ interface Props {
   onSalir?: () => void;
 }
 
-/** Cabecera de vidrio flotante: logo, indicador de nivel y menú de perfil. */
 export function Cabecera({ perfil, onIr, onSalir }: Props) {
   const n = nivel(perfil.puntos_total);
   const { actual, meta } = progresoNivel(perfil.puntos_total);

@@ -4,7 +4,6 @@ import { ORDEN_FASES } from '../config';
 export const r = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
-// ---------- detectores de dificultad ----------------------------------
 export const tieneLlevadas = (a: number, b: number) => {
   let carry = 0;
   while (a > 0 || b > 0) {
@@ -22,8 +21,6 @@ export const tienePrestamos = (a: number, b: number) => {
   return false;
 };
 
-// ---------- generadores por operación ---------------------------------
-/** Sumas de 3 y 4 dígitos. Rampa: primeros 40% de 3 dígitos, resto de 4. */
 export function genSuma(i: number, total: number): Ejercicio {
   const [min, max] = i < total * 0.4 ? [100, 999] : [1000, 9999];
   const a = r(min, max);
@@ -31,15 +28,13 @@ export function genSuma(i: number, total: number): Ejercicio {
   return { op: 'suma', a, b, sol: a + b };
 }
 
-/** Restas de 3 y 4 dígitos. b = r(min, a-1) garantiza a > b > 0: nunca negativo. */
 export function genResta(i: number, total: number): Ejercicio {
   const [min, max] = i < total * 0.4 ? [100, 999] : [1000, 9999];
-  const a = r(min + 1, max);       // min+1 para que r(min, a-1) tenga rango válido
+  const a = r(min + 1, max);
   const b = r(min, a - 1);
   return { op: 'resta', a, b, sol: a - b };
 }
 
-/** 3 dígitos × 1 dígito (primera mitad) o × 2 dígitos (segunda). Sin 0, 1 ni múltiplos de 10. */
 export function genMult(i: number, total: number): Ejercicio {
   const a = r(100, 999);
   let b: number;
@@ -51,7 +46,6 @@ export function genMult(i: number, total: number): Ejercicio {
   return { op: 'mult', a, b, sol: a * b };
 }
 
-/** Divisiones exactas: se genera divisor y cociente y se multiplica. Resto 0 por construcción. */
 export function genDiv(i: number, total: number): Ejercicio {
   const d = i < total * 0.6 ? r(2, 9) : r(11, 29);
   const qMin = Math.max(Math.ceil(100 / d), 2);
@@ -66,14 +60,9 @@ const GEN: Record<Op, (i: number, total: number) => Ejercicio> = {
 
 const clave = (e: Ejercicio) => `${e.op}:${e.a}:${e.b}`;
 
-const CUOTA_DIFICILES = 0.7;   // ~70% con llevadas/préstamos, ~30% limpias
+const CUOTA_DIFICILES = 0.7;
 const MAX_INTENTOS = 50;
 
-/**
- * Genera los ejercicios de una fase: sin repetidos y, en sumas/restas,
- * respetando la cuota de llevadas/préstamos. Si tras 50 intentos no cuadra,
- * acepta lo que salga (nunca se cuelga).
- */
 export function genFase(op: Op, total: number): Ejercicio[] {
   const out: Ejercicio[] = [];
   const vistos = new Set<string>();
@@ -105,7 +94,6 @@ export function genFase(op: Op, total: number): Ejercicio[] {
   return out;
 }
 
-/** Genera la sesión completa, en el orden de fases, con `orden` global creciente. */
 export function genSesion(porFase: number): (Ejercicio & { orden: number })[] {
   return ORDEN_FASES.flatMap((op, f) =>
     genFase(op, porFase).map((e, i) => ({ ...e, orden: f * porFase + i })),

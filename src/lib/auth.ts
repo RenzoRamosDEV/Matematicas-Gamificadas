@@ -3,10 +3,6 @@ import { supabase } from './supabase';
 
 const emailDe = (usuario: string) => `${usuario.trim().toLowerCase()}@${CONFIG.AUTH_EMAIL_DOMAIN}`;
 
-/**
- * Login normal: usuario + contraseña (la contraseña la fija quien administra el juego
- * en Supabase → Authentication → Users). Devuelve un mensaje de error o null si entró.
- */
 export async function entrar(usuario: string, password: string): Promise<string | null> {
   if (!usuario.trim() || !password) return 'Escribe tu usuario y tu contraseña.';
   const { error } = await supabase.auth.signInWithPassword({ email: emailDe(usuario), password });
@@ -17,11 +13,6 @@ export async function salir() {
   await supabase.auth.signOut();
 }
 
-/**
- * Acceso directo opcional por link: https://.../juego/?u=<usuario>&t=<contraseña>
- * Tras entrar, se limpia la URL para que la contraseña no acabe en el historial.
- * Devuelve un mensaje de error si el link no vale; null si todo fue bien o no había token.
- */
 export async function entrarConToken(): Promise<string | null> {
   const params = new URLSearchParams(location.search);
   const token = params.get('t');

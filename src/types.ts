@@ -7,7 +7,6 @@ export interface Ejercicio {
   sol: number;
 }
 
-/** Fila de la tabla exercises */
 export interface EjercicioDB extends Ejercicio {
   id: string;
   session_id: string;
@@ -46,7 +45,6 @@ export interface Session {
   detalle: FaseDetalle[] | null;
 }
 
-/** Lo que devuelve la RPC finalizar_sesion */
 export interface ResultadoFinal {
   puntos: number;
   aciertos: number;
@@ -57,7 +55,6 @@ export interface ResultadoFinal {
   fases: FaseDetalle[];
 }
 
-/** Apunte del jugador en el calendario (tabla notas): puede haber varios por día */
 export interface Nota {
   id: string;
   fecha: string;

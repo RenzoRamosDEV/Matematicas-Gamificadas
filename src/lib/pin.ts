@@ -3,10 +3,6 @@ import { CONFIG } from '../config';
 export const PIN_LONGITUD = 8;
 const CLAVE_DESBLOQUEO = 'reto:admin';
 
-/**
- * SHA-256 en JavaScript puro. Se usa cuando `crypto.subtle` no está disponible:
- * en http:// fuera de localhost (p. ej. el móvil por la IP de la Wi-Fi) el navegador no lo expone.
- */
 export function sha256HexJs(texto: string): string {
   const K = new Uint32Array([
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
@@ -47,23 +43,20 @@ export function sha256HexJs(texto: string): string {
   return [...H].map((x) => x.toString(16).padStart(8, '0')).join('');
 }
 
-/** SHA-256 en hexadecimal: Web Crypto si existe (contexto seguro), si no la versión en JS. */
 export async function sha256Hex(texto: string): Promise<string> {
   try {
     if (globalThis.crypto?.subtle) {
       const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto));
       return [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, '0')).join('');
     }
-  } catch { /* cae al respaldo */ }
+  } catch {}
   return sha256HexJs(texto);
 }
 
-/** Compara el PIN con la huella guardada en la configuración (el PIN en claro no está en el código). */
 export async function pinCorrecto(pin: string): Promise<boolean> {
   return (await sha256Hex(pin)) === CONFIG.ADMIN_PIN_SHA256;
 }
 
-/** El desbloqueo dura lo que dure la pestaña. */
 export const adminDesbloqueado = () => { try { return sessionStorage.getItem(CLAVE_DESBLOQUEO) === '1'; } catch { return false; } };
-export const desbloquearAdmin = () => { try { sessionStorage.setItem(CLAVE_DESBLOQUEO, '1'); } catch { /* ignorar */ } };
-export const bloquearAdmin = () => { try { sessionStorage.removeItem(CLAVE_DESBLOQUEO); } catch { /* ignorar */ } };
+export const desbloquearAdmin = () => { try { sessionStorage.setItem(CLAVE_DESBLOQUEO, '1'); } catch {} };
+export const bloquearAdmin = () => { try { sessionStorage.removeItem(CLAVE_DESBLOQUEO); } catch {} };

@@ -6,8 +6,8 @@ interface Props {
   mes: Mes;
   hoy: string;
   seleccion: string;
-  sesiones: Map<string, Session>;   // por fecha, solo completadas
-  conNota: Set<string>;             // fechas con apunte
+  sesiones: Map<string, Session>;
+  conNota: Set<string>;
   onSeleccionar: (fecha: string) => void;
   onCambiarMes: (delta: number) => void;
 }
@@ -22,7 +22,6 @@ const BOLA: Record<Exclude<ColorDia, null>, string> = {
 };
 const TEXTO_BOLA: Record<Exclude<ColorDia, null>, string> = { verde: 'Todo bien', amarillo: 'Algún fallo', rojo: 'Todo mal', gris: 'Sin reto' };
 
-/** Calendario mensual: una bolita por día según cómo fue el reto, los puntos, los apuntes y el día seleccionado. */
 export function Calendario({ mes, hoy, seleccion, sesiones, conNota, onSeleccionar, onCambiarMes }: Props) {
   const semanas = semanasDelMes(mes);
   const esMesActual = mes === hoy.slice(0, 7);

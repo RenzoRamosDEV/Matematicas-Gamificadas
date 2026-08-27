@@ -3,14 +3,13 @@ import type { EjercicioDB, Op } from '../types';
 import { Icono } from './Icono';
 
 interface Props {
-  ejercicios: EjercicioDB[];   // los de la sesión (puede estar vacío si aún no se ha empezado)
+  ejercicios: EjercicioDB[];
   hechas: Op[];
-  actual: Op | null;           // fase a medias (si se refrescó jugando)
+  actual: Op | null;
   onElegir: (op: Op) => void;
   cargando?: boolean;
 }
 
-/** Las 4 fases como tarjetas elegibles; las hechas se muestran con su resultado y no se pueden repetir. */
 export function SelectorFases({ ejercicios, hechas, actual, onElegir, cargando }: Props) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full">

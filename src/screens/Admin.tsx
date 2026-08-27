@@ -30,7 +30,6 @@ const GRANULARIDADES: { g: Granularidad; texto: string }[] = [
 ];
 const num = (v: number | null, unidad = '') => (v === null ? '—' : `${Number.isInteger(v) ? v : v.toFixed(1).replace('.', ',')}${unidad}`);
 
-/** Panel de estadísticas de solo lectura (modo admin). Todo se calcula en el navegador. */
 export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: Props) {
   const hoy = hoyMadrid();
   const oscuro = usePrefiereOscuro();
@@ -83,7 +82,6 @@ export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: 
 
       {!cargando && !vacio && (
         <>
-          {/* 1. Resumen general */}
           <section className="mt-6 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 in d2">
             <Tarjeta icono="target" acento="azul" valor={String(resumen.retos)} label="Retos completados" />
             <Tarjeta icono="check" acento="verde" valor={num(resumen.porcentaje, ' %')} label={`Aciertos (${resumen.aciertos} de ${resumen.cuentas})`} />
@@ -93,7 +91,6 @@ export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: 
             <Tarjeta icono="flame" acento="rosa" valor={`${perfil.racha_max} ${perfil.racha_max === 1 ? 'día' : 'días'}`} label={`Mejor racha · ${resumen.puntos.toLocaleString('es-ES')} pts`} />
           </section>
 
-          {/* 2. Por periodo */}
           <Seccion titulo="Por periodo" delay="d3" derecha={
             <div className="flex gap-1 glass-fuerte border border-linea rounded-[14px] p-1" role="tablist" aria-label="Agrupar por">
               {GRANULARIDADES.map((x) => (
@@ -130,7 +127,6 @@ export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: 
             </div>
           </Seccion>
 
-          {/* 3. Puntos débiles */}
           <Seccion titulo="Puntos débiles" delay="d4">
             <div className="grid md:grid-cols-2 gap-5">
               <Panel titulo="Acierto por operación">
@@ -152,7 +148,6 @@ export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: 
             </div>
           </Seccion>
 
-          {/* 4. Tiempo por cuenta */}
           <Seccion titulo="Tiempo por cuenta" delay="d5">
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
               <Tarjeta icono="clock" acento="violeta" valor={num(t.general, ' s')} label="Media general" />
@@ -164,7 +159,6 @@ export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: 
             </div>
           </Seccion>
 
-          {/* 5. Día a día */}
           <Seccion titulo="Día a día" delay="d6">
             <div className="grid lg:grid-cols-[1fr_1.1fr] gap-5 items-start">
               <Calendario mes={mes} hoy={hoy} seleccion={dia} sesiones={porFecha} conNota={new Set()} onSeleccionar={(f) => { setDia(f); setMes(mesDe(f)); }} onCambiarMes={(d) => setMes((m) => mesVecino(m, d))} />

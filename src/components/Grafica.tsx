@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { paleta, usePrefiereOscuro } from '../lib/paletaGraficas';
 
-/** Ancho real del contenedor (px), actualizado al redimensionar: la gráfica ocupa todo el espacio disponible. */
 function useAncho<T extends HTMLElement>() {
   const ref = useRef<T>(null);
   const [ancho, setAncho] = useState(0);
@@ -19,30 +18,25 @@ export interface DatoBarra { etiqueta: string; corto?: string; valor: number | n
 
 interface PropsBarras {
   datos: DatoBarra[];
-  max?: number;                 // techo del eje (100 para porcentajes)
-  unidad?: string;              // sufijo del valor ('%', ' s')
-  titulo: string;               // para lectores de pantalla
+  max?: number;
+  unidad?: string;
+  titulo: string;
   alto?: number;
 }
 
 const fmt = (v: number | null, unidad: string) => (v === null ? '—' : `${Number.isInteger(v) ? v : v.toFixed(1).replace('.', ',')}${unidad}`);
 
-/**
- * Barras verticales: marcas finas con el extremo redondeado y la base recta, rejilla recesiva, un solo eje.
- * Etiqueta directa del valor cuando hay pocas barras; siempre tooltip (<title>) y etiqueta de categoría.
- */
 export function Barras({ datos, max, unidad = '', titulo, alto = 170 }: PropsBarras) {
   const p = paleta(usePrefiereOscuro());
   const { ref, ancho: disponible } = useAncho<HTMLElement>();
   const n = Math.max(datos.length, 1);
-  // cada barra ocupa una fracción del ancho real; mínimo según la etiqueta más larga para que no se pisen
   const maxChars = Math.max(1, ...datos.map((d) => (d.corto ?? d.etiqueta).length));
   const slotMin = Math.max(44, Math.round(maxChars * 7.2) + 12);
   const slot = Math.max(slotMin, Math.floor((disponible || 600) / n)), ancho = n * slot, margen = { arriba: 22, abajo: 34, izq: 4 };
   const techo = max ?? Math.max(1, ...datos.map((d) => d.valor ?? 0)) * 1.15;
   const hPlot = alto - margen.arriba - margen.abajo;
   const y = (v: number) => margen.arriba + hPlot - (Math.min(v, techo) / techo) * hPlot;
-  const barW = Math.min(64, Math.round(slot * 0.56));   // marcas finas aunque haya mucho espacio
+  const barW = Math.min(64, Math.round(slot * 0.56));
   const etiquetasDirectas = n <= 8;
   const pasos = [0.25, 0.5, 0.75, 1];
 
@@ -69,7 +63,6 @@ export function Barras({ datos, max, unidad = '', titulo, alto = 170 }: PropsBar
           return (
             <g key={d.etiqueta + i}>
               <title>{`${d.etiqueta}: ${fmt(d.valor, unidad)}${d.detalle ? ` · ${d.detalle}` : ''}`}</title>
-              {/* zona de hover más grande que la marca */}
               <rect x={i * slot} y={margen.arriba} width={slot} height={hPlot} fill="transparent" />
               {path && <path d={path} fill={color} />}
               {d.valor === null && <line x1={x0} x2={x0 + barW} y1={base} y2={base} stroke={p.suave} strokeWidth={2} strokeDasharray="3 3" />}
@@ -89,7 +82,6 @@ export interface PuntoLinea { etiqueta: string; corto?: string; valor: number | 
 
 interface PropsLinea { datos: PuntoLinea[]; unidad?: string; titulo: string; alto?: number }
 
-/** Línea de 2px con marcadores de 8px y tooltip por punto; para evolución en el tiempo. */
 export function Linea({ datos, unidad = '', titulo, alto = 170 }: PropsLinea) {
   const p = paleta(usePrefiereOscuro());
   const { ref, ancho: disponible } = useAncho<HTMLElement>();

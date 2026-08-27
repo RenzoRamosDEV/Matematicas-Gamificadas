@@ -1,4 +1,3 @@
-/** Guijarro de vidrio: la mascota del sistema. Flota, parpadea y tiene tres destellos. */
 export function Mascota({ size = 200, className = '' }: { size?: number; className?: string }) {
   return (
     <div className={`relative grid place-items-center ${className}`} style={{ width: size * 1.3, height: size * 1.25 }} aria-hidden="true">

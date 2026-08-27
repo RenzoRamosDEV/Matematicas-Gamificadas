@@ -9,7 +9,7 @@ import { Icono, type NombreIcono } from '../components/Icono';
 interface Props {
   perfil: Profile;
   resultado: ResultadoFinal;
-  ejercicios: EjercicioDB[];   // las 20 cuentas del reto, para la corrección
+  ejercicios: EjercicioDB[];
   yaJugado: boolean;
   onVolver: () => void;
   onSalir?: () => void;
@@ -68,7 +68,6 @@ export function Resumen({ perfil, resultado, ejercicios, yaJugado, onVolver, onS
           })}
         </ul>
 
-        {/* Corrección completa: qué puso y cuál era la respuesta correcta */}
         <section className="glass rounded-[26px] p-4 sm:p-5 flex flex-col gap-3 in d4">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-[16px] font-bold tracking-tight inline-flex items-center gap-2">

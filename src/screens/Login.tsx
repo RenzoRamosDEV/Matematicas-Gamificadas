@@ -4,9 +4,7 @@ import { Icono } from '../components/Icono';
 import { Mascota } from '../components/Mascota';
 
 interface Props {
-  /** Mensaje inicial (p. ej. un link de acceso que no funcionó). */
   mensaje?: string | null;
-  /** Devuelve un mensaje de error o null si entró. */
   onEntrar: (usuario: string, password: string) => Promise<string | null>;
 }
 
@@ -22,7 +20,6 @@ export function Login({ mensaje, onEntrar }: Props) {
     setError(null);
     const err = await onEntrar(usuario, password);
     if (err) { setError(err); setOcupado(false); }
-    // si entró, App cambia de pantalla; no hace falta reactivar el botón
   };
 
   return (
@@ -58,7 +55,6 @@ export function Login({ mensaje, onEntrar }: Props) {
         </Boton>
       </form>
 
-      {/* Texto descriptivo visible para personas y rastreadores: qué es la app */}
       <footer className="mt-6 max-w-md text-center text-[12.5px] leading-snug text-tinta-3 text-pretty in d3">
         <p>
           <strong className="text-tinta-2 font-semibold">Reto Diario</strong> es un juego gratuito de cálculo mental: cada día, sumas, restas,

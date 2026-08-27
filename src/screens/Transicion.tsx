@@ -6,13 +6,13 @@ import { Icono, type NombreIcono } from '../components/Icono';
 import { SelectorFases } from '../components/SelectorFases';
 
 interface Props {
-  op: Op;                       // fase recién terminada
+  op: Op;
   aciertos: number;
   total: number;
   ejercicios: EjercicioDB[];
   hechas: Op[];
-  onElegir: (op: Op) => void;   // siguiente fase, la que quiera el jugador
-  onVerResultado: () => void;   // cuando no queda ninguna
+  onElegir: (op: Op) => void;
+  onVerResultado: () => void;
   onInicio: () => void;
   cargando?: boolean;
 }
@@ -45,7 +45,6 @@ export function Transicion({ op, aciertos, total, ejercicios, hechas, onElegir, 
           <Barra valor={total ? aciertos / total : 0} acento={acento} className="w-full" animada />
           {aciertos === total && total > 0 && <span className="chip chip-verde">+25 puntos por fase perfecta</span>}
         </div>
-
 
         {quedan > 0 ? (
           <>

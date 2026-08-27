@@ -1,6 +1,5 @@
 import type { SVGProps } from 'react';
 
-/** Set de iconos lineales (estilo Lucide/SF Symbols): stroke 1.75, rejilla de 24. */
 const PATHS = {
   target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/>',
   chart: '<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M12 15V8"/><path d="M16 15v-6"/>',
@@ -40,7 +39,6 @@ export function Icono({ nombre, size = 24, ...rest }: Props) {
     <svg
       width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
-      // Los paths son constantes propias, no contenido de usuario.
       dangerouslySetInnerHTML={{ __html: PATHS[nombre] }}
       {...rest}
     />

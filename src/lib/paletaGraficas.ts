@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Op } from '../types';
 
-/**
- * Colores de serie para las gráficas del panel. Validados (claro sobre #f5f6fa, oscuro sobre #0b0d15)
- * con el validador de paletas: separación normal y para daltonismo; la identidad de cada serie va
- * siempre acompañada de etiqueta o tabla, nunca solo por color.
- */
 export interface Paleta { serie: Record<Op, string>; base: string; texto: string; suave: string; rejilla: string; eje: string }
 
 const CLARA: Paleta = {
@@ -19,7 +14,6 @@ const OSCURA: Paleta = {
 
 export const paleta = (oscuro: boolean) => (oscuro ? OSCURA : CLARA);
 
-/** Sigue a prefers-color-scheme en tiempo real. */
 export function usePrefiereOscuro(): boolean {
   const [oscuro, setOscuro] = useState(() => typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches);
   useEffect(() => {
