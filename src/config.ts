@@ -17,7 +17,7 @@ export const CONFIG = {
 
 export const ORDEN_FASES = ['suma', 'resta', 'mult', 'div'] as const;
 
-export type Acento = 'azul' | 'violeta' | 'verde' | 'amarillo' | 'rosa';
+export type Acento = 'azul' | 'violeta' | 'verde' | 'amarillo' | 'rosa' | 'gris';
 
 export const FASE_INFO: Record<(typeof ORDEN_FASES)[number], { nombre: string; simbolo: string; acento: Acento }> = {
   suma:  { nombre: 'Sumas',            simbolo: '+', acento: 'azul' },

@@ -3,7 +3,7 @@ import { CONFIG, FASE_INFO, ORDEN_FASES, type Acento } from '../config';
 import type { Op, Profile, Session } from '../types';
 import { evaluarLogros } from '../lib/logros';
 import { hoyMadrid, puntosSemana, semanaActual } from '../lib/semana';
-import { comodinesDisponibles } from '../lib/comodin';
+import { comodinesDisponibles, estadoRacha } from '../lib/comodin';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
 import { Icono, type NombreIcono } from '../components/Icono';
@@ -33,6 +33,7 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
   const hoy = hoyMadrid();
   const dias = semanaActual(sesiones, hoy);
   const comodines = comodinesDisponibles(perfil, hoy);   // anticipa la recarga de 30 días que la DB aplica al finalizar
+  const racha = estadoRacha(perfil, hoy);                 // viva / en juego (el comodín la salvará) / perdida
   const totalSemana = puntosSemana(dias);
   const maxPuntos = Math.max(1, ...dias.map((d) => d.puntos));
 
@@ -77,7 +78,8 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
             )}
           </div>
           <div className="grid grid-cols-3 gap-2.5 in d5">
-            <Stat icono="flame" acento="rosa" valor={`${perfil.racha_actual} ${perfil.racha_actual === 1 ? 'día' : 'días'}`} label="Racha" />
+            <Stat icono="flame" acento={racha.estado === 'perdida' ? 'gris' : 'rosa'} valor={`${racha.racha} ${racha.racha === 1 ? 'día' : 'días'}`}
+              label={racha.estado === 'en_juego' ? 'Racha · en juego' : racha.estado === 'perdida' ? 'Racha · perdida' : 'Racha'} />
             <Stat icono="star" acento="amarillo" valor={perfil.puntos_total.toLocaleString('es-ES')} label="Puntos" />
             <Stat icono="shield" acento="verde" valor={String(comodines)} label={comodines === 1 ? 'Comodín' : 'Comodines'} />
           </div>
@@ -96,9 +98,10 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
             <span className={`tile ${completado ? 'tile-verde' : 'tile-amarillo'} w-6 h-6 rounded-[8px]`}><Icono nombre={completado ? 'check' : 'star'} size={14} /></span>
             {completado ? `+${puntosHoy} puntos hoy` : hechas > 0 ? `${hechas} de 4 fases hoy` : '+10 por acierto'}
           </div>
-          {comodines > 0 && (
+          {(comodines > 0 || racha.estado === 'perdida') && (
             <div className="glass flota absolute bottom-4 left-4 sm:bottom-10 sm:left-10 rounded-[14px] flex items-center gap-2 pl-2 pr-3 py-2 text-[12.5px] font-semibold" style={{ animationDelay: '-4s' }}>
-              <span className="tile tile-verde w-6 h-6 rounded-[8px]"><Icono nombre="shield" size={14} /></span>Comodín listo
+              <span className={`tile ${racha.estado === 'perdida' ? 'tile-gris' : racha.estado === 'en_juego' ? 'tile-amarillo' : 'tile-verde'} w-6 h-6 rounded-[8px]`}><Icono nombre="shield" size={14} /></span>
+              {racha.estado === 'en_juego' ? 'Ayer no jugaste: hoy el comodín salva tu racha' : racha.estado === 'perdida' ? 'La racha vuelve a empezar hoy' : 'Comodín listo'}
             </div>
           )}
         </div>
