@@ -26,6 +26,7 @@ export interface Profile {
   racha_max: number;
   ultima_sesion_fecha: string | null;
   comodines_disponibles: number;
+  ultimo_comodin_fecha: string | null;
 }
 
 export interface FaseDetalle {
