@@ -8,7 +8,6 @@
     <title>Reto Diario — Cálculo mental para niños (sumas, restas, multiplicaciones y divisiones)</title>
     <meta name="description" content="Un reto de cálculo mental al día para niños de 8 a 12 años: 4 fases de sumas, restas, multiplicaciones y divisiones con cronómetro, puntos, racha con comodín, 42 insignias y calendario de progreso. Gratis, sin anuncios y en español." />
     <meta name="keywords" content="cálculo mental, matemáticas para niños, juego de matemáticas, sumas, restas, multiplicaciones, divisiones, tablas de multiplicar, práctica diaria, primaria, gamificación, racha, insignias" />
-    <meta name="author" content="Renzo Ramos" />
     <link rel="canonical" href="https://renzoramosdev.github.io/Matematicas-Gamificadas/" />
     <link rel="alternate" hreflang="es" href="https://renzoramosdev.github.io/Matematicas-Gamificadas/" />
     <link rel="alternate" hreflang="x-default" href="https://renzoramosdev.github.io/Matematicas-Gamificadas/" />
@@ -83,22 +82,21 @@
             "Calendario de progreso con apuntes por día",
             "Modo claro y oscuro automático"
           ],
-          "author": { "@id": "https://renzoramosdev.github.io/Matematicas-Gamificadas/#autor" },
-          "codeRepository": "https://github.com/RenzoRamosDEV/Matematicas-Gamificadas",
-          "license": "https://opensource.org/licenses/MIT"
+          "keywords": "cálculo mental, matemáticas para niños, sumas, restas, multiplicaciones, tablas de multiplicar, divisiones, práctica diaria, primaria"
         },
         {
-          "@type": "Person",
-          "@id": "https://renzoramosdev.github.io/Matematicas-Gamificadas/#autor",
-          "name": "Renzo Ramos",
-          "url": "https://github.com/RenzoRamosDEV"
+          "@type": "FAQPage",
+          "mainEntity": [
+            { "@type": "Question", "name": "¿Qué es Reto Diario?", "acceptedAnswer": { "@type": "Answer", "text": "Un juego web gratuito para practicar cálculo mental: cada día un reto de sumas, restas, multiplicaciones y divisiones con puntos, racha e insignias. Para niños de 8 a 12 años y cualquiera que quiera entrenar el cálculo." } },
+            { "@type": "Question", "name": "¿Cuánto cuesta?", "acceptedAnswer": { "@type": "Answer", "text": "Nada. Es gratis y sin anuncios." } },
+            { "@type": "Question", "name": "¿Cómo se juega?", "acceptedAnswer": { "@type": "Answer", "text": "Un reto al día con cuatro fases de cinco cuentas cada una. Se ganan puntos por acierto y por rapidez, y se mantiene una racha jugando cada día." } }
+          ]
         },
         {
           "@type": "WebSite",
           "url": "https://renzoramosdev.github.io/Matematicas-Gamificadas/",
-          "name": "Reto Diario — Matemáticas Gamificadas",
-          "inLanguage": "es",
-          "publisher": { "@id": "https://renzoramosdev.github.io/Matematicas-Gamificadas/#autor" }
+          "name": "Reto Diario",
+          "inLanguage": "es"
         }
       ]
     }
@@ -108,16 +106,16 @@
     <!-- Contenido estático para rastreadores sin JavaScript; React lo sustituye al montar. -->
     <div id="root">
       <main style="font-family: system-ui, sans-serif; max-width: 42rem; margin: 3rem auto; padding: 0 1.25rem; color: #101323">
-        <h1>Reto Diario: cálculo mental para niños</h1>
-        <p>Un reto al día para niños de 8 a 12 años: cuatro fases de <strong>sumas, restas, multiplicaciones y divisiones</strong> con cronómetro, puntos, racha con comodín, 42 insignias y un calendario de progreso con apuntes. Gratis, sin anuncios y en español.</p>
-        <h2>Cómo funciona</h2>
+        <h1>Reto Diario: practica cálculo mental cada día</h1>
+        <p>Reto Diario es un juego gratuito para mejorar el cálculo mental. Cada día propone un reto con cuatro fases —<strong>sumas, restas, multiplicaciones y divisiones</strong>— con tiempo por fase, puntos, racha diaria e insignias. Pensado para niños de 8 a 12 años y para cualquiera que quiera entrenar el cálculo. En español, sin anuncios y sin costes.</p>
+        <h2>Cómo se juega</h2>
         <ul>
-          <li>Cada día se generan 20 cuentas nuevas (5 por operación). El niño elige el orden de las fases y escribe la respuesta como en papel, empezando por las unidades.</li>
-          <li>+10 puntos por acierto, +25 por fase perfecta, bonus de velocidad solo si la fase es perfecta y +100 por un reto sin fallos. Los puntos y la racha se suman al completar las cuatro fases.</li>
-          <li>La racha se mantiene jugando cada día; un comodín cubre un día perdido y se recarga cada 30 días.</li>
-          <li>Las insignias se ganan acertando: retos, racha, puntos, aciertos por operación, perfección y velocidad.</li>
+          <li>Un reto nuevo al día con 20 cuentas: eliges el orden de las fases y escribes la respuesta como en papel.</li>
+          <li>Sumas puntos por cada acierto, con bonus por hacer una fase perfecta y por rapidez.</li>
+          <li>Mantienes una racha jugando cada día; un comodín cubre un día perdido.</li>
+          <li>Al terminar ves la corrección de cada cuenta, y en el calendario tu progreso día a día.</li>
         </ul>
-        <p>Código abierto en <a href="https://github.com/RenzoRamosDEV/Matematicas-Gamificadas">GitHub</a>. Para jugar hace falta JavaScript.</p>
+        <p>Para jugar necesitas activar JavaScript en tu navegador.</p>
       </main>
     </div>
     <script type="module" src="/src/main.tsx"></script>

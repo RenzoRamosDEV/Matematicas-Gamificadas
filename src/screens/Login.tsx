@@ -54,12 +54,10 @@ export function Login({ mensaje, onEntrar }: Props) {
           {ocupado ? 'Entrando…' : 'Entrar'}
         </Boton>
       </form>
-
       <footer className="mt-6 max-w-md text-center text-[12.5px] leading-snug text-tinta-3 text-pretty in d3">
         <p>
-          <strong className="text-tinta-2 font-semibold">Reto Diario</strong> es un juego gratuito de cálculo mental: cada día, sumas, restas,
-          multiplicaciones y divisiones en cuatro fases, con puntos, racha e insignias. El acceso lo da quien administra el juego.
-          {' '}<a className="underline hover:text-tinta" href="https://github.com/RenzoRamosDEV/Matematicas-Gamificadas" rel="noopener" target="_blank">Código abierto</a>.
+          <strong className="text-tinta-2 font-semibold">Reto Diario</strong> es un juego gratuito para practicar cálculo mental: cada día, sumas,
+          restas, multiplicaciones y divisiones con puntos, racha e insignias.
         </p>
       </footer>
     </main>

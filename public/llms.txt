@@ -1,31 +1,27 @@
-# Reto Diario — Matemáticas gamificadas
+# Reto Diario
 
-> Juego web gratuito de cálculo mental diario para niños de 8 a 12 años. Cada día, un reto de cuatro fases (sumas, restas, multiplicaciones y divisiones) con cronómetro por fase, puntos, racha con comodín, insignias, calendario de progreso y apuntes. Sin anuncios, sin compras, sin recopilación de datos de terceros. Interfaz en español, diseño tipo "liquid glass", modo claro y oscuro.
+> Reto Diario es un juego web gratuito para practicar cálculo mental. Cada día propone un reto de cuatro fases —sumas, restas, multiplicaciones y divisiones— con tiempo por fase, puntos, racha diaria con comodín, insignias y un calendario donde ver el progreso día a día. Pensado para niños de primaria (8 a 12 años) y para cualquiera que quiera mejorar el cálculo mental. En español, sin anuncios y sin costes.
 
-Sitio: https://renzoramosdev.github.io/Matematicas-Gamificadas/
-Código fuente (MIT): https://github.com/RenzoRamosDEV/Matematicas-Gamificadas
+Página: https://renzoramosdev.github.io/Matematicas-Gamificadas/
 
-## Qué es
+## Cómo se juega
 
-- Un reto por día: 4 fases × 5 cuentas (sumas y restas de 3–4 cifras con llevadas, multiplicaciones y divisiones exactas), el niño elige el orden y escribe la respuesta como en papel (de derecha a izquierda).
-- Puntuación: +10 por acierto, +25 por fase perfecta, +20/+10 por velocidad solo si la fase es perfecta, +100 por reto perfecto. Los puntos y la racha solo se suman al completar las 4 fases.
-- Racha diaria con un comodín que cubre un día perdido y se recarga cada 30 días.
-- 42 insignias (retos, racha, puntos, aciertos por operación, perfección, velocidad, especiales) que solo se ganan acertando.
-- Calendario mensual con el resultado de cada día (verde: todo bien; amarillo: algún fallo; rojo: todo mal; gris: sin reto) y apuntes libres por día.
-- Acceso con usuario y contraseña que crea el adulto responsable; no hay registro público.
+- Un reto nuevo cada día: 20 cuentas repartidas en cuatro fases (5 de cada operación). Se elige el orden de las fases.
+- Las respuestas se escriben como en papel, empezando por las unidades.
+- Se ganan puntos por cada acierto, con bonus por fase perfecta y por rapidez; los puntos y la racha se suman al terminar las cuatro fases.
+- La racha diaria se mantiene jugando cada día; un comodín cubre un día perdido.
+- Al terminar se corrige cada cuenta: se ve la respuesta dada y la correcta.
 
-## Tecnología
+## Qué ofrece
 
-- Front: React 19 + TypeScript + Vite + Tailwind CSS v4, desplegado en GitHub Pages.
-- Backend: Supabase (Postgres, Auth, RPC `security definer`). La corrección, los puntos y la racha se calculan en la base de datos; el cliente nunca envía puntos ni resultados.
+- Práctica diaria de sumas, restas, multiplicaciones y tablas, y divisiones.
+- Insignias por constancia, aciertos y rapidez.
+- Calendario mensual con el resultado de cada día y apuntes personales.
+- Modo claro y oscuro; funciona en móvil, tablet y ordenador.
+- Acceso privado con usuario y contraseña; no hay registro abierto ni recogida de datos para terceros.
 
-## Páginas
+## Para quién
 
-- Inicio: https://renzoramosdev.github.io/Matematicas-Gamificadas/ — login y panel del jugador de Reto Diario.
-- Reto del día: https://renzoramosdev.github.io/Matematicas-Gamificadas/#reto
-- Insignias: https://renzoramosdev.github.io/Matematicas-Gamificadas/#logros
-- Progreso y calendario: https://renzoramosdev.github.io/Matematicas-Gamificadas/#progreso
-
-## Autor
-
-Renzo Ramos — https://github.com/RenzoRamosDEV
+- Familias que quieren que un niño repase matemáticas unos minutos al día.
+- Docentes o tutores que buscan una rutina corta y motivadora de cálculo mental.
+- Cualquier persona que quiera entrenar el cálculo a diario.
