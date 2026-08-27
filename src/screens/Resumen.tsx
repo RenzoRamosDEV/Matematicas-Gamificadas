@@ -1,19 +1,22 @@
 import { FASE_INFO, type Acento } from '../config';
-import type { Profile, ResultadoFinal } from '../types';
+import type { EjercicioDB, Profile, ResultadoFinal } from '../types';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
+import { Correccion } from '../components/Correccion';
 import { Icono, type NombreIcono } from '../components/Icono';
 
 interface Props {
   perfil: Profile;
   resultado: ResultadoFinal;
+  ejercicios: EjercicioDB[];   // las 20 cuentas del reto, para la corrección
   yaJugado: boolean;
   onVolver: () => void;
   onSalir?: () => void;
 }
 
-export function Resumen({ perfil, resultado, yaJugado, onVolver, onSalir }: Props) {
+export function Resumen({ perfil, resultado, ejercicios, yaJugado, onVolver, onSalir }: Props) {
   const perfecta = resultado.sesion_perfecta;
+  const fallos = resultado.total - resultado.aciertos;
   return (
     <div className="min-h-dvh max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
       <Cabecera perfil={perfil} onSalir={onSalir} />
@@ -63,11 +66,27 @@ export function Resumen({ perfil, resultado, yaJugado, onVolver, onSalir }: Prop
           })}
         </ul>
 
+        {/* Corrección completa: qué puso y cuál era la respuesta correcta */}
+        <section className="glass rounded-[26px] p-4 sm:p-5 flex flex-col gap-3 in d4">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-[16px] font-bold tracking-tight inline-flex items-center gap-2">
+              <Icono nombre="target" size={16} />Tus cuentas
+            </h2>
+            <span className={`chip ${fallos === 0 ? 'chip-verde' : 'chip-rosa'} tabular-nums`}>
+              {fallos === 0 ? 'Todas bien' : `${fallos} ${fallos === 1 ? 'fallo' : 'fallos'}`}
+            </span>
+          </div>
+          <p className="text-[13px] text-tinta-3 -mt-1">
+            {fallos === 0 ? 'Aquí tienes las cuentas de hoy.' : 'En rojo, lo que pusiste; al lado, la respuesta correcta.'}
+          </p>
+          <Correccion ejercicios={ejercicios} />
+        </section>
+
         {perfil.racha_max > resultado.racha && (
           <p className="text-tinta-3 text-sm text-center">Tu récord de racha: {perfil.racha_max} días</p>
         )}
 
-        <Boton variante="glass" icono="chevLeft" onClick={onVolver} className="self-center in d4">Volver al inicio</Boton>
+        <Boton variante="glass" icono="chevLeft" onClick={onVolver} className="self-center in d5">Volver al inicio</Boton>
       </main>
     </div>
   );

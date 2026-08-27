@@ -167,6 +167,7 @@ body {
   .tile-verde    { background: linear-gradient(150deg, var(--color-verde), var(--color-verde-2)); box-shadow: 0 10px 22px -10px var(--color-verde-2); }
   .tile-amarillo { background: linear-gradient(150deg, var(--color-amarillo), var(--color-amarillo-2)); box-shadow: 0 10px 22px -10px var(--color-amarillo-2); }
   .tile-rosa     { background: linear-gradient(150deg, var(--color-rosa), var(--color-rosa-2)); box-shadow: 0 10px 22px -10px var(--color-rosa-2); }
+  .tile-rojo     { background: linear-gradient(150deg, var(--color-rojo), var(--color-rojo-2)); box-shadow: 0 10px 22px -10px var(--color-rojo-2); }
   .tile-gris     { background: var(--pista); color: var(--color-tinta-3); box-shadow: none; border: 1px solid var(--color-linea); }
   .tile-gris::after { display: none; }
 

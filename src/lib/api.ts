@@ -96,3 +96,10 @@ export async function reintentar<T>(fn: () => Promise<T>, veces = 2, esperaMs = 
   }
   throw ultimo;
 }
+
+/** Cuentas de una sesión (propia) para revisar aciertos y fallos, ordenadas. */
+export async function cargarEjercicios(sessionId: string): Promise<EjercicioDB[]> {
+  const { data, error } = await supabase.from('exercises').select('*').eq('session_id', sessionId).order('orden');
+  fail('cuentas', error);
+  return (data ?? []) as EjercicioDB[];
+}

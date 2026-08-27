@@ -46,6 +46,7 @@ export function Transicion({ op, aciertos, total, ejercicios, hechas, onElegir, 
           {aciertos === total && total > 0 && <span className="chip chip-verde">+25 puntos por fase perfecta</span>}
         </div>
 
+
         {quedan > 0 ? (
           <>
             <div className="text-center flex flex-col gap-1 in d2">

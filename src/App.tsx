@@ -215,7 +215,7 @@ export default function App() {
       />
     );
   } else if (resultado) {
-    contenido = <Resumen perfil={perfil} resultado={resultado} yaJugado={yaJugado} onVolver={() => setVista('inicio')} onSalir={onSalir} />;
+    contenido = <Resumen perfil={perfil} resultado={resultado} ejercicios={ejercicios} yaJugado={yaJugado} onVolver={() => setVista('inicio')} onSalir={onSalir} />;
   } else if (progreso.pantalla === 'finalizando') {
     contenido = <Cargando texto="Calculando resultado…" />;
   } else if (progreso.pantalla === 'eligiendo' || !progreso.actual) {

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FASE_INFO, type Acento } from '../config';
 import type { Nota, Profile, Session } from '../types';
-import { borrarNota, cargarNotas, crearNota, reintentar } from '../lib/api';
+import { borrarNota, cargarEjercicios, cargarNotas, crearNota, reintentar } from '../lib/api';
+import type { EjercicioDB } from '../types';
+import { Correccion } from '../components/Correccion';
 import { mesDe, mesVecino, nombreDia, type Mes } from '../lib/calendario';
 import { hoyMadrid } from '../lib/semana';
 import { Boton } from '../components/Boton';
@@ -29,6 +31,7 @@ export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso }: Props
   const [borradores, setBorradores] = useState<Record<string, string>>({});   // apunte en edición por fecha
   const [guardando, setGuardando] = useState(false);
   const [borrando, setBorrando] = useState<string | null>(null);
+  const [cuentas, setCuentas] = useState<Record<string, EjercicioDB[] | 'cargando'>>({});   // por id de sesión
 
   const porFecha = useMemo(() => new Map(sesiones.filter((s) => s.estado === 'completada').map((s) => [s.fecha, s])), [sesiones]);
   const completadas = porFecha.size;
@@ -70,6 +73,13 @@ export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso }: Props
 
   const sesion = porFecha.get(seleccion);
   const futuro = seleccion > hoy;
+  const cuentasDelDia = sesion ? cuentas[sesion.id] : undefined;
+  const verCuentas = async () => {
+    if (!sesion || cuentasDelDia) return;
+    setCuentas((c) => ({ ...c, [sesion.id]: 'cargando' }));
+    try { const lista = await cargarEjercicios(sesion.id); setCuentas((c) => ({ ...c, [sesion.id]: lista })); }
+    catch (e) { setCuentas((c) => { const n = { ...c }; delete n[sesion.id]; return n; }); onAviso(`No se pudieron cargar las cuentas: ${(e as Error).message}`); }
+  };
 
   return (
     <div className="min-h-dvh max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
@@ -123,6 +133,14 @@ export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso }: Props
                   </li>
                 ))}
               </ul>
+              <h3 className="text-sm font-semibold text-tinta-2 inline-flex items-center gap-1.5 mt-1"><Icono nombre="target" size={14} />Tus cuentas de ese día</h3>
+              {cuentasDelDia === undefined && (
+                <button type="button" onClick={verCuentas} className="self-start inline-flex items-center gap-1 text-sm font-semibold text-tinta-2 hover:text-tinta transition">
+                  Ver qué pusiste y la respuesta correcta<Icono nombre="chev" size={14} />
+                </button>
+              )}
+              {cuentasDelDia === 'cargando' && <p className="text-sm text-tinta-3 animate-pulse">Cargando cuentas…</p>}
+              {Array.isArray(cuentasDelDia) && <Correccion ejercicios={cuentasDelDia} />}
             </div>
           ) : (
             <p className="text-tinta-2 text-sm">
