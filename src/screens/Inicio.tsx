@@ -6,6 +6,7 @@ import { hoyMadrid, puntosSemana, semanaActual } from '../lib/semana';
 import { comodinesDisponibles, estadoRacha } from '../lib/comodin';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
+import type { Destino } from '../components/MenuPerfil';
 import { Icono, type NombreIcono } from '../components/Icono';
 import { Mascota } from '../components/Mascota';
 
@@ -23,9 +24,10 @@ interface Props {
   onVerProgreso: () => void;
   cargando: boolean;
   onSalir?: () => void;
+  onIr: (destino: Destino) => void;
 }
 
-export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, onEmpezar, onVerResultado, onVerLogros, onVerProgreso, cargando, onSalir }: Props) {
+export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, onEmpezar, onVerResultado, onVerLogros, onVerProgreso, cargando, onSalir, onIr }: Props) {
   const nombre = perfil.nombre.charAt(0).toUpperCase() + perfil.nombre.slice(1);
   const completado = estadoReto === 'completado';
 
@@ -52,7 +54,7 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
 
   return (
     <div className="min-h-dvh max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
-      <Cabecera perfil={perfil} onSalir={onSalir} />
+      <Cabecera perfil={perfil} onIr={onIr} onSalir={onSalir} />
 
       {/* ---- Hero ---- */}
       <section className="mt-6 sm:mt-10 grid lg:grid-cols-[1.1fr_.9fr] gap-5 sm:gap-8 items-center">

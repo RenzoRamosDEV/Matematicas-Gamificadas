@@ -8,6 +8,7 @@ import { mesDe, mesVecino, nombreDia, type Mes } from '../lib/calendario';
 import { hoyMadrid } from '../lib/semana';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
+import type { Destino } from '../components/MenuPerfil';
 import { Calendario } from '../components/Calendario';
 import { Icono, type NombreIcono } from '../components/Icono';
 
@@ -17,13 +18,14 @@ interface Props {
   onVolver: () => void;
   onSalir?: () => void;
   onAviso: (texto: string) => void;
+  onIr: (destino: Destino) => void;
 }
 
 const MAX_NOTA = 500;
 const fmtHora = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
 
 /** Página de progreso: calendario con los retos completados y los apuntes del jugador (varios por día). */
-export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso }: Props) {
+export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso, onIr }: Props) {
   const hoy = hoyMadrid();
   const [mes, setMes] = useState<Mes>(mesDe(hoy));
   const [seleccion, setSeleccion] = useState(hoy);
@@ -83,7 +85,7 @@ export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso }: Props
 
   return (
     <div className="min-h-dvh max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
-      <Cabecera perfil={perfil} onSalir={onSalir} />
+      <Cabecera perfil={perfil} onIr={onIr} onSalir={onSalir} />
 
       <section className="mt-6 sm:mt-10 flex flex-col gap-2 px-1 in d1">
         <button type="button" onClick={onVolver} className="self-start inline-flex items-center gap-1 text-sm font-semibold text-tinta-2 hover:text-tinta transition">

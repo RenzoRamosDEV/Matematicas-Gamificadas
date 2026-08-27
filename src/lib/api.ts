@@ -103,3 +103,10 @@ export async function cargarEjercicios(sessionId: string): Promise<EjercicioDB[]
   fail('cuentas', error);
   return (data ?? []) as EjercicioDB[];
 }
+
+/** Todas las cuentas del jugador (todas sus sesiones), para el panel de estadísticas. RLS limita a las propias. */
+export async function cargarTodasLasCuentas(): Promise<EjercicioDB[]> {
+  const { data, error } = await supabase.from('exercises').select('*').order('session_id').order('orden').limit(20000);
+  fail('cuentas', error);
+  return (data ?? []) as EjercicioDB[];
+}

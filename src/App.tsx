@@ -16,11 +16,14 @@ import { Resumen } from './screens/Resumen';
 import { Login } from './screens/Login';
 import { Logros } from './screens/Logros';
 import { Progreso as PaginaProgreso } from './screens/Progreso';
+import { Pin } from './screens/Pin';
+import { Admin } from './screens/Admin';
+import { adminDesbloqueado, bloquearAdmin, desbloquearAdmin } from './lib/pin';
 import { Cargando, ErrorPantalla } from './screens/Estados';
 
 type Estado = 'cargando' | 'sin_acceso' | 'error' | 'listo';
 /** Qué se ve cuando el estado es 'listo': el inicio, el reto (elegir fase / jugar / resumen) o las insignias. */
-type Vista = 'inicio' | 'reto' | 'logros' | 'progreso';
+type Vista = 'inicio' | 'reto' | 'logros' | 'progreso' | 'admin';
 
 /** Reconstruye el resultado de una sesión ya completada (para el "resumen del día"). */
 function resultadoDesdeSesion(s: Session, perfil: Profile): ResultadoFinal {
@@ -47,7 +50,7 @@ export default function App() {
   // Así el botón atrás del navegador funciona y un refresco a mitad de reto vuelve al reto.
   const vistaDeHash = (): Vista => {
     const h = location.hash.slice(1);
-    return h === 'reto' || h === 'logros' || h === 'progreso' ? h : 'inicio';
+    return h === 'reto' || h === 'logros' || h === 'progreso' || h === 'admin' ? h : 'inicio';
   };
   const [vista, setVistaLocal] = useState<Vista>(vistaDeHash);
   useEffect(() => {
@@ -62,6 +65,10 @@ export default function App() {
   };
   const abrirLogros = () => setVista('logros');
   const cerrarLogros = () => setVista('inicio');
+  // Modo admin: PIN de familia; el desbloqueo dura lo que dure la pestaña
+  const [adminOk, setAdminOk] = useState(adminDesbloqueado);
+  const desbloquear = () => { desbloquearAdmin(); setAdminOk(true); };
+  const bloquear = () => { bloquearAdmin(); setAdminOk(false); setVista('inicio'); };
 
   // Cola de escrituras a la DB: se encadenan para no perder ninguna y poder esperarlas antes de finalizar
   const cola = useRef<Promise<void>>(Promise.resolve());
@@ -121,6 +128,7 @@ export default function App() {
   const onSalir = async () => {
     await salir();
     setPerfil(null); setSession(null); setSesiones([]); setEjercicios([]); setResultado(null); setYaJugado(false);
+    bloquearAdmin(); setAdminOk(false);
     setProgreso(PROGRESO_INICIAL); setVista('inicio'); cerrarLogros(); setMensaje(null); setEstado('sin_acceso');
   };
 
@@ -202,20 +210,24 @@ export default function App() {
   const estadoReto: EstadoReto = resultado ? 'completado' : ejercicios.length ? 'en_curso' : 'nuevo';
 
   let contenido;
-  if (vista === 'logros') {
-    contenido = <Logros perfil={perfil} sesiones={sesiones} onVolver={cerrarLogros} onSalir={onSalir} />;
+  if (vista === 'admin') {
+    contenido = adminOk
+      ? <Admin perfil={perfil} sesiones={sesiones} onIr={setVista} onBloquear={bloquear} onSalir={onSalir} onAviso={setAviso} />
+      : <Pin onDesbloquear={desbloquear} onVolver={() => setVista('inicio')} />;
+  } else if (vista === 'logros') {
+    contenido = <Logros perfil={perfil} sesiones={sesiones} onVolver={cerrarLogros} onSalir={onSalir} onIr={setVista} />;
   } else if (vista === 'progreso') {
-    contenido = <PaginaProgreso perfil={perfil} sesiones={sesiones} onVolver={() => setVista('inicio')} onSalir={onSalir} onAviso={setAviso} />;
+    contenido = <PaginaProgreso perfil={perfil} sesiones={sesiones} onVolver={() => setVista('inicio')} onSalir={onSalir} onAviso={setAviso} onIr={setVista} />;
   } else if (vista === 'inicio') {
     contenido = (
       <Inicio
         perfil={perfil} sesiones={sesiones} estadoReto={estadoReto} fasesHechas={progreso.hechas}
         puntosHoy={resultado?.puntos ?? session.puntos}
-        onEmpezar={irAlReto} onVerResultado={() => setVista('reto')} onVerLogros={abrirLogros} onVerProgreso={() => setVista('progreso')} cargando={ocupado} onSalir={onSalir}
+        onEmpezar={irAlReto} onVerResultado={() => setVista('reto')} onVerLogros={abrirLogros} onVerProgreso={() => setVista('progreso')} cargando={ocupado} onSalir={onSalir} onIr={setVista}
       />
     );
   } else if (resultado) {
-    contenido = <Resumen perfil={perfil} resultado={resultado} ejercicios={ejercicios} yaJugado={yaJugado} onVolver={() => setVista('inicio')} onSalir={onSalir} />;
+    contenido = <Resumen perfil={perfil} resultado={resultado} ejercicios={ejercicios} yaJugado={yaJugado} onVolver={() => setVista('inicio')} onSalir={onSalir} onIr={setVista} />;
   } else if (progreso.pantalla === 'finalizando') {
     contenido = <Cargando texto="Calculando resultado…" />;
   } else if (progreso.pantalla === 'eligiendo' || !progreso.actual) {

@@ -3,6 +3,7 @@ import { CATEGORIAS, evaluarLogros, type LogroEvaluado } from '../lib/logros';
 import { Barra } from '../components/Barra';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
+import type { Destino } from '../components/MenuPerfil';
 import { Icono } from '../components/Icono';
 
 interface Props {
@@ -10,17 +11,18 @@ interface Props {
   sesiones: Session[];
   onVolver: () => void;
   onSalir?: () => void;
+  onIr: (destino: Destino) => void;
 }
 
 /** Página de insignias: todas las medallas en grande, por categoría y con su progreso real. */
-export function Logros({ perfil, sesiones, onVolver, onSalir }: Props) {
+export function Logros({ perfil, sesiones, onVolver, onSalir, onIr }: Props) {
   const logros = evaluarLogros({ perfil, sesiones });
   const conseguidos = logros.filter((l) => l.conseguido).length;
   const grupos = CATEGORIAS.map((cat) => ({ cat, items: logros.filter((l) => l.categoria === cat) })).filter((g) => g.items.length);
 
   return (
     <div className="min-h-dvh max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
-      <Cabecera perfil={perfil} onSalir={onSalir} />
+      <Cabecera perfil={perfil} onIr={onIr} onSalir={onSalir} />
 
       <section className="mt-6 sm:mt-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 px-1 in d1">
         <div className="flex flex-col gap-2">

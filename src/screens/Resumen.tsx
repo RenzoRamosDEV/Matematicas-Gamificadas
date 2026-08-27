@@ -2,6 +2,7 @@ import { FASE_INFO, type Acento } from '../config';
 import type { EjercicioDB, Profile, ResultadoFinal } from '../types';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
+import type { Destino } from '../components/MenuPerfil';
 import { Correccion } from '../components/Correccion';
 import { Icono, type NombreIcono } from '../components/Icono';
 
@@ -12,14 +13,15 @@ interface Props {
   yaJugado: boolean;
   onVolver: () => void;
   onSalir?: () => void;
+  onIr: (destino: Destino) => void;
 }
 
-export function Resumen({ perfil, resultado, ejercicios, yaJugado, onVolver, onSalir }: Props) {
+export function Resumen({ perfil, resultado, ejercicios, yaJugado, onVolver, onSalir, onIr }: Props) {
   const perfecta = resultado.sesion_perfecta;
   const fallos = resultado.total - resultado.aciertos;
   return (
     <div className="min-h-dvh max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
-      <Cabecera perfil={perfil} onSalir={onSalir} />
+      <Cabecera perfil={perfil} onIr={onIr} onSalir={onSalir} />
       <main className="max-w-md mx-auto w-full flex flex-col gap-5 mt-8">
         <div className="text-center flex flex-col items-center gap-3 pop">
           <div className={`tile ${perfecta ? 'tile-amarillo' : 'tile-verde'} w-20 h-20 rounded-[24px]`}>
