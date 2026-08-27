@@ -14,7 +14,7 @@ export function Cabecera({ perfil, onSalir }: { perfil: Profile; onSalir?: () =>
         <div className="tile w-[34px] h-[34px] rounded-[11px]" style={{ background: 'linear-gradient(145deg, var(--color-azul), var(--color-violeta-2))' }}>
           <Icono nombre="spark" size={18} />
         </div>
-        <span>Reto</span>
+        <span>Reto Diario</span>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">

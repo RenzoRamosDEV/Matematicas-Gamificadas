@@ -1,4 +1,4 @@
-# Reto de cálculo 🧮
+# Reto Diario 🧮
 
 Juego diario de aritmética para un niño de 10 años. Cuatro fases (sumas, restas, multiplicaciones, divisiones), timer por bloque, puntos y racha. Sitio 100 % estático en GitHub Pages + Supabase (Postgres, Auth y RPC). Login sencillo con usuario y contraseña (o link de acceso directo).
 

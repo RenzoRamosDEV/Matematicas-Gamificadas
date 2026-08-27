@@ -1,4 +1,4 @@
-# Reto — Matemáticas gamificadas
+# Reto Diario — Matemáticas gamificadas
 
 > Juego web gratuito de cálculo mental diario para niños de 8 a 12 años. Cada día, un reto de cuatro fases (sumas, restas, multiplicaciones y divisiones) con cronómetro por fase, puntos, racha con comodín, insignias, calendario de progreso y apuntes. Sin anuncios, sin compras, sin recopilación de datos de terceros. Interfaz en español, diseño tipo "liquid glass", modo claro y oscuro.
 
@@ -21,7 +21,7 @@ Código fuente (MIT): https://github.com/RenzoRamosDEV/Matematicas-Gamificadas
 
 ## Páginas
 
-- Inicio: https://renzoramosdev.github.io/Matematicas-Gamificadas/ — login y panel del jugador.
+- Inicio: https://renzoramosdev.github.io/Matematicas-Gamificadas/ — login y panel del jugador de Reto Diario.
 - Reto del día: https://renzoramosdev.github.io/Matematicas-Gamificadas/#reto
 - Insignias: https://renzoramosdev.github.io/Matematicas-Gamificadas/#logros
 - Progreso y calendario: https://renzoramosdev.github.io/Matematicas-Gamificadas/#progreso
