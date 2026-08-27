@@ -19,7 +19,8 @@ export function Pin({ onDesbloquear, onVolver }: Props) {
   const comprobar = async () => {
     if (pin.length !== PIN_LONGITUD || comprobando) return;
     setComprobando(true);
-    const ok = await pinCorrecto(pin);
+    let ok = false;
+    try { ok = await pinCorrecto(pin); } catch { ok = false; }
     setComprobando(false);
     if (ok) onDesbloquear();
     else { setError(true); setPin(''); }
