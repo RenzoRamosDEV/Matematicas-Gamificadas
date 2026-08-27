@@ -1,6 +1,6 @@
 # Reto Diario 🧮
 
-Juego diario de aritmética para un niño de 10 años. Cuatro fases (sumas, restas, multiplicaciones, divisiones), timer por bloque, puntos y racha. Sitio 100 % estático en GitHub Pages + Supabase (Postgres, Auth y RPC). Login sencillo con usuario y contraseña (o link de acceso directo).
+Juego diario de aritmética para niños de primaria (8 a 12 años). Cuatro fases (sumas, restas, multiplicaciones, divisiones), timer por bloque, puntos y racha. Sitio 100 % estático en GitHub Pages + Supabase (Postgres, Auth y RPC). Login sencillo con usuario y contraseña (o link de acceso directo).
 
 **Objetivo de producto: que vuelva mañana.** Fallar no resta, el tiempo es por fase (no por ejercicio), y hay un comodín de racha al mes.
 
@@ -45,13 +45,13 @@ scripts/token.mjs                   ← genera una contraseña aleatoria + link 
 1. Crea un **proyecto nuevo** (separado de tus otras apps: la config de Auth es global por proyecto).
 2. SQL Editor → pega y ejecuta `supabase/migrations/0001_init.sql`.
 3. Authentication → Providers → Email: desactiva **"Allow new users to sign up"**. Deja "Confirm email" desactivado o marca "Auto Confirm" al crear usuarios.
-4. Crea el jugador en Authentication → Users → **Add user**: email `<usuario>@renzoramosdev.github.io` (p. ej. `abel@renzoramosdev.github.io`) y la contraseña que tú elijas (marca *Auto Confirm User*). El niño entra con **usuario** (`abel`) y esa **contraseña**.
-   Si prefieres una contraseña aleatoria y un link de acceso directo: `node scripts/token.mjs abel https://renzoramosdev.github.io/Matematicas-Gamificadas/`.
+4. Crea el jugador en Authentication → Users → **Add user**: email `<usuario>@renzoramosdev.github.io` (p. ej. `jugador@renzoramosdev.github.io`) y la contraseña que tú elijas (marca *Auto Confirm User*). Quien juegue entra con ese **usuario** (`jugador`) y esa **contraseña**. No hay registro público: las cuentas las crea quien administra el juego.
+   Si prefieres una contraseña aleatoria y un link de acceso directo: `node scripts/token.mjs <usuario> https://renzoramosdev.github.io/Matematicas-Gamificadas/`.
    El dominio del email es el de GitHub Pages porque Supabase Auth rechaza dominios reservados (`.local`, `.test`, `example.com`); se cambia en `CONFIG.AUTH_EMAIL_DOMAIN`.
-   El perfil en `profiles` se crea solo (trigger `on_auth_user_created`) con `nombre = abel`.
+   El perfil en `profiles` se crea solo (trigger `on_auth_user_created`) con `nombre = <usuario>`.
 5. Project Settings → API: copia **Project URL** y **anon public key**.
 
-Más jugadores: repite el paso 4 con otro nombre (`primo`). Cada uno tiene su fila en `profiles`, sus puntos y su racha. Para revocar el acceso, cambia la contraseña del usuario en el dashboard.
+Más jugadores (opcional): repite el paso 4 con otro nombre. Cada uno tiene su fila en `profiles`, sus puntos y su racha. Para revocar el acceso, cambia la contraseña del usuario en el dashboard.
 
 ### 2. GitHub
 
@@ -64,7 +64,7 @@ Más jugadores: repite el paso 4 con otro nombre (`primo`). Cada uno tiene su fi
 ### 3. Entrar
 
 Abre `https://renzoramosdev.github.io/Matematicas-Gamificadas/`, escribe usuario y contraseña y aterrizas en el menú. La sesión queda en `localStorage`, así que las siguientes veces entra directo; el botón **Salir** de la cabecera la cierra.
-Acceso directo opcional: `…/?u=abel&t=<contraseña>` entra sin teclear nada y limpia la URL.
+Acceso directo opcional: `…/?u=<usuario>&t=<contraseña>` entra sin teclear nada y limpia la URL.
 
 ## Desarrollo local
 

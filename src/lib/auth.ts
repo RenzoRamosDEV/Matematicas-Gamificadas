@@ -18,7 +18,7 @@ export async function salir() {
 }
 
 /**
- * Acceso directo opcional por link: https://.../juego/?u=abel&t=<contraseña>
+ * Acceso directo opcional por link: https://.../juego/?u=<usuario>&t=<contraseña>
  * Tras entrar, se limpia la URL para que la contraseña no acabe en el historial.
  * Devuelve un mensaje de error si el link no vale; null si todo fue bien o no había token.
  */
@@ -27,8 +27,10 @@ export async function entrarConToken(): Promise<string | null> {
   const token = params.get('t');
   if (!token) return null;
 
-  const usuario = params.get('u') ?? CONFIG.USUARIO_POR_DEFECTO;
-  const { error } = await supabase.auth.signInWithPassword({ email: emailDe(usuario), password: token });
+  const usuario = params.get('u');
+  const { error } = usuario
+    ? await supabase.auth.signInWithPassword({ email: emailDe(usuario), password: token })
+    : { error: new Error('link sin usuario') };
 
   history.replaceState(null, '', location.pathname + location.hash);
   return error ? 'Ese link no funciona. Entra con tu usuario y contraseña.' : null;
