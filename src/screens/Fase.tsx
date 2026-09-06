@@ -158,19 +158,23 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
           </div>
 
           <div key={actual.id} className="flex-1 flex flex-col items-center justify-center py-2 pop">
+            {op === 'div' ? (
+              <CajaDivision a={actual.a} b={actual.b} buffer={buffer} />
+            ) : (
             <div className="flex flex-col items-end gap-1.5 sm:gap-2 font-mono tabular-nums">
-              <div className="flex">{digitosA.map((d, i) => <Celda key={i}>{d}</Celda>)}</div>
-              <div className="flex">
+              <div className="flex gap-1 sm:gap-1.5">{digitosA.map((d, i) => <Celda key={i} className="caja caja-rosa">{d}</Celda>)}</div>
+              <div className="flex gap-1 sm:gap-1.5">
                 <Celda className="text-tinta-2">{info.simbolo}</Celda>
-                {digitosB.map((d, i) => <Celda key={i}>{d}</Celda>)}
+                {digitosB.map((d, i) => <Celda key={i} className="caja caja-amarillo">{d}</Celda>)}
               </div>
               <div className="h-[3px] w-full rounded-full bg-tinta/70 my-1" />
               <div className="flex gap-1 sm:gap-1.5" aria-live="polite" aria-label={buffer ? `Respuesta ${buffer}` : 'Sin respuesta'}>
                 {rtl && <Cursor />}
-                {digitosR.map((d, i) => <Celda key={i} respuesta>{d}</Celda>)}
+                {digitosR.map((d, i) => <Celda key={i} className="caja caja-azul pop">{d}</Celda>)}
                 {!rtl && <Cursor />}
               </div>
             </div>
+            )}
             <p className="mt-4 text-[12.5px] text-tinta-3">
               {rtl ? 'Escribe empezando por las unidades, como en el papel.' : 'Escribe el cociente de izquierda a derecha.'}
             </p>
@@ -198,8 +202,42 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
   );
 }
 
-function Celda({ children, respuesta, className = '' }: { children: React.ReactNode; respuesta?: boolean; className?: string }) {
-  return <span className={`celda ${respuesta ? 'celda-respuesta' : ''} ${className}`}>{children}</span>;
+function Celda({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return <span className={`celda ${className}`}>{children}</span>;
+}
+
+/* La caja de toda la vida: dividendo, resta y resto a la izquierda; divisor y cociente tras la galera. */
+function CajaDivision({ a, b, buffer }: { a: number; b: number; buffer: string }) {
+  const digitosA = String(a).split('');
+  const digitosB = String(b).split('');
+  const digitosR = buffer.split('');
+  const huecosResta = String(b * 9).length; // lo más largo que se resta: divisor × 9
+  const huecosResto = digitosB.length;      // el resto siempre es menor que el divisor
+
+  return (
+    <div className="pizarra-div max-w-full overflow-x-auto flex items-stretch font-mono tabular-nums px-1" aria-label={`${a} dividido entre ${b}`}>
+      <div className="grid grid-cols-[auto_auto] gap-x-1.5 sm:gap-x-2 gap-y-1.5 sm:gap-y-2 items-center self-start">
+        <span />
+        <div className="flex gap-1 sm:gap-1.5">{digitosA.map((d, i) => <span key={i} className="celda caja caja-rosa">{d}</span>)}</div>
+        <span className="justify-self-end text-tinta-2 font-bold text-[25px] sm:text-[38px] lg:text-[44px] leading-none">−</span>
+        <div className="flex gap-1 sm:gap-1.5">{Array.from({ length: huecosResta }, (_, i) => <span key={i} className="celda caja caja-verde" />)}</div>
+        <div className="col-span-2 h-[3px] rounded-full bg-tinta/70" />
+        <span />
+        <div className="flex gap-1 sm:gap-1.5">{Array.from({ length: huecosResto }, (_, i) => <span key={i} className="celda caja" />)}</div>
+      </div>
+
+      <div className="w-[3px] rounded-full bg-tinta/70 mx-2 sm:mx-3 shrink-0" />
+
+      <div className="flex flex-col gap-1.5 sm:gap-2 items-start self-start">
+        <div className="flex gap-1 sm:gap-1.5">{digitosB.map((d, i) => <span key={i} className="celda caja caja-amarillo">{d}</span>)}</div>
+        <div className="h-[3px] w-full min-w-[90px] sm:min-w-[130px] rounded-full bg-tinta/70" />
+        <div className="flex gap-1 sm:gap-1.5" aria-live="polite" aria-label={buffer ? `Cociente ${buffer}` : 'Sin cociente'}>
+          {digitosR.map((d, i) => <span key={i} className="celda caja caja-azul pop">{d}</span>)}
+          <Cursor />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function Cursor() {

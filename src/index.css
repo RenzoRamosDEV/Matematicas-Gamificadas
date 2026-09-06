@@ -153,12 +153,23 @@ body {
 
   /* ---- Pizarra: una celda por columna de la cuenta ----------------------- */
   .celda { display: inline-grid; place-items: center; width: 44px; height: 56px; font-size: 34px; font-weight: 700; line-height: 1; color: var(--color-tinta); }
-  .celda-respuesta { background: var(--vidrio-fuerte); border: 1px solid var(--color-linea); border-radius: 14px; corner-shape: superellipse(1.5);
-    box-shadow: 0 1px 0 var(--vidrio-brillo-inset) inset, 0 6px 16px -10px rgba(30,40,80,.3); animation: pop .2s var(--ease-fluida) both; }
   .celda-cursor { border: 2px dashed color-mix(in oklch, var(--color-azul-2) 55%, transparent); border-radius: 14px; corner-shape: superellipse(1.5); }
   .celda-cursor > i { display: block; width: 3px; height: 55%; border-radius: 2px; background: var(--color-azul-2); animation: parpadeo 1.1s steps(2, start) infinite; }
   @media (min-width: 640px) { .celda { width: 56px; height: 68px; font-size: 44px; } }
   @media (min-width: 1024px) { .celda { width: 64px; height: 76px; font-size: 50px; } }
+
+  /* ---- Caja de división: dividendo | divisor y cociente bajo la galera ---- */
+  .caja { background: var(--vidrio-fuerte); border: 2px solid var(--pista-borde); border-radius: 14px; corner-shape: superellipse(1.5);
+    box-shadow: 0 1px 0 var(--vidrio-brillo-inset) inset, 0 6px 16px -10px rgba(30,40,80,.2); }
+  .caja-rosa     { border-color: color-mix(in oklch, var(--color-rosa) 70%, transparent); }
+  .caja-verde    { border-color: color-mix(in oklch, var(--color-verde) 70%, transparent); }
+  .caja-amarillo { border-color: color-mix(in oklch, var(--color-amarillo) 85%, transparent); }
+  .caja-azul     { border-color: color-mix(in oklch, var(--color-azul) 70%, transparent); }
+  /* La caja completa es más ancha que una cuenta en columna: celdas algo más pequeñas */
+  .pizarra-div { --cw: 34px; --ch: 46px; --cfs: 25px; }
+  .pizarra-div .celda { width: var(--cw); height: var(--ch); font-size: var(--cfs); }
+  @media (min-width: 640px) { .pizarra-div { --cw: 50px; --ch: 62px; --cfs: 38px; } }
+  @media (min-width: 1024px) { .pizarra-div { --cw: 58px; --ch: 70px; --cfs: 44px; } }
 
   /* ---- Tiles (icono sobre gradiente), chips ---------------------------- */
   .tile { position: relative; display: grid; place-items: center; color: #fff; border-radius: 18px; corner-shape: superellipse(1.5);
