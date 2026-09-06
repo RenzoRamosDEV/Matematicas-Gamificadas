@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { paleta, usePrefiereOscuro } from '../lib/paletaGraficas';
+import { usePaleta } from '../lib/paletaGraficas';
 
 function useAncho<T extends HTMLElement>() {
   const ref = useRef<T>(null);
@@ -27,7 +27,7 @@ interface PropsBarras {
 const fmt = (v: number | null, unidad: string) => (v === null ? '—' : `${Number.isInteger(v) ? v : v.toFixed(1).replace('.', ',')}${unidad}`);
 
 export function Barras({ datos, max, unidad = '', titulo, alto = 170 }: PropsBarras) {
-  const p = paleta(usePrefiereOscuro());
+  const p = usePaleta();
   const { ref, ancho: disponible } = useAncho<HTMLElement>();
   const n = Math.max(datos.length, 1);
   const maxChars = Math.max(1, ...datos.map((d) => (d.corto ?? d.etiqueta).length));
@@ -78,12 +78,60 @@ export function Barras({ datos, max, unidad = '', titulo, alto = 170 }: PropsBar
   );
 }
 
+export interface SerieLinea { nombre: string; color: string; valores: (number | null)[] }
+
+interface PropsLineas {
+  etiquetas: { larga: string; corta: string }[];
+  series: SerieLinea[];
+  unidad?: string;
+  titulo: string;
+  alto?: number;
+  max?: number;
+}
+
+/* Varias líneas sobre el mismo eje (una por operación). Cada punto lleva su tooltip. */
+export function Lineas({ etiquetas, series, unidad = '', titulo, alto = 190, max }: PropsLineas) {
+  const p = usePaleta();
+  const { ref, ancho: disponible } = useAncho<HTMLElement>();
+  const n = Math.max(etiquetas.length, 1);
+  const slot = Math.max(44, Math.floor((disponible || 600) / n)), ancho = n * slot, margen = { arriba: 14, abajo: 34 };
+  const valores = series.flatMap((s) => s.valores.filter((v): v is number => v !== null));
+  if (valores.length === 0) return <p className="text-sm text-tinta-3">Sin datos todavía.</p>;
+  const techo = max ?? Math.max(1, ...valores) * 1.15;
+  const hPlot = alto - margen.arriba - margen.abajo;
+  const x = (i: number) => i * slot + slot / 2;
+  const y = (v: number) => margen.arriba + hPlot - (Math.min(v, techo) / techo) * hPlot;
+  return (
+    <figure ref={ref} className="m-0 w-full overflow-x-auto">
+      <svg viewBox={`0 0 ${ancho} ${alto}`} width={ancho} height={alto} role="img" aria-label={titulo} style={{ display: 'block', fontFamily: 'inherit' }}>
+        <title>{titulo}</title>
+        {[0.25, 0.5, 0.75, 1].map((f) => <line key={f} x1={0} x2={ancho} y1={y(techo * f)} y2={y(techo * f)} stroke={p.rejilla} strokeWidth={1} />)}
+        <line x1={0} x2={ancho} y1={y(0)} y2={y(0)} stroke={p.eje} strokeWidth={1} />
+        {series.map((s) => {
+          const d = s.valores.map((v, i) => (v === null ? null : `${x(i)},${y(v)}`)).filter(Boolean).join(' L');
+          return (
+            <g key={s.nombre}>
+              {d && <path d={`M${d}`} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />}
+              {s.valores.map((v, i) => v !== null && (
+                <circle key={i} cx={x(i)} cy={y(v)} r={3.5} fill={s.color} stroke="var(--color-fondo)" strokeWidth={1.5}>
+                  <title>{`${s.nombre} · ${etiquetas[i].larga}: ${fmt(v, unidad)}`}</title>
+                </circle>
+              ))}
+            </g>
+          );
+        })}
+        {etiquetas.map((e, i) => <text key={e.corta + i} x={x(i)} y={alto - 12} textAnchor="middle" fontSize={11} fill={p.suave}>{e.corta}</text>)}
+      </svg>
+    </figure>
+  );
+}
+
 export interface PuntoLinea { etiqueta: string; corto?: string; valor: number | null; detalle?: string }
 
 interface PropsLinea { datos: PuntoLinea[]; unidad?: string; titulo: string; alto?: number }
 
 export function Linea({ datos, unidad = '', titulo, alto = 170 }: PropsLinea) {
-  const p = paleta(usePrefiereOscuro());
+  const p = usePaleta();
   const { ref, ancho: disponible } = useAncho<HTMLElement>();
   const puntos = datos.filter((d) => d.valor !== null) as (PuntoLinea & { valor: number })[];
   const n = Math.max(datos.length, 1);

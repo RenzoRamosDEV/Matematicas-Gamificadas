@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { claveDe, cuentasCompletadas, cuentasDelDia, etiquetaDe, porOperacion, porPeriodo, puntosDebiles, resumenGeneral, tiempos, type Datos } from './estadisticas';
+import { aciertosPorOperacionYPeriodo, claveDe, cuentasCompletadas, cuentasDelDia, etiquetaDe, porOperacion, porPeriodo, puntosDebiles, resumenGeneral, tiempos, type Datos } from './estadisticas';
 import type { EjercicioDB, Op } from '../types';
 
 let n = 0;
@@ -106,5 +106,14 @@ describe('tiempos y día a día', () => {
     expect(cs[0].segundos).toBe(4);
     expect(cs[4].segundos).toBeNull();
     expect(cuentasDelDia(datos, '2026-09-01')).toHaveLength(0);
+  });
+});
+
+describe('aciertosPorOperacionYPeriodo', () => {
+  it('una serie por operación, en orden temporal y con null donde no hay cuentas', () => {
+    const serie = aciertosPorOperacionYPeriodo(datos, 'semana');
+    expect(serie.map((x) => x.clave)).toEqual(['2026-08-24', '2026-08-31']);
+    expect(serie[0].porOp).toEqual({ suma: 50, resta: 100, mult: 100, div: 0 });
+    expect(serie[1].porOp).toEqual({ suma: 0, resta: null, mult: null, div: 0 });
   });
 });

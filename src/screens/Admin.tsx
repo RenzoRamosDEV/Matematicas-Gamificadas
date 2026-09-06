@@ -5,14 +5,15 @@ import { cargarTodasLasCuentas, reintentar } from '../lib/api';
 import { mesDe, mesVecino, nombreDia, type Mes } from '../lib/calendario';
 import { hoyMadrid } from '../lib/semana';
 import { esCorrecta } from '../lib/correccion';
+import { ausencias } from '../lib/asistencia';
 import {
-  cuentasDelDia, porOperacion, porPeriodo, puntosDebiles, resumenGeneral, tiempos, type Datos, type Granularidad, type Grupo,
+  aciertosPorOperacionYPeriodo, cuentasDelDia, porOperacion, porPeriodo, puntosDebiles, resumenGeneral, tiempos, type Datos, type Granularidad, type Grupo,
 } from '../lib/estadisticas';
-import { paleta, usePrefiereOscuro } from '../lib/paletaGraficas';
+import { usePaleta } from '../lib/paletaGraficas';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
 import { Calendario } from '../components/Calendario';
-import { Barras, Linea } from '../components/Grafica';
+import { Barras, Linea, Lineas } from '../components/Grafica';
 import { Icono, type NombreIcono } from '../components/Icono';
 import type { Destino } from '../components/MenuPerfil';
 
@@ -32,8 +33,7 @@ const num = (v: number | null, unidad = '') => (v === null ? '—' : `${Number.i
 
 export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: Props) {
   const hoy = hoyMadrid();
-  const oscuro = usePrefiereOscuro();
-  const p = paleta(oscuro);
+  const p = usePaleta();
   const [cuentas, setCuentas] = useState<EjercicioDB[] | null>(null);
   const [granularidad, setGranularidad] = useState<Granularidad>('semana');
   const [mes, setMes] = useState<Mes>(mesDe(hoy));
@@ -50,6 +50,9 @@ export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: 
   const debiles = useMemo(() => puntosDebiles(datos), [datos]);
   const t = useMemo(() => tiempos(datos), [datos]);
   const delDia = useMemo(() => cuentasDelDia(datos, dia), [datos, dia]);
+  const faltas = useMemo(() => ausencias(sesiones, hoy), [sesiones, hoy]);
+  const periodosAsc = useMemo(() => [...periodos].reverse().slice(-14), [periodos]);
+  const serieOps = useMemo(() => aciertosPorOperacionYPeriodo(datos, granularidad).slice(-14), [datos, granularidad]);
   const porFecha = useMemo(() => new Map(sesiones.filter((s) => s.estado === 'completada').map((s) => [s.fecha, s])), [sesiones]);
 
   const cargando = cuentas === null;
@@ -82,13 +85,15 @@ export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: 
 
       {!cargando && !vacio && (
         <>
-          <section className="mt-6 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 in d2">
+          <section className="mt-6 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 in d2">
             <Tarjeta icono="target" acento="azul" valor={String(resumen.retos)} label="Retos completados" />
             <Tarjeta icono="check" acento="verde" valor={num(resumen.porcentaje, ' %')} label={`Aciertos (${resumen.aciertos} de ${resumen.cuentas})`} />
             <Tarjeta icono="x" acento="rojo" valor={String(resumen.fallos)} label="Fallos en total" />
             <Tarjeta icono="medal" acento="amarillo" valor={num(resumen.promedioPorReto)} label="Aciertos por reto (de 20)" />
             <Tarjeta icono="clock" acento="violeta" valor={num(resumen.tiempoMedio, ' s')} label="Tiempo medio por cuenta" />
             <Tarjeta icono="flame" acento="rosa" valor={`${perfil.racha_max} ${perfil.racha_max === 1 ? 'día' : 'días'}`} label={`Mejor racha · ${resumen.puntos.toLocaleString('es-ES')} pts`} />
+            <Tarjeta icono="calendar" acento="gris" valor={`${faltas.dias} ${faltas.dias === 1 ? 'día' : 'días'}`} label="Sin entrar desde el primer reto" />
+            <Tarjeta icono="alert" acento={faltas.peorTanda > 0 ? 'rojo' : 'gris'} valor={`${faltas.peorTanda} ${faltas.peorTanda === 1 ? 'día' : 'días'}`} label="Mayor tanda sin entrar" />
           </section>
 
           <Seccion titulo="Por periodo" delay="d3" derecha={
@@ -101,8 +106,22 @@ export function Admin({ perfil, sesiones, onIr, onBloquear, onSalir, onAviso }: 
               ))}
             </div>
           }>
-            <Barras titulo={`Porcentaje de aciertos por ${granularidad}`} unidad=" %" max={100}
-              datos={[...periodos].reverse().slice(-14).map((x) => ({ etiqueta: x.etiqueta, corto: cortoPeriodo(x.clave, granularidad), valor: x.porcentaje, detalle: `${x.aciertos} de ${x.cuentas} · ${x.retos} ${x.retos === 1 ? 'reto' : 'retos'}` }))} />
+            <div className="grid md:grid-cols-2 gap-5">
+              <Panel titulo="Porcentaje de aciertos">
+                <Barras titulo={`Porcentaje de aciertos por ${granularidad}`} unidad=" %" max={100}
+                  datos={periodosAsc.map((x) => ({ etiqueta: x.etiqueta, corto: cortoPeriodo(x.clave, granularidad), valor: x.porcentaje, detalle: `${x.aciertos} de ${x.cuentas} · ${x.retos} ${x.retos === 1 ? 'reto' : 'retos'}` }))} />
+              </Panel>
+              <Panel titulo="Constancia: retos completados">
+                <Barras titulo={`Retos completados por ${granularidad}`}
+                  datos={periodosAsc.map((x) => ({ etiqueta: x.etiqueta, corto: cortoPeriodo(x.clave, granularidad), valor: x.retos, detalle: `${x.puntos} puntos` }))} />
+              </Panel>
+            </div>
+            <Panel titulo="Cómo va cada operación">
+              <Lineas titulo={`Porcentaje de aciertos por operación y ${granularidad}`} unidad=" %" max={100}
+                etiquetas={serieOps.map((x) => ({ larga: x.etiqueta, corta: cortoPeriodo(x.clave, granularidad) }))}
+                series={ORDEN_FASES.map((op) => ({ nombre: FASE_INFO[op].nombre, color: colorOp(op), valores: serieOps.map((x) => x.porOp[op]) }))} />
+              <Leyenda items={ORDEN_FASES.map((op) => ({ texto: FASE_INFO[op].nombre, color: colorOp(op) }))} />
+            </Panel>
             <div className="overflow-x-auto">
               <table className="w-full text-sm mt-2">
                 <thead><tr className="text-left text-tinta-3 text-[12px] uppercase tracking-wide">
@@ -238,9 +257,10 @@ function Seccion({ titulo, delay, derecha, children }: { titulo: string; delay: 
   );
 }
 
+/* min-w-0: si no, el panel crece con el SVG de la gráfica y se sale de la tarjeta en móvil */
 function Panel({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 min-w-0">
       <h3 className="text-[15px] font-semibold text-tinta-2">{titulo}</h3>
       {children}
     </div>

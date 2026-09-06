@@ -103,6 +103,24 @@ export function porOperacion(d: Datos): (Grupo & { op: Op })[] {
   return ORDEN_FASES.map((op) => ({ op, ...grupoDe(op, cs.filter((c) => c.op === op)) }));
 }
 
+// Evolución del acierto de cada operación a lo largo del tiempo (para la gráfica de líneas del admin).
+export interface PuntoOperacion { clave: string; etiqueta: string; porOp: Record<Op, number | null>; cuentas: number }
+
+export function aciertosPorOperacionYPeriodo(d: Datos, g: Granularidad): PuntoOperacion[] {
+  const cs = cuentasCompletadas(d);
+  const grupos = new Map<string, CuentaConFecha[]>();
+  for (const c of cs) { const k = claveDe(c.fecha, g); grupos.set(k, [...(grupos.get(k) ?? []), c]); }
+  return [...grupos.entries()]
+    .sort(([a], [b]) => (a < b ? -1 : 1))
+    .map(([clave, xs]) => ({
+      clave, etiqueta: etiquetaDe(clave, g), cuentas: xs.length,
+      porOp: Object.fromEntries(ORDEN_FASES.map((op) => {
+        const de = xs.filter((c) => c.op === op);
+        return [op, pct(de.filter(esCorrecta).length, de.length)];
+      })) as Record<Op, number | null>,
+    }));
+}
+
 export interface CuentaFallada { op: Op; a: number; b: number; sol: number; fallos: number; intentos: number; respuestas: (number | null)[] }
 
 export interface PuntosDebiles {
