@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CONFIG, ORDEN_FASES } from './config';
 import type { EjercicioDB, Op, Profile, ResultadoFinal, Session } from './types';
 import { entrar, entrarConToken, haySesion, salir } from './lib/auth';
-import { cargarPerfil, cargarSesiones, finalizarSesion, guardarRespuesta, iniciarSesion, insertarEjercicios, reintentar } from './lib/api';
+import { canjearRecompensa, cargarCanjes, cargarPerfil, cargarSesiones, finalizarSesion, guardarRespuesta, iniciarSesion, insertarEjercicios, reintentar } from './lib/api';
+import type { Canje } from './lib/recompensas';
 import { genSesion } from './lib/generador';
 import { borrarProgreso, guardarProgreso, leerProgreso, PROGRESO_INICIAL, type Progreso } from './lib/progreso';
 import { supabaseConfigurado } from './lib/supabase';
@@ -40,6 +41,7 @@ export default function App() {
   const [perfil, setPerfil] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [sesiones, setSesiones] = useState<Session[]>([]);
+  const [canjes, setCanjes] = useState<Canje[]>([]);
   const [ejercicios, setEjercicios] = useState<EjercicioDB[]>([]);
   const [progreso, setProgreso] = useState<Progreso>(PROGRESO_INICIAL);
   const [resultado, setResultado] = useState<ResultadoFinal | null>(null);
@@ -86,8 +88,11 @@ export default function App() {
       if (errToken) { setMensaje(errToken); setEstado('sin_acceso'); return; }
       if (!(await haySesion())) { setEstado('sin_acceso'); return; }
 
-      const [p, { session: s, ejercicios: ej }, hist] = await Promise.all([cargarPerfil(), iniciarSesion(), cargarHistorial([])]);
-      setPerfil(p); setSession(s); setEjercicios(ej); setSesiones(hist);
+      const [p, { session: s, ejercicios: ej }, hist, cj] = await Promise.all([
+        cargarPerfil(), iniciarSesion(), cargarHistorial([]),
+        reintentar(cargarCanjes).catch((e: Error) => { setAviso(`Canjes no disponibles: ${e.message}`); return [] as Canje[]; }),
+      ]);
+      setPerfil(p); setSession(s); setEjercicios(ej); setSesiones(hist); setCanjes(cj);
       if (esTema(p.tema)) aplicarTema(p.tema); // el tema de la cuenta manda sobre el del dispositivo
 
       if (s.estado === 'completada') {
@@ -121,7 +126,7 @@ export default function App() {
 
   const onSalir = async () => {
     await salir();
-    setPerfil(null); setSession(null); setSesiones([]); setEjercicios([]); setResultado(null); setYaJugado(false);
+    setPerfil(null); setSession(null); setSesiones([]); setEjercicios([]); setResultado(null); setYaJugado(false); setCanjes([]);
     bloquearAdmin(); setAdminOk(false);
     setProgreso(PROGRESO_INICIAL); setVista('inicio'); cerrarLogros(); setMensaje(null); setEstado('sin_acceso');
   };
@@ -129,6 +134,17 @@ export default function App() {
   const actualizarProgreso = (p: Progreso) => {
     setProgreso(p);
     if (session) guardarProgreso(session.id, p);
+  };
+
+  const canjear = async (recompensa: string): Promise<Canje | null> => {
+    try {
+      const c = await canjearRecompensa(recompensa);
+      setCanjes((xs) => [...xs, c]);
+      return c;
+    } catch (e) {
+      setAviso(`No se pudo canjear: ${(e as Error).message}`);
+      return null;
+    }
   };
 
   const irAlReto = () => {
@@ -211,7 +227,7 @@ export default function App() {
     contenido = (
       <Inicio
         perfil={perfil} sesiones={sesiones} estadoReto={estadoReto} fasesHechas={progreso.hechas}
-        puntosHoy={resultado?.puntos ?? session.puntos}
+        puntosHoy={resultado?.puntos ?? session.puntos} canjes={canjes} onCanjear={canjear}
         onEmpezar={irAlReto} onVerResultado={() => setVista('reto')} onVerLogros={abrirLogros} onVerProgreso={() => setVista('progreso')} cargando={ocupado} onSalir={onSalir} onIr={setVista}
       />
     );

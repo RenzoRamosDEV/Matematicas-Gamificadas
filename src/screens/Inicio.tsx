@@ -1,9 +1,11 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { CONFIG, FASE_INFO, ORDEN_FASES, type Acento } from '../config';
 import type { Op, Profile, Session } from '../types';
 import { evaluarLogros } from '../lib/logros';
 import { hoyMadrid, puntosSemana, semanaActual } from '../lib/semana';
 import { comodinesDisponibles, estadoRacha } from '../lib/comodin';
+import { estadoRecompensa, RECOMPENSAS, type Canje, type Recompensa } from '../lib/recompensas';
+import { Barra } from '../components/Barra';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
 import type { Destino } from '../components/MenuPerfil';
@@ -18,6 +20,8 @@ interface Props {
   fasesHechas: Op[];
   estadoReto: EstadoReto;
   puntosHoy: number;
+  canjes: Canje[];
+  onCanjear: (recompensa: string) => Promise<Canje | null>;
   onEmpezar: () => void;
   onVerResultado: () => void;
   onVerLogros: () => void;
@@ -27,7 +31,7 @@ interface Props {
   onIr: (destino: Destino) => void;
 }
 
-export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, onEmpezar, onVerResultado, onVerLogros, onVerProgreso, cargando, onSalir, onIr }: Props) {
+export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, canjes, onCanjear, onEmpezar, onVerResultado, onVerLogros, onVerProgreso, cargando, onSalir, onIr }: Props) {
   const nombre = perfil.nombre.charAt(0).toUpperCase() + perfil.nombre.slice(1);
   const completado = estadoReto === 'completado';
 
@@ -47,6 +51,19 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
   const minRestantes = Math.round(fases.filter((f) => !f.hecha).reduce((n, f) => n + CONFIG.TIEMPOS[f.op], 0) / 60);
 
   const accionReto = completado ? onVerResultado : onEmpezar;
+
+  // Canje en dos toques: primero confirma, luego va al servidor; al volver, opción de avisar por correo.
+  const [confirmando, setConfirmando] = useState<string | null>(null);
+  const [canjeando, setCanjeando] = useState<string | null>(null);
+  const [avisar, setAvisar] = useState<string | null>(null); // recompensa recién canjeada
+  const pedirCanje = async (r: Recompensa) => {
+    if (confirmando !== r.id) { setConfirmando(r.id); return; }
+    setConfirmando(null);
+    setCanjeando(r.id);
+    const c = await onCanjear(r.id);
+    setCanjeando(null);
+    if (c) setAvisar(r.id);
+  };
 
   return (
     <div className="min-h-dvh max-w-[1200px] mx-auto px-4 sm:px-12 pb-12">
@@ -166,6 +183,54 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
             )}
           </div>
         </Tarjeta>
+      </section>
+
+      <div className="flex items-baseline justify-between mt-10 sm:mt-14 mb-4 px-1 in d7">
+        <h2 className="text-[22px] sm:text-[26px] font-bold tracking-tight">Recompensas</h2>
+        <span className="text-[12.5px] text-tinta-3 font-medium tabular-nums">Llevas {perfil.puntos_total.toLocaleString('es-ES')} puntos</span>
+      </div>
+      <section className="grid md:grid-cols-2 gap-3.5 sm:gap-5">
+        {RECOMPENSAS.map((r) => {
+          const e = estadoRecompensa(perfil.puntos_total, r.cada, canjes.filter((c) => c.recompensa === r.id));
+          return (
+            <article key={r.id} className={`glass ${e.disponible ? `luz-${r.acento}` : ''} rounded-[30px] p-5 sm:p-6 flex flex-col gap-3.5 in d8`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className={`tile tile-${r.acento} w-[52px] h-[52px] sm:w-[58px] sm:h-[58px]`}><Icono nombre={r.icono} size={26} /></div>
+                {e.canjeadas > 0 && (
+                  <span className="chip chip-verde"><Icono nombre="check" size={13} />{e.canjeadas === 1 ? 'Canjeada 1 vez' : `Canjeada ${e.canjeadas} veces`}</span>
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-[18px] sm:text-[19px] font-bold tracking-tight">{r.nombre}</h3>
+                <p className="text-[14.5px] text-tinta-2 leading-snug mt-1">{r.detalle}</p>
+              </div>
+              {avisar === r.id ? (
+                <div className="flex flex-col gap-2.5">
+                  <span className="chip chip-verde self-start"><Icono nombre="check" size={13} />¡Canjeada! Ahora, a disfrutarla</span>
+                  {CONFIG.AVISO_EMAIL && (
+                    <span className="chip chip-verde self-start"><Icono nombre="spark" size={13} />Se ha enviado un correo de aviso a {CONFIG.AVISO_EMAIL}</span>
+                  )}
+                  <Boton variante="glass" onClick={() => setAvisar(null)}>Cerrar</Boton>
+                </div>
+              ) : e.disponible ? (
+                <div className="flex flex-col gap-2.5">
+                  <Barra valor={1} acento={r.acento} />
+                  <Boton icono="check" onClick={() => void pedirCanje(r)} disabled={canjeando !== null}>
+                    {canjeando === r.id ? 'Canjeando…' : confirmando === r.id ? '¿Seguro? El contador vuelve a empezar' : '¡Canjear!'}
+                  </Boton>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1.5">
+                  <Barra valor={e.progreso / r.cada} acento={r.acento} />
+                  <div className="flex justify-between gap-2 text-[12.5px] text-tinta-3 tabular-nums">
+                    <span><b className="text-tinta-2 font-semibold">{e.progreso.toLocaleString('es-ES')}</b> de {r.cada.toLocaleString('es-ES')}</span>
+                    <span>Te faltan {e.faltan.toLocaleString('es-ES')}</span>
+                  </div>
+                </div>
+              )}
+            </article>
+          );
+        })}
       </section>
     </div>
   );

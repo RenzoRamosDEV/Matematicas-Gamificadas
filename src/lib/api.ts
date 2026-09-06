@@ -1,4 +1,5 @@
 import type { Ejercicio, EjercicioDB, Nota, Op, Profile, ResultadoFinal, Session } from '../types';
+import type { Canje } from './recompensas';
 import { supabase } from './supabase';
 
 const fail = (ctx: string, e: { message: string } | null) => {
@@ -9,6 +10,18 @@ export async function cargarPerfil(): Promise<Profile> {
   const { data, error } = await supabase.from('profiles').select('*').single();
   fail('perfil', error);
   return data as Profile;
+}
+
+export async function cargarCanjes(): Promise<Canje[]> {
+  const { data, error } = await supabase.from('canjes').select('id, recompensa, puntos, created_at').order('created_at');
+  fail('canjes', error);
+  return (data ?? []) as Canje[];
+}
+
+export async function canjearRecompensa(recompensa: string): Promise<Canje> {
+  const { data, error } = await supabase.rpc('canjear_recompensa', { p_recompensa: recompensa });
+  fail('canjear', error);
+  return data as Canje;
 }
 
 export async function guardarTema(id: string, tema: string) {

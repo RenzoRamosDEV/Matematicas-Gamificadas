@@ -7,6 +7,8 @@ export const CONFIG = {
   BONUS_VELOCIDAD_MEDIA: 10,
   BONUS_SESION_PERFECTA: 100,
   AUTH_EMAIL_DOMAIN: 'renzoramosdev.github.io',
+  // A quién avisa el botón "Avisar por correo" al canjear una recompensa (vacío = sin botón).
+  AVISO_EMAIL: (import.meta.env.VITE_AVISO_EMAIL as string | undefined) ?? '',
   ADMIN_PIN_SHA256: 'b28209f6ae287fb789d774b764f6d05f2cab0b4641a377941f77996aa61ba9ea',
 } as const;
 
