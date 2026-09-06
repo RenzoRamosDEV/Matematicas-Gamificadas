@@ -50,10 +50,15 @@ export function semanasDelMes(mes: Mes): CeldaMes[][] {
   return semanas;
 }
 
-export type ColorDia = 'verde' | 'amarillo' | 'rojo' | 'gris' | null;
+export type ColorDia = 'verde' | 'amarillo' | 'rojo' | 'gris' | 'falta' | null;
 
-export function colorDelDia(sesion: Session | undefined, fecha: string, hoy: string): ColorDia {
-  if (!sesion) return fecha < hoy ? 'gris' : null;
+// `primera` es la fecha del primer reto completado: desde ahí, un día pasado sin
+// reto es una falta ("No entró"); antes de empezar solo es un día sin reto.
+export function colorDelDia(sesion: Session | undefined, fecha: string, hoy: string, primera: string | null = null): ColorDia {
+  if (!sesion) {
+    if (fecha >= hoy) return null;
+    return primera && fecha >= primera ? 'falta' : 'gris';
+  }
   const fases = sesion.detalle ?? [];
   const total = fases.reduce((n, f) => n + f.total, 0);
   const aciertos = fases.reduce((n, f) => n + f.aciertos, 0);

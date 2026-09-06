@@ -19,12 +19,14 @@ const BOLA: Record<Exclude<ColorDia, null>, string> = {
   amarillo: 'bg-amarillo-2 shadow-[0_0_8px_-1px_var(--color-amarillo-2)]',
   rojo: 'bg-rojo-2 shadow-[0_0_8px_-1px_var(--color-rojo-2)]',
   gris: 'bg-gris',
+  falta: 'border-[1.5px] border-rojo-2 bg-transparent', // hueco: ese día no entró
 };
-const TEXTO_BOLA: Record<Exclude<ColorDia, null>, string> = { verde: 'Todo bien', amarillo: 'Algún fallo', rojo: 'Todo mal', gris: 'Sin reto' };
+const TEXTO_BOLA: Record<Exclude<ColorDia, null>, string> = { verde: 'Todo bien', amarillo: 'Algún fallo', rojo: 'Todo mal', gris: 'Sin reto', falta: 'No entró' };
 
 export function Calendario({ mes, hoy, seleccion, sesiones, conNota, onSeleccionar, onCambiarMes }: Props) {
   const semanas = semanasDelMes(mes);
   const esMesActual = mes === hoy.slice(0, 7);
+  const primera = sesiones.size ? [...sesiones.keys()].sort()[0] : null;
   return (
     <div className="glass rounded-[30px] p-4 sm:p-6 flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -50,7 +52,7 @@ export function Calendario({ mes, hoy, seleccion, sesiones, conNota, onSeleccion
         ))}
         {semanas.flat().map((c) => {
           const s = sesiones.get(c.fecha);
-          const color = colorDelDia(s, c.fecha, hoy);
+          const color = colorDelDia(s, c.fecha, hoy, primera);
           const esHoy = c.fecha === hoy;
           const sel = c.fecha === seleccion;
           const futuro = c.fecha > hoy;
@@ -86,6 +88,7 @@ export function Calendario({ mes, hoy, seleccion, sesiones, conNota, onSeleccion
         <span className="inline-flex items-center gap-1.5"><i className={`w-2 h-2 rounded-full ${BOLA.verde}`} />Todo bien</span>
         <span className="inline-flex items-center gap-1.5"><i className={`w-2 h-2 rounded-full ${BOLA.amarillo}`} />Algún fallo</span>
         <span className="inline-flex items-center gap-1.5"><i className={`w-2 h-2 rounded-full ${BOLA.rojo}`} />Todo mal</span>
+        <span className="inline-flex items-center gap-1.5"><i className={`w-2 h-2 rounded-full ${BOLA.falta}`} />No entró</span>
         <span className="inline-flex items-center gap-1.5"><i className={`w-2 h-2 rounded-full ${BOLA.gris}`} />Sin reto</span>
         <span className="inline-flex items-center gap-1.5"><i className="w-3 h-3 rounded-full ring-2 ring-azul-2 ring-offset-1 ring-offset-fondo" />Hoy</span>
         <span className="inline-flex items-center gap-1.5"><Icono nombre="pencil" size={11} />Con apunte</span>

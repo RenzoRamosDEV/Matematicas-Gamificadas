@@ -16,4 +16,12 @@ describe('colorDelDia', () => {
     expect(colorDelDia(undefined, '2026-08-26', '2026-08-26')).toBe(null);   // hoy, aún sin reto
     expect(colorDelDia(undefined, '2026-09-01', '2026-08-26')).toBe(null);
   });
+  it('falta ("No entró") si el día pasó sin reto después del primer reto completado', () => {
+    const primera = '2026-08-18';
+    expect(colorDelDia(undefined, '2026-08-20', '2026-08-26', primera)).toBe('falta');
+    expect(colorDelDia(undefined, '2026-08-17', '2026-08-26', primera)).toBe('gris'); // antes de empezar no es falta
+    expect(colorDelDia(undefined, '2026-08-26', '2026-08-26', primera)).toBe(null);   // hoy no cuenta todavía
+    expect(colorDelDia(undefined, '2026-09-01', '2026-08-26', primera)).toBe(null);   // futuro
+    expect(colorDelDia(sesion([fase(5)]), '2026-08-20', '2026-08-26', primera)).toBe('verde'); // con reto, lo suyo
+  });
 });

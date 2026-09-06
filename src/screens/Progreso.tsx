@@ -6,6 +6,8 @@ import type { EjercicioDB } from '../types';
 import { Correccion } from '../components/Correccion';
 import { mesDe, mesVecino, nombreDia, type Mes } from '../lib/calendario';
 import { hoyMadrid } from '../lib/semana';
+import { estadoRacha } from '../lib/comodin';
+import { ausencias } from '../lib/asistencia';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
 import type { Destino } from '../components/MenuPerfil';
@@ -26,6 +28,8 @@ const fmtHora = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-d
 
 export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso, onIr }: Props) {
   const hoy = hoyMadrid();
+  const racha = estadoRacha(perfil, hoy);
+  const faltas = useMemo(() => ausencias(sesiones, hoy), [sesiones, hoy]);
   const [mes, setMes] = useState<Mes>(mesDe(hoy));
   const [seleccion, setSeleccion] = useState(hoy);
   const [notas, setNotas] = useState<Nota[]>([]);
@@ -94,11 +98,14 @@ export function Progreso({ perfil, sesiones, onVolver, onSalir, onAviso, onIr }:
         <p className="text-tinta-2 text-[17px] text-pretty">Tus retos día a día. Toca un día para ver cómo fue y dejar tus apuntes.</p>
       </section>
 
-      <section className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3 in d2">
+      <section className="mt-6 grid grid-cols-2 lg:grid-cols-3 gap-3 in d2">
         <Stat icono="star" acento="amarillo" valor={perfil.puntos_total.toLocaleString('es-ES')} label="Puntos en total" />
-        <Stat icono="flame" acento="rosa" valor={`${perfil.racha_actual} ${perfil.racha_actual === 1 ? 'día' : 'días'}`} label="Racha actual" />
+        <Stat icono="flame" acento={racha.estado === 'perdida' ? 'gris' : 'rosa'} valor={`${racha.racha} ${racha.racha === 1 ? 'día' : 'días'}`}
+          label={racha.estado === 'en_juego' ? 'Racha · en juego' : racha.estado === 'perdida' ? 'Racha · perdida' : 'Racha actual'} />
         <Stat icono="trophy" acento="violeta" valor={`${perfil.racha_max} ${perfil.racha_max === 1 ? 'día' : 'días'}`} label="Mejor racha" />
         <Stat icono="target" acento="azul" valor={String(completadas)} label={completadas === 1 ? 'Reto completado' : 'Retos completados'} />
+        <Stat icono="calendar" acento="gris" valor={`${faltas.dias} ${faltas.dias === 1 ? 'día' : 'días'}`} label="Sin entrar" />
+        <Stat icono="alert" acento={faltas.peorTanda > 0 ? 'rojo' : 'gris'} valor={`${faltas.peorTanda} ${faltas.peorTanda === 1 ? 'día' : 'días'}`} label="Mayor tanda sin entrar" />
       </section>
 
       <section className="mt-6 grid lg:grid-cols-[1.15fr_.85fr] gap-4 sm:gap-6 items-start">
