@@ -60,7 +60,8 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, o
           </span>
           <h1 className="text-[40px] sm:text-6xl font-bold leading-[1.02] tracking-[-.035em] text-balance in d2">
             ¡Hola, {nombre}!{' '}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-azul-2 via-violeta-2 to-rosa-2">¿Qué quieres descubrir</span> hoy?
+            {/* py: el degradado solo pinta dentro de la caja; sin él, las letras altas de los temas manuscritos salen cortadas */}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-azul-2 via-violeta-2 to-rosa-2 py-[0.25em]">¿Qué quieres descubrir</span> hoy?
           </h1>
           <p className="text-[17px] sm:text-[19px] text-tinta-2 leading-snug max-w-[46ch] text-pretty in d3">
             Aprende, organiza y descubre cosas nuevas mientras completas pequeños retos.
