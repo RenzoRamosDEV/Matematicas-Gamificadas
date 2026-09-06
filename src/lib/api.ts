@@ -11,6 +11,11 @@ export async function cargarPerfil(): Promise<Profile> {
   return data as Profile;
 }
 
+export async function guardarTema(id: string, tema: string) {
+  const { error } = await supabase.from('profiles').update({ tema }).eq('id', id);
+  fail('guardar tema', error);
+}
+
 export async function iniciarSesion(): Promise<{ session: Session; ejercicios: EjercicioDB[] }> {
   const { data: id, error } = await supabase.rpc('iniciar_sesion');
   fail('iniciar_sesion', error);

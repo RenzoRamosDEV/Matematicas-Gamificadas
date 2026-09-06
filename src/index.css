@@ -254,6 +254,183 @@ body {
 @keyframes parpadeo { to { visibility: hidden; } }
 @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(.4); } 50% { opacity: .9; transform: scale(1); } }
 
+/* ============================== Temas ==================================
+   El tema vive en <html data-tema="...">. Cristal (el base) no lleva atributo.
+   Cada tema redefine los tokens y retoca los componentes que le dan carácter.
+   Estas reglas van fuera de @layer a propósito: ganan a utilidades y componentes. */
+
+/* ---- Papel de cole: cuaderno cuadriculado, lápiz y ceras ---------------- */
+:root[data-tema="papel"] {
+  color-scheme: light;
+  --font-sans: "Patrick Hand", "Comic Sans MS", cursive;
+  --font-mono: "Patrick Hand", "Comic Sans MS", cursive;
+  --color-fondo: #f7f2e7; --color-fondo-2: #f2ecdd;
+  --color-tinta: #2f3640; --color-tinta-2: #5b6470; --color-tinta-3: #8a8f98;
+  --color-linea: rgba(47, 54, 64, 0.2);
+  --color-azul: #7fa3e0;    --color-azul-2: #5b8bd9;
+  --color-violeta: #b39ddb; --color-violeta-2: #9b7bd0;
+  --color-verde: #8cc39c;   --color-verde-2: #67a97b;
+  --color-amarillo: #ecc06a;--color-amarillo-2: #e5a93d;
+  --color-rosa: #ea93a7;    --color-rosa-2: #e2708a;
+  --color-rojo: #d96b5f;    --color-rojo-2: #c94f42;
+  --color-gris: #d8d2c2;
+  --vidrio: #fffdf6; --vidrio-fuerte: #fffdf6; --vidrio-opaco: #fffdf6; --menu-fondo: #fffdf6;
+  --vidrio-brillo: transparent; --vidrio-brillo-inset: transparent;
+  --vidrio-sombra: 3px 4px 0 rgba(47, 54, 64, 0.14);
+  --vidrio-sombra-hover: 4px 6px 0 rgba(47, 54, 64, 0.18);
+  --pista: rgba(47, 54, 64, 0.08); --pista-borde: rgba(47, 54, 64, 0.3);
+  --boton-texto: #fffdf6; --boton-sombra: 3px 4px 0 rgba(47, 54, 64, 0.3);
+  --escena-brillo: transparent;
+  --glow-a: transparent; --glow-b: transparent; --glow-c: transparent; --glow-d: transparent;
+  --luz-cursor: transparent; --grano-opacidad: 0;
+}
+:root[data-tema="papel"] .ambiente {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(91, 139, 217, 0.16) 23px 24px),
+    repeating-linear-gradient(90deg, transparent 0 23px, rgba(91, 139, 217, 0.16) 23px 24px),
+    var(--color-fondo);
+}
+:root[data-tema="papel"] h1, :root[data-tema="papel"] h2 { font-family: "Caveat", cursive; letter-spacing: 0; }
+:root[data-tema="papel"] .glass, :root[data-tema="papel"] .menu-flotante,
+:root[data-tema="papel"] .tecla, :root[data-tema="papel"] .campo { border: 2px solid var(--color-tinta); }
+:root[data-tema="papel"] .glass::before { display: none; }
+:root[data-tema="papel"] .tecla { box-shadow: 2px 3px 0 rgba(47, 54, 64, 0.2); }
+:root[data-tema="papel"] .btn { border: 2px solid var(--color-tinta); }
+:root[data-tema="papel"] .caja { border-width: 3px; background: #fffdf6; box-shadow: none; border-radius: 12px 14px 11px 13px; }
+:root[data-tema="papel"] .celda-cursor { border-radius: 12px 14px 11px 13px; }
+:root[data-tema="papel"] .tile { box-shadow: 2px 2px 0 rgba(47, 54, 64, 0.2); }
+:root[data-tema="papel"] .tile::after { display: none; }
+:root[data-tema="papel"] .guijarro {
+  background: #fffdf6; border: 3px solid var(--color-tinta);
+  box-shadow: 4px 5px 0 rgba(47, 54, 64, 0.15);
+}
+:root[data-tema="papel"] .guijarro::before, :root[data-tema="papel"] .guijarro::after {
+  content: ""; position: absolute; left: 8%; width: 84%; border-top: 2px dashed rgba(47, 54, 64, 0.2);
+}
+:root[data-tema="papel"] .guijarro::before { top: 22%; transform: rotate(-13deg); }
+:root[data-tema="papel"] .guijarro::after { top: 64%; transform: rotate(8deg); }
+:root[data-tema="papel"] .guijarro-brillo, :root[data-tema="papel"] .guijarro-nucleo,
+:root[data-tema="papel"] .destello { display: none; }
+:root[data-tema="papel"] .guijarro-sombra { background: radial-gradient(ellipse, rgba(47, 54, 64, 0.18), transparent 70%); }
+
+/* ---- Terminal retro: fósforo verde, scanlines y cursor ------------------ */
+:root[data-tema="terminal"] {
+  color-scheme: dark;
+  --font-sans: "VT323", "Courier New", monospace;
+  --font-mono: "VT323", "Courier New", monospace;
+  --color-fondo: #04070a; --color-fondo-2: #071009;
+  --color-tinta: #39ff6e; --color-tinta-2: #2ecc5f; --color-tinta-3: #1d9c4a;
+  --color-linea: rgba(57, 255, 110, 0.3);
+  --color-azul: #39ff6e;    --color-azul-2: #2ecc5f;
+  --color-violeta: #8dffab; --color-violeta-2: #39ff6e;
+  --color-verde: #39ff6e;   --color-verde-2: #2ecc5f;
+  --color-amarillo: #ffb347;--color-amarillo-2: #ff9d1f;
+  --color-rosa: #ffb347;    --color-rosa-2: #ff9d1f;
+  --color-rojo: #ff5f56;    --color-rojo-2: #e0443b;
+  --color-gris: #123a20;
+  --vidrio: rgba(57, 255, 110, 0.04); --vidrio-fuerte: rgba(57, 255, 110, 0.08);
+  --vidrio-opaco: #06110a; --menu-fondo: #06110a;
+  --vidrio-brillo: transparent; --vidrio-brillo-inset: transparent;
+  --vidrio-sombra: 0 0 14px rgba(57, 255, 110, 0.12);
+  --vidrio-sombra-hover: 0 0 22px rgba(57, 255, 110, 0.2);
+  --pista: rgba(57, 255, 110, 0.14); --pista-borde: rgba(57, 255, 110, 0.45);
+  --boton-texto: #04070a; --boton-sombra: 0 0 16px rgba(57, 255, 110, 0.4);
+  --escena-brillo: transparent;
+  --glow-a: transparent; --glow-b: transparent; --glow-c: transparent; --glow-d: transparent;
+  --luz-cursor: transparent;
+}
+:root[data-tema="terminal"] .ambiente { background: radial-gradient(120% 90% at 50% 30%, #0a1410 0%, #04070a 75%); }
+:root[data-tema="terminal"] .grano {
+  opacity: 1; mix-blend-mode: normal;
+  background-image: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.22) 2px 4px);
+}
+:root[data-tema="terminal"] body { letter-spacing: 0.02em; }
+:root[data-tema="terminal"] .glass, :root[data-tema="terminal"] .menu-flotante,
+:root[data-tema="terminal"] .tecla, :root[data-tema="terminal"] .campo,
+:root[data-tema="terminal"] .btn, :root[data-tema="terminal"] .caja,
+:root[data-tema="terminal"] .celda-cursor, :root[data-tema="terminal"] .chip,
+:root[data-tema="terminal"] .tile { border-radius: 4px; corner-shape: round; }
+:root[data-tema="terminal"] .glass, :root[data-tema="terminal"] .menu-flotante {
+  border: 2px solid var(--color-linea);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+:root[data-tema="terminal"] .glass::before { display: none; }
+:root[data-tema="terminal"] .tecla, :root[data-tema="terminal"] .campo { border: 2px solid var(--color-linea); }
+:root[data-tema="terminal"] .btn-glass { border: 2px solid var(--color-linea); }
+:root[data-tema="terminal"] .caja { border-width: 2px; background: transparent; box-shadow: none; }
+:root[data-tema="terminal"] .tile { text-shadow: none; box-shadow: 0 0 10px rgba(57, 255, 110, 0.25); }
+:root[data-tema="terminal"] .tile::after { display: none; }
+:root[data-tema="terminal"] .guijarro {
+  background: #06110a; border: 2px solid #39ff6e;
+  box-shadow: 0 0 18px rgba(57, 255, 110, 0.35), inset 0 0 24px rgba(57, 255, 110, 0.12);
+}
+:root[data-tema="terminal"] .guijarro-brillo, :root[data-tema="terminal"] .guijarro-nucleo { display: none; }
+:root[data-tema="terminal"] .guijarro-ojo { background: #39ff6e; box-shadow: 0 0 8px rgba(57, 255, 110, 0.8); }
+:root[data-tema="terminal"] .guijarro-ojo::after { background: rgba(4, 7, 10, 0.6); }
+:root[data-tema="terminal"] .guijarro-rubor { background: rgba(255, 179, 71, 0.35); }
+:root[data-tema="terminal"] .guijarro-sombra { background: radial-gradient(ellipse, rgba(57, 255, 110, 0.2), transparent 70%); }
+:root[data-tema="terminal"] .destello { background: #39ff6e; box-shadow: 0 0 10px 2px rgba(57, 255, 110, 0.8); }
+
+/* ---- Póster pop: pegatinas, borde negro gordo y sombra dura ------------- */
+:root[data-tema="pop"] {
+  color-scheme: light;
+  --font-sans: "Baloo 2", "Trebuchet MS", sans-serif;
+  --font-mono: "Baloo 2", "Trebuchet MS", sans-serif;
+  --color-fondo: #fff4d6; --color-fondo-2: #ffedbd;
+  --color-tinta: #111111; --color-tinta-2: #3f3f46; --color-tinta-3: #6b7280;
+  --color-linea: rgba(17, 17, 17, 0.6);
+  --color-azul: #57b0ff;    --color-azul-2: #2f8fe6;
+  --color-violeta: #cdb8ff; --color-violeta-2: #a88cf0;
+  --color-verde: #7bd88f;   --color-verde-2: #4dbd68;
+  --color-amarillo: #ffd23f;--color-amarillo-2: #f5b800;
+  --color-rosa: #ff8fb8;    --color-rosa-2: #ff4fa3;
+  --color-rojo: #ff5f56;    --color-rojo-2: #e0443b;
+  --color-gris: #ece3cb;
+  --vidrio: #ffffff; --vidrio-fuerte: #ffffff; --vidrio-opaco: #ffffff; --menu-fondo: #ffffff;
+  --vidrio-brillo: transparent; --vidrio-brillo-inset: transparent;
+  --vidrio-sombra: 6px 6px 0 #111111;
+  --vidrio-sombra-hover: 8px 8px 0 #111111;
+  --pista: rgba(17, 17, 17, 0.1); --pista-borde: #111111;
+  --boton-texto: #ffffff; --boton-sombra: 4px 4px 0 rgba(17, 17, 17, 0.85);
+  --escena-brillo: transparent;
+  --glow-a: transparent; --glow-b: transparent; --glow-c: transparent; --glow-d: transparent;
+  --luz-cursor: transparent; --grano-opacidad: 0;
+}
+:root[data-tema="pop"] .ambiente {
+  background:
+    radial-gradient(circle 150px at 94% -2%, #57b0ff 99%, transparent 100%),
+    radial-gradient(circle 120px at -3% 96%, #ffd23f 99%, transparent 100%),
+    var(--color-fondo);
+}
+:root[data-tema="pop"] h1, :root[data-tema="pop"] h2 { font-family: "Lilita One", "Baloo 2", sans-serif; font-weight: 400; letter-spacing: 0.01em; }
+:root[data-tema="pop"] .glass, :root[data-tema="pop"] .menu-flotante { border: 3px solid #111111; }
+:root[data-tema="pop"] .glass::before { display: none; }
+:root[data-tema="pop"] .btn { border: 3px solid #111111; }
+:root[data-tema="pop"] .tecla { border: 3px solid #111111; box-shadow: 3px 3px 0 #111111; }
+:root[data-tema="pop"] .campo { border: 3px solid #111111; }
+:root[data-tema="pop"] .chip { border: 2px solid #111111; color: var(--color-tinta); }
+:root[data-tema="pop"] .caja { border: 3px solid #111111; background: #ffffff; box-shadow: 3px 3px 0 #111111; }
+:root[data-tema="pop"] .caja-rosa     { background: #ff8fb8; }
+:root[data-tema="pop"] .caja-verde    { background: #d9f4e0; }
+:root[data-tema="pop"] .caja-amarillo { background: #ffd23f; }
+:root[data-tema="pop"] .caja-azul     { background: #a8d6ff; }
+:root[data-tema="pop"] .celda-cursor { border-color: #111111; }
+:root[data-tema="pop"] .celda-cursor > i { background: #111111; }
+:root[data-tema="pop"] .tile { border: 3px solid #111111; box-shadow: 3px 3px 0 #111111; color: #111111; }
+:root[data-tema="pop"] .tile::after { display: none; }
+:root[data-tema="pop"] .tile-azul     { background: var(--color-azul); }
+:root[data-tema="pop"] .tile-violeta  { background: var(--color-violeta); }
+:root[data-tema="pop"] .tile-verde    { background: var(--color-verde); }
+:root[data-tema="pop"] .tile-amarillo { background: var(--color-amarillo); }
+:root[data-tema="pop"] .tile-rosa     { background: var(--color-rosa); color: #ffffff; }
+:root[data-tema="pop"] .tile-rojo     { background: var(--color-rojo); color: #ffffff; }
+:root[data-tema="pop"] .guijarro {
+  border: 4px solid #111111;
+  box-shadow: 0 0 0 5px #ffffff, 0 0 0 8px #111111, 10px 12px 0 rgba(17, 17, 17, 0.85);
+}
+:root[data-tema="pop"] .guijarro-rubor { background: #ff4fa3; filter: none; border: 2px solid #111111; }
+:root[data-tema="pop"] .guijarro-sombra { background: radial-gradient(ellipse, rgba(17, 17, 17, 0.3), transparent 70%); }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

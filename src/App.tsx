@@ -19,6 +19,7 @@ import { Progreso as PaginaProgreso } from './screens/Progreso';
 import { Pin } from './screens/Pin';
 import { Admin } from './screens/Admin';
 import { adminDesbloqueado, bloquearAdmin, desbloquearAdmin } from './lib/pin';
+import { aplicarTema, esTema } from './lib/tema';
 import { Cargando, ErrorPantalla } from './screens/Estados';
 
 type Estado = 'cargando' | 'sin_acceso' | 'error' | 'listo';
@@ -29,7 +30,8 @@ function resultadoDesdeSesion(s: Session, perfil: Profile): ResultadoFinal {
   const aciertos = fases.reduce((n, f) => n + f.aciertos, 0);
   const total = fases.reduce((n, f) => n + f.total, 0);
   return { puntos: s.puntos, aciertos, total, sesion_perfecta: total > 0 && aciertos === total,
-           racha: perfil.racha_actual, comodin_usado: false, fases };
+           // el comodín se gastó en este reto si el servidor lo apuntó con la fecha de la sesión
+           racha: perfil.racha_actual, comodin_usado: perfil.ultimo_comodin_fecha === s.fecha, fases };
 }
 
 export default function App() {
@@ -86,6 +88,7 @@ export default function App() {
 
       const [p, { session: s, ejercicios: ej }, hist] = await Promise.all([cargarPerfil(), iniciarSesion(), cargarHistorial([])]);
       setPerfil(p); setSession(s); setEjercicios(ej); setSesiones(hist);
+      if (esTema(p.tema)) aplicarTema(p.tema); // el tema de la cuenta manda sobre el del dispositivo
 
       if (s.estado === 'completada') {
         setResultado(resultadoDesdeSesion(s, p));

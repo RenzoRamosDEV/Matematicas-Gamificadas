@@ -26,6 +26,7 @@ export interface Profile {
   ultima_sesion_fecha: string | null;
   comodines_disponibles: number;
   ultimo_comodin_fecha: string | null;
+  tema: string;
 }
 
 export interface FaseDetalle {
