@@ -12,7 +12,7 @@ Sitio 100 % estático en **GitHub Pages** + **Supabase** (Postgres, Auth y RPC).
 - Las respuestas se escriben **como en papel**: de derecha a izquierda (unidades primero) en suma, resta y multiplicación; de izquierda a derecha en la división, que se presenta con **la caja de toda la vida** (dividendo, divisor, cociente y resto). Todas las cuentas van en **casillas de colores**: primer número rosa, segundo amarillo, respuesta azul.
 - Los puntos y la racha **solo se suman al completar las cuatro fases**.
 - Al terminar, **corrección** de cada cuenta: la respuesta dada y la correcta.
-- **Recompensas**: premios reales canjeables con los puntos —ir al cine cada 6.000, comida fuera cada 20.000—. Al canjear (con confirmación), el contador de esa recompensa se reinicia **sin gastar los puntos totales** y el servidor **avisa por correo a los padres** automáticamente.
+- **Recompensas**: premios reales canjeables con los puntos —ir al cine cada 6.000, comida fuera cada 12.000—. Al canjear (con confirmación), el contador de esa recompensa se reinicia **sin gastar los puntos totales** y el servidor **avisa por correo a los padres** automáticamente.
 - **Mi progreso**: calendario mensual con el color de cada día (verde todo bien, amarillo algún fallo, rojo todo mal, círculo rojo hueco «No entró», gris sin reto), apuntes personales por día y el registro de días sin entrar (total y mayor tanda).
 - **Mis logros**: 42 insignias por constancia, aciertos por operación, perfección y velocidad.
 - **Estilo del juego**: desde el menú del perfil se elige entre cuatro temas completos (Cristal, Papel de cole, Terminal retro y Póster pop); se guarda en la cuenta y se aplica en cualquier dispositivo.

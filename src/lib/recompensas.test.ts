@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { estadoRecompensa, RECOMPENSAS } from './recompensas';
 
 describe('recompensas', () => {
-  it('cine cada 6000 y comida cada 20000', () => {
-    expect(RECOMPENSAS.map((r) => [r.id, r.cada])).toEqual([['cine', 6000], ['comida', 20000]]);
+  it('cine cada 6000 y comida cada 12000', () => {
+    expect(RECOMPENSAS.map((r) => [r.id, r.cada])).toEqual([['cine', 6000], ['comida', 12000]]);
   });
   it('sin puntos: nada disponible y falta el precio entero', () => {
     expect(estadoRecompensa(0, 6000)).toEqual({ canjeadas: 0, progreso: 0, faltan: 6000, disponible: false });

@@ -14,7 +14,7 @@ export interface Recompensa {
 // de esa recompensa, pero los puntos totales no se gastan.
 export const RECOMPENSAS: Recompensa[] = [
   { id: 'cine', nombre: 'Ir al cine', detalle: 'Cada 6.000 puntos', cada: 6000, icono: 'play', acento: 'rosa' },
-  { id: 'comida', nombre: 'Comida fuera, la que tú elijas', detalle: 'Cada 20.000 puntos', cada: 20000, icono: 'trophy', acento: 'amarillo' },
+  { id: 'comida', nombre: 'Comida fuera, la que tú elijas', detalle: 'Cada 12.000 puntos', cada: 12000, icono: 'trophy', acento: 'amarillo' },
 ];
 
 export interface Canje {

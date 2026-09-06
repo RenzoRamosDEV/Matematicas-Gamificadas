@@ -15,7 +15,7 @@ grant select on canjes to authenticated;
 -- Espejo de RECOMPENSAS en src/lib/recompensas.ts
 create or replace function cfg_precio_recompensa(p text) returns int
 language sql immutable set search_path = public as $$
-  select case p when 'cine' then 6000 when 'comida' then 20000 else 0 end
+  select case p when 'cine' then 6000 when 'comida' then 12000 else 0 end
 $$;
 
 create or replace function canjear_recompensa(p_recompensa text)
