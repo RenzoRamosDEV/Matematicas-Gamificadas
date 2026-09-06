@@ -1,7 +1,6 @@
 import { CONFIG } from '../config';
 
 export const PIN_LONGITUD = 8;
-const CLAVE_DESBLOQUEO = 'reto:admin';
 
 export function sha256HexJs(texto: string): string {
   const K = new Uint32Array([
@@ -56,7 +55,3 @@ export async function sha256Hex(texto: string): Promise<string> {
 export async function pinCorrecto(pin: string): Promise<boolean> {
   return (await sha256Hex(pin)) === CONFIG.ADMIN_PIN_SHA256;
 }
-
-export const adminDesbloqueado = () => { try { return sessionStorage.getItem(CLAVE_DESBLOQUEO) === '1'; } catch { return false; } };
-export const desbloquearAdmin = () => { try { sessionStorage.setItem(CLAVE_DESBLOQUEO, '1'); } catch {} };
-export const bloquearAdmin = () => { try { sessionStorage.removeItem(CLAVE_DESBLOQUEO); } catch {} };

@@ -19,7 +19,6 @@ import { Logros } from './screens/Logros';
 import { Progreso as PaginaProgreso } from './screens/Progreso';
 import { Pin } from './screens/Pin';
 import { Admin } from './screens/Admin';
-import { adminDesbloqueado, bloquearAdmin, desbloquearAdmin } from './lib/pin';
 import { aplicarTema, esTema } from './lib/tema';
 import { Cargando, ErrorPantalla } from './screens/Estados';
 
@@ -65,9 +64,11 @@ export default function App() {
   };
   const abrirLogros = () => setVista('logros');
   const cerrarLogros = () => setVista('inicio');
-  const [adminOk, setAdminOk] = useState(adminDesbloqueado);
-  const desbloquear = () => { desbloquearAdmin(); setAdminOk(true); };
-  const bloquear = () => { bloquearAdmin(); setAdminOk(false); setVista('inicio'); };
+  // El PIN se pide SIEMPRE al entrar: el desbloqueo solo dura mientras se está dentro del modo admin.
+  const [adminOk, setAdminOk] = useState(false);
+  const desbloquear = () => setAdminOk(true);
+  const bloquear = () => { setAdminOk(false); setVista('inicio'); };
+  useEffect(() => { if (vista !== 'admin') setAdminOk(false); }, [vista]);
 
   const cola = useRef<Promise<void>>(Promise.resolve());
   const encolar = (fn: () => Promise<void>) => {
@@ -127,7 +128,7 @@ export default function App() {
   const onSalir = async () => {
     await salir();
     setPerfil(null); setSession(null); setSesiones([]); setEjercicios([]); setResultado(null); setYaJugado(false); setCanjes([]);
-    bloquearAdmin(); setAdminOk(false);
+    setAdminOk(false);
     setProgreso(PROGRESO_INICIAL); setVista('inicio'); cerrarLogros(); setMensaje(null); setEstado('sin_acceso');
   };
 
