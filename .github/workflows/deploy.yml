@@ -20,6 +20,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_AVISO_EMAIL: ${{ secrets.VITE_AVISO_EMAIL }}
           # Pages sirve en /<repo>/ — se deriva del nombre del repositorio
           VITE_BASE: /${{ github.event.repository.name }}/
       - uses: actions/upload-pages-artifact@v3
