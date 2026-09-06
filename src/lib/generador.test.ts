@@ -90,6 +90,19 @@ describe('genFase', () => {
     expect(llev / (N * 10)).toBeCloseTo(0.7, 1);
     expect(prest / (N * 10)).toBeCloseTo(0.7, 1);
   });
+  it('con las 5 cuentas del juego real: cada fase lleva 3 o 4 difíciles y la media es ~70%', () => {
+    for (const [op, esDificil] of [['suma', tieneLlevadas], ['resta', tienePrestamos]] as const) {
+      let dificiles = 0;
+      const N = 800;
+      for (let k = 0; k < N; k++) {
+        const n = genFase(op, 5).filter((e) => esDificil(e.a, e.b)).length;
+        expect(n).toBeGreaterThanOrEqual(3);
+        expect(n).toBeLessThanOrEqual(4);
+        dificiles += n;
+      }
+      expect(dificiles / (N * 5)).toBeCloseTo(0.7, 1);
+    }
+  });
 });
 
 describe('genSesion', () => {

@@ -61,12 +61,15 @@ const GEN: Record<Op, (i: number, total: number) => Ejercicio> = {
 const clave = (e: Ejercicio) => `${e.op}:${e.a}:${e.b}`;
 
 const CUOTA_DIFICILES = 0.7;
-const MAX_INTENTOS = 50;
+const MAX_INTENTOS = 200;
 
 export function genFase(op: Op, total: number): Ejercicio[] {
   const out: Ejercicio[] = [];
   const vistos = new Set<string>();
-  const maxDificiles = Math.round(total * CUOTA_DIFICILES);
+  // Redondeo aleatorio: con 5 cuentas el 70% exacto (3,5) no existe, así que
+  // unas fases llevan 3 difíciles y otras 4 para que la media sea la cuota.
+  const esperado = total * CUOTA_DIFICILES;
+  const maxDificiles = Math.floor(esperado) + (Math.random() < esperado % 1 ? 1 : 0);
   const maxLimpias = total - maxDificiles;
   let dificiles = 0;
   let limpias = 0;
