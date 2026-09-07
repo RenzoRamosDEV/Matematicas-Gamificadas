@@ -157,7 +157,7 @@ export function Banderas({ perfil, adivinadas, onEmpezarRonda, onAcierto, onVolv
                 <input
                   ref={inputRef} value={respuesta} onChange={(e) => setRespuesta(e.target.value)}
                   className="campo w-full text-center" placeholder="¿Qué país es?"
-                  autoComplete="off" autoCapitalize="off" spellCheck={false} aria-label="Nombre del país"
+                  autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} aria-label="Nombre del país"
                 />
                 <div className="flex gap-2">
                   <Boton type="submit" icono="check" className="flex-1" disabled={respuesta.trim() === ''}>Comprobar</Boton>
@@ -174,7 +174,7 @@ export function Banderas({ perfil, adivinadas, onEmpezarRonda, onAcierto, onVolv
                   <>
                     <span className="chip chip-verde text-[14px]">
                       <Icono nombre="check" size={14} />
-                      {resultado === 'con-tilde' ? '¡+3! Con su tilde y todo' : llevaTilde(pais!.nombre) ? `¡+2! Era ${pais!.nombre} (con tilde valía +3)` : '¡+2! Muy bien'}
+                      {resultado === 'con-tilde' ? '¡+3! Con su tilde y todo' : llevaTilde(pais!.nombre) ? `¡+2! Es ${pais!.nombre}: te llevas 2, con la tilde habrían sido 3` : '¡+2! Muy bien'}
                     </span>
                     {nueva && <span className="chip chip-azul text-[13px] tabular-nums"><Icono nombre="spark" size={13} />¡País nuevo! Ya llevas {totalAdivinadas}</span>}
                   </>
