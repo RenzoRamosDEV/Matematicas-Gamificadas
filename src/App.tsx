@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CONFIG, ORDEN_FASES } from './config';
 import type { EjercicioDB, Op, Profile, ResultadoFinal, Session } from './types';
 import { entrar, entrarConToken, haySesion, salir } from './lib/auth';
-import { canjearRecompensa, cargarCanjes, cargarPerfil, cargarSesiones, finalizarSesion, guardarRespuesta, iniciarSesion, insertarEjercicios, reintentar } from './lib/api';
+import { acertarBandera, canjearRecompensa, cargarBanderas, cargarCanjes, cargarPerfil, cargarSesiones, empezarBanderas, finalizarSesion, guardarRespuesta, iniciarSesion, insertarEjercicios, reintentar, type AciertoBandera } from './lib/api';
 import type { Canje } from './lib/recompensas';
 import { genSesion } from './lib/generador';
+import { hoyMadrid } from './lib/semana';
 import { borrarProgreso, guardarProgreso, leerProgreso, PROGRESO_INICIAL, type Progreso } from './lib/progreso';
 import { supabaseConfigurado } from './lib/supabase';
 import { Fondo } from './components/Fondo';
@@ -18,12 +19,13 @@ import { Login } from './screens/Login';
 import { Logros } from './screens/Logros';
 import { Progreso as PaginaProgreso } from './screens/Progreso';
 import { Pin } from './screens/Pin';
+import { Banderas } from './screens/Banderas';
 import { Admin } from './screens/Admin';
 import { aplicarTema, esTema } from './lib/tema';
 import { Cargando, ErrorPantalla } from './screens/Estados';
 
 type Estado = 'cargando' | 'sin_acceso' | 'error' | 'listo';
-type Vista = 'inicio' | 'reto' | 'logros' | 'progreso' | 'admin';
+type Vista = 'inicio' | 'reto' | 'logros' | 'progreso' | 'admin' | 'banderas';
 
 function resultadoDesdeSesion(s: Session, perfil: Profile): ResultadoFinal {
   const fases = s.detalle ?? [];
@@ -41,6 +43,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [sesiones, setSesiones] = useState<Session[]>([]);
   const [canjes, setCanjes] = useState<Canje[]>([]);
+  const [banderas, setBanderas] = useState<string[]>([]);
   const [ejercicios, setEjercicios] = useState<EjercicioDB[]>([]);
   const [progreso, setProgreso] = useState<Progreso>(PROGRESO_INICIAL);
   const [resultado, setResultado] = useState<ResultadoFinal | null>(null);
@@ -49,7 +52,7 @@ export default function App() {
   const [aviso, setAviso] = useState<string | null>(null);
   const vistaDeHash = (): Vista => {
     const h = location.hash.slice(1);
-    return h === 'reto' || h === 'logros' || h === 'progreso' || h === 'admin' ? h : 'inicio';
+    return h === 'reto' || h === 'logros' || h === 'progreso' || h === 'admin' || h === 'banderas' ? h : 'inicio';
   };
   const [vista, setVistaLocal] = useState<Vista>(vistaDeHash);
   useEffect(() => {
@@ -89,11 +92,12 @@ export default function App() {
       if (errToken) { setMensaje(errToken); setEstado('sin_acceso'); return; }
       if (!(await haySesion())) { setEstado('sin_acceso'); return; }
 
-      const [p, { session: s, ejercicios: ej }, hist, cj] = await Promise.all([
+      const [p, { session: s, ejercicios: ej }, hist, cj, bd] = await Promise.all([
         cargarPerfil(), iniciarSesion(), cargarHistorial([]),
         reintentar(cargarCanjes).catch((e: Error) => { setAviso(`Canjes no disponibles: ${e.message}`); return [] as Canje[]; }),
+        reintentar(cargarBanderas).catch(() => [] as string[]),
       ]);
-      setPerfil(p); setSession(s); setEjercicios(ej); setSesiones(hist); setCanjes(cj);
+      setPerfil(p); setSession(s); setEjercicios(ej); setSesiones(hist); setCanjes(cj); setBanderas(bd);
       if (esTema(p.tema)) aplicarTema(p.tema); // el tema de la cuenta manda sobre el del dispositivo
 
       if (s.estado === 'completada') {
@@ -127,7 +131,7 @@ export default function App() {
 
   const onSalir = async () => {
     await salir();
-    setPerfil(null); setSession(null); setSesiones([]); setEjercicios([]); setResultado(null); setYaJugado(false); setCanjes([]);
+    setPerfil(null); setSession(null); setSesiones([]); setEjercicios([]); setResultado(null); setYaJugado(false); setCanjes([]); setBanderas([]);
     setAdminOk(false);
     setProgreso(PROGRESO_INICIAL); setVista('inicio'); cerrarLogros(); setMensaje(null); setEstado('sin_acceso');
   };
@@ -144,6 +148,29 @@ export default function App() {
       return c;
     } catch (e) {
       setAviso(`No se pudo canjear: ${(e as Error).message}`);
+      return null;
+    }
+  };
+
+  // El juego de banderas: abrir la ronda del día y registrar cada acierto en la cuenta.
+  const empezarRondaBanderas = async (): Promise<boolean> => {
+    try {
+      await empezarBanderas();
+      setPerfil((p) => (p ? { ...p, banderas_dia: hoyMadrid() } : p));
+      return true;
+    } catch {
+      return false; // ya jugó hoy (o sin red): la pantalla lo muestra bloqueado
+    }
+  };
+
+  const acertarBanderaHoy = async (codigo: string, conTilde: boolean): Promise<AciertoBandera | null> => {
+    try {
+      const r = await acertarBandera(codigo, conTilde);
+      if (r.nueva) setBanderas((xs) => (xs.includes(codigo) ? xs : [...xs, codigo]));
+      setPerfil((p) => (p ? { ...p, puntos_total: r.puntos_total } : p));
+      return r;
+    } catch (e) {
+      setAviso(`No se pudo guardar el acierto: ${(e as Error).message}`);
       return null;
     }
   };
@@ -221,14 +248,16 @@ export default function App() {
       ? <Admin perfil={perfil} sesiones={sesiones} onIr={setVista} onBloquear={bloquear} onSalir={onSalir} onAviso={setAviso} />
       : <Pin onDesbloquear={desbloquear} onVolver={() => setVista('inicio')} />;
   } else if (vista === 'logros') {
-    contenido = <Logros perfil={perfil} sesiones={sesiones} onVolver={cerrarLogros} onSalir={onSalir} onIr={setVista} />;
+    contenido = <Logros perfil={perfil} sesiones={sesiones} banderas={banderas.length} onVolver={cerrarLogros} onSalir={onSalir} onIr={setVista} />;
   } else if (vista === 'progreso') {
     contenido = <PaginaProgreso perfil={perfil} sesiones={sesiones} onVolver={() => setVista('inicio')} onSalir={onSalir} onAviso={setAviso} onIr={setVista} />;
+  } else if (vista === 'banderas') {
+    contenido = <Banderas perfil={perfil} adivinadas={banderas} onEmpezarRonda={empezarRondaBanderas} onAcierto={acertarBanderaHoy} onVolver={() => setVista('inicio')} onSalir={onSalir} onIr={setVista} />;
   } else if (vista === 'inicio') {
     contenido = (
       <Inicio
         perfil={perfil} sesiones={sesiones} estadoReto={estadoReto} fasesHechas={progreso.hechas}
-        puntosHoy={resultado?.puntos ?? session.puntos} canjes={canjes} onCanjear={canjear}
+        puntosHoy={resultado?.puntos ?? session.puntos} canjes={canjes} onCanjear={canjear} banderas={banderas.length}
         onEmpezar={irAlReto} onVerResultado={() => setVista('reto')} onVerLogros={abrirLogros} onVerProgreso={() => setVista('progreso')} cargando={ocupado} onSalir={onSalir} onIr={setVista}
       />
     );

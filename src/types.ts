@@ -27,6 +27,7 @@ export interface Profile {
   comodines_disponibles: number;
   ultimo_comodin_fecha: string | null;
   tema: string;
+  banderas_dia: string | null; // último día que entró al juego de banderas
 }
 
 export interface FaseDetalle {

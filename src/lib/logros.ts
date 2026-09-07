@@ -5,15 +5,16 @@ import type { FaseDetalle, Op, Profile, Session } from '../types';
 export interface ContextoLogros {
   perfil: Pick<Profile, 'puntos_total' | 'racha_max'>;
   sesiones: Pick<Session, 'estado' | 'detalle' | 'fecha' | 'puntos'>[];
+  banderas?: number; // banderas distintas adivinadas en el juego extra (vive en el dispositivo)
 }
 
 export type CategoriaLogro =
   | 'Retos' | 'Racha' | 'Puntos'
   | 'Sumas' | 'Restas' | 'Multiplicaciones' | 'Divisiones'
-  | 'Perfección' | 'Velocidad' | 'Especiales';
+  | 'Perfección' | 'Velocidad' | 'Banderas' | 'Especiales';
 
 export const CATEGORIAS: CategoriaLogro[] = [
-  'Retos', 'Racha', 'Puntos', 'Sumas', 'Restas', 'Multiplicaciones', 'Divisiones', 'Perfección', 'Velocidad', 'Especiales',
+  'Retos', 'Racha', 'Puntos', 'Sumas', 'Restas', 'Multiplicaciones', 'Divisiones', 'Perfección', 'Velocidad', 'Banderas', 'Especiales',
 ];
 
 export interface Logro {
@@ -56,6 +57,7 @@ const sesionesPerfectas = (c: ContextoLogros) => completadas(c).filter(esPerfect
 const mejorSesion = (c: ContextoLogros) => completadas(c).reduce((m, s) => Math.max(m, s.puntos), 0);
 const esFinde = (fecha: string) => { const d = new Date(`${fecha}T00:00:00Z`).getUTCDay(); return d === 0 || d === 6; };
 const retosEnFinde = (c: ContextoLogros) => retosValidos(c).filter((s) => esFinde(s.fecha)).length;
+const banderasNuevas = (c: ContextoLogros) => c.banderas ?? 0;
 
 const logro = (
   id: string, categoria: CategoriaLogro, nombre: string, descripcion: string,
@@ -108,6 +110,13 @@ export const LOGROS: Logro[] = [
   logro('sesion_200',    'Especiales', 'Gran día',      'Consigue 200 puntos en un solo reto', 'spark', 'rosa', mejorSesion, 200),
   logro('sesion_400',    'Especiales', 'Día redondo',   'Consigue 400 puntos en un solo reto', 'spark', 'amarillo', mejorSesion, 400),
   logro('finde',         'Especiales', 'Finde matemático', 'Un reto con al menos la mitad bien en sábado o domingo', 'calendar', 'verde', retosEnFinde, 1),
+
+  // Juego extra de banderas: cuentan solo los países adivinados por primera vez
+  logro('banderas_10',  'Banderas', 'Explorador',        'Adivina 10 banderas distintas',        'zap', 'verde', banderasNuevas, 10),
+  logro('banderas_25',  'Banderas', 'Trotamundos',       'Adivina 25 banderas distintas',        'zap', 'azul', banderasNuevas, 25),
+  logro('banderas_50',  'Banderas', 'Medio mundo',       'Adivina 50 banderas distintas',        'zap', 'violeta', banderasNuevas, 50),
+  logro('banderas_100', 'Banderas', 'Cien países',       'Adivina 100 banderas distintas',       'zap', 'amarillo', banderasNuevas, 100),
+  logro('banderas_195', 'Banderas', '¡El mundo entero!', 'Adivina las 195 banderas de países',   'trophy', 'rosa', banderasNuevas, 195),
 ];
 
 export type LogroEvaluado = Logro & { conseguido: boolean; actual: number; meta: number };

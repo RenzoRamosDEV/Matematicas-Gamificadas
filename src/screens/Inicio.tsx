@@ -5,6 +5,7 @@ import { evaluarLogros } from '../lib/logros';
 import { hoyMadrid, puntosSemana, semanaActual } from '../lib/semana';
 import { comodinesDisponibles, estadoRacha } from '../lib/comodin';
 import { estadoRecompensa, RECOMPENSAS, type Canje, type Recompensa } from '../lib/recompensas';
+
 import { Barra } from '../components/Barra';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
@@ -22,6 +23,7 @@ interface Props {
   puntosHoy: number;
   canjes: Canje[];
   onCanjear: (recompensa: string) => Promise<Canje | null>;
+  banderas: number; // banderas distintas adivinadas (para los logros)
   onEmpezar: () => void;
   onVerResultado: () => void;
   onVerLogros: () => void;
@@ -31,7 +33,7 @@ interface Props {
   onIr: (destino: Destino) => void;
 }
 
-export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, canjes, onCanjear, onEmpezar, onVerResultado, onVerLogros, onVerProgreso, cargando, onSalir, onIr }: Props) {
+export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, canjes, onCanjear, banderas, onEmpezar, onVerResultado, onVerLogros, onVerProgreso, cargando, onSalir, onIr }: Props) {
   const nombre = perfil.nombre.charAt(0).toUpperCase() + perfil.nombre.slice(1);
   const completado = estadoReto === 'completado';
 
@@ -42,7 +44,7 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, c
   const totalSemana = puntosSemana(dias);
   const maxPuntos = Math.max(1, ...dias.map((d) => d.puntos));
 
-  const logros = evaluarLogros({ perfil, sesiones });
+  const logros = evaluarLogros({ perfil, sesiones, banderas });
   const conseguidos = logros.filter((l) => l.conseguido).length;
   const muestra = [...logros.filter((l) => l.conseguido), ...logros.filter((l) => !l.conseguido)].slice(0, 7);
 
@@ -184,6 +186,34 @@ export function Inicio({ perfil, sesiones, fasesHechas, estadoReto, puntosHoy, c
             )}
           </div>
         </Tarjeta>
+      </section>
+
+      <div className="flex items-baseline justify-between mt-10 sm:mt-14 mb-4 px-1 in d7">
+        <h2 className="text-[22px] sm:text-[26px] font-bold tracking-tight">Extras</h2>
+      </div>
+      <section className="grid md:grid-cols-3 gap-3.5 sm:gap-5">
+        <Tarjeta
+          acento="amarillo" icono="zap" titulo="Adivina la bandera" delay="d7" onClick={() => onIr('banderas')}
+          texto="¿De qué país es cada bandera? +2 por acierto y +3 si lo escribes con su tilde."
+          chip={perfil.banderas_dia === hoy
+            ? <span className="chip chip-verde"><Icono nombre="check" size={13} />Hecho hoy</span>
+            : <span className="chip">Jugar<Icono nombre="chev" size={13} /></span>}
+        >
+          <div className="text-[26px] leading-none tracking-[.12em]" aria-hidden="true">🇪🇸 🇯🇵 🇧🇷 🇲🇽 🇫🇷</div>
+        </Tarjeta>
+        {[1, 2].map((n) => (
+          <article key={n} className="rounded-[30px] p-5 sm:p-6 flex flex-col gap-3.5 border-2 border-dashed in d8" style={{ borderColor: 'var(--pista-borde)' }}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="tile tile-gris w-[52px] h-[52px] sm:w-[58px] sm:h-[58px]"><Icono nombre="lock" size={26} /></div>
+              <span className="chip">Pronto</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-[18px] sm:text-[19px] font-bold tracking-tight text-tinta-2">Próximamente</h3>
+              <p className="text-[14.5px] text-tinta-3 leading-snug mt-1">Aquí llegará otro juego extra.</p>
+            </div>
+            <div className="text-[26px] leading-none tracking-[.2em] text-tinta-3 opacity-50" aria-hidden="true">· · ·</div>
+          </article>
+        ))}
       </section>
 
       <div className="flex items-baseline justify-between mt-10 sm:mt-14 mb-4 px-1 in d7">

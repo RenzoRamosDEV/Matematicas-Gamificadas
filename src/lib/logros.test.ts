@@ -96,3 +96,19 @@ describe('perfección, velocidad y especiales', () => {
     expect(p.primer_reto.conseguido).toBe(false);
   });
 });
+
+describe('logros de banderas', () => {
+  it('usan las banderas distintas adivinadas del juego extra', () => {
+    const r = por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [], banderas: 30 }));
+    expect(r.banderas_10.conseguido).toBe(true);
+    expect(r.banderas_25.conseguido).toBe(true);
+    expect(r.banderas_50.conseguido).toBe(false);
+    expect(r.banderas_50.actual).toBe(30);
+    expect(r.banderas_50.meta).toBe(50);
+  });
+  it('sin dato de banderas, todo a cero (no rompe)', () => {
+    const r = por(evaluarLogros({ perfil: perfil(0, 0), sesiones: [] }));
+    expect(r.banderas_10.conseguido).toBe(false);
+    expect(r.banderas_10.actual).toBe(0);
+  });
+});

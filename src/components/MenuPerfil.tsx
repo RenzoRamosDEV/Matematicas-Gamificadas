@@ -5,7 +5,7 @@ import { Icono, type NombreIcono } from './Icono';
 import { aplicarTema, TEMAS, temaGuardado, type Tema } from '../lib/tema';
 import { guardarTema } from '../lib/api';
 
-export type Destino = 'inicio' | 'progreso' | 'logros' | 'admin';
+export type Destino = 'inicio' | 'progreso' | 'logros' | 'admin' | 'banderas';
 
 interface Props {
   perfil: Profile;

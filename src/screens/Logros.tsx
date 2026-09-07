@@ -1,5 +1,6 @@
 import type { Profile, Session } from '../types';
 import { CATEGORIAS, evaluarLogros, type LogroEvaluado } from '../lib/logros';
+
 import { Barra } from '../components/Barra';
 import { Boton } from '../components/Boton';
 import { Cabecera } from '../components/Cabecera';
@@ -9,13 +10,14 @@ import { Icono } from '../components/Icono';
 interface Props {
   perfil: Profile;
   sesiones: Session[];
+  banderas: number; // banderas distintas adivinadas en el juego extra
   onVolver: () => void;
   onSalir?: () => void;
   onIr: (destino: Destino) => void;
 }
 
-export function Logros({ perfil, sesiones, onVolver, onSalir, onIr }: Props) {
-  const logros = evaluarLogros({ perfil, sesiones });
+export function Logros({ perfil, sesiones, banderas, onVolver, onSalir, onIr }: Props) {
+  const logros = evaluarLogros({ perfil, sesiones, banderas });
   const conseguidos = logros.filter((l) => l.conseguido).length;
   const grupos = CATEGORIAS.map((cat) => ({ cat, items: logros.filter((l) => l.categoria === cat) })).filter((g) => g.items.length);
 

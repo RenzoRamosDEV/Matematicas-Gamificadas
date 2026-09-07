@@ -24,6 +24,25 @@ export async function canjearRecompensa(recompensa: string): Promise<Canje> {
   return data as Canje;
 }
 
+export async function cargarBanderas(): Promise<string[]> {
+  const { data, error } = await supabase.from('banderas').select('codigo');
+  fail('banderas', error);
+  return (data ?? []).map((x) => (x as { codigo: string }).codigo);
+}
+
+export async function empezarBanderas(): Promise<void> {
+  const { error } = await supabase.rpc('banderas_empezar');
+  fail('banderas', error);
+}
+
+export interface AciertoBandera { nueva: boolean; total: number; puntos: number; puntos_total: number }
+
+export async function acertarBandera(codigo: string, conTilde: boolean): Promise<AciertoBandera> {
+  const { data, error } = await supabase.rpc('banderas_acierto', { p_codigo: codigo, p_con_tilde: conTilde });
+  fail('bandera', error);
+  return data as AciertoBandera;
+}
+
 export async function guardarTema(id: string, tema: string) {
   const { error } = await supabase.from('profiles').update({ tema }).eq('id', id);
   fail('guardar tema', error);
