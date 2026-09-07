@@ -166,7 +166,7 @@ body {
   .caja-amarillo { border-color: color-mix(in oklch, var(--color-amarillo) 85%, transparent); }
   .caja-azul     { border-color: color-mix(in oklch, var(--color-azul) 70%, transparent); }
   /* La caja completa es más ancha que una cuenta en columna: celdas algo más pequeñas */
-  .pizarra-div { --cw: 34px; --ch: 46px; --cfs: 25px; }
+  .pizarra-div { --cw: 38px; --ch: 50px; --cfs: 28px; }
   .pizarra-div .celda { width: var(--cw); height: var(--ch); font-size: var(--cfs); }
   @media (min-width: 640px) { .pizarra-div { --cw: 50px; --ch: 62px; --cfs: 38px; } }
   @media (min-width: 1024px) { .pizarra-div { --cw: 58px; --ch: 70px; --cfs: 44px; } }

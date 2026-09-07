@@ -32,6 +32,7 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
   );
   const [restante, setRestante] = useState<number>(() => Math.max(0, total - Math.floor((Date.now() - inicio) / 1000)));
   const [confirmando, setConfirmando] = useState(false);
+  const [borrador, setBorrador] = useState(false);
   const desdeRef = useRef(Date.now());
   const terminadoRef = useRef(false);
 
@@ -134,6 +135,15 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
       </header>
       <Barra valor={restante / total} acento={urgente ? 'rosa' : info.acento} />
 
+      <div className="glass rounded-[18px] px-3.5 py-2.5 flex items-center gap-2.5 text-[13.5px] font-semibold text-tinta-2 in d2" role="note">
+        <span className="tile tile-amarillo w-8 h-8 rounded-[10px] shrink-0"><Icono nombre="pencil" size={16} /></span>
+        <span className="flex-1">Te recomendamos usar papel y lápiz: haz ahí la cuenta y escribe aquí {op === 'div' ? 'el cociente' : 'el resultado'}.</span>
+        <button type="button" onClick={() => setBorrador((v) => !v)} aria-pressed={borrador}
+          className="chip shrink-0 hover:text-tinta transition">
+          <Icono nombre="pencil" size={13} />{borrador ? 'Cerrar borrador' : 'O escribe aquí'}
+        </button>
+      </div>
+
       <div className="grid lg:grid-cols-[1.15fr_.85fr] gap-3 sm:gap-5 items-center">
         <section className={`glass luz-${info.acento} rounded-[32px] sm:rounded-[36px] p-4 sm:p-8 flex flex-col gap-4 min-h-[380px] lg:min-h-[480px] in d2`}>
           <div className="flex items-center justify-between gap-3">
@@ -176,9 +186,10 @@ export function Fase({ op, numFase, ejercicios, inicio, onRespuesta, onTerminar,
             </div>
             )}
             <p className="mt-4 text-[12.5px] text-tinta-3">
-              {rtl ? 'Escribe empezando por las unidades, como en el papel.' : 'Escribe el cociente de izquierda a derecha.'}
+              {rtl ? 'Escribe empezando por las unidades, como en el papel.' : 'Haz la cuenta en tu papel y escribe aquí el cociente, de izquierda a derecha.'}
             </p>
           </div>
+          {borrador && <Borrador />}
         </section>
 
         <aside className="flex flex-col gap-3 in d3">
@@ -206,24 +217,17 @@ function Celda({ children, className = '' }: { children: React.ReactNode; classN
   return <span className={`celda ${className}`}>{children}</span>;
 }
 
-/* La caja de toda la vida: dividendo, resta y resto a la izquierda; divisor y cociente tras la galera. */
+/* La caja de toda la vida: dividendo | divisor, y debajo de la galera se escribe el cociente.
+   La cuenta se hace en papel (hay un aviso en la fase); aquí no hay huecos de resta ni resto. */
 function CajaDivision({ a, b, buffer }: { a: number; b: number; buffer: string }) {
   const digitosA = String(a).split('');
   const digitosB = String(b).split('');
   const digitosR = buffer.split('');
-  const huecosResta = String(b * 9).length; // lo más largo que se resta: divisor × 9
-  const huecosResto = digitosB.length;      // el resto siempre es menor que el divisor
 
   return (
     <div className="pizarra-div max-w-full overflow-x-auto flex items-stretch font-mono tabular-nums px-1" aria-label={`${a} dividido entre ${b}`}>
-      <div className="grid grid-cols-[auto_auto] gap-x-1.5 sm:gap-x-2 gap-y-1.5 sm:gap-y-2 items-center self-start">
-        <span />
-        <div className="flex gap-1 sm:gap-1.5">{digitosA.map((d, i) => <span key={i} className="celda caja caja-rosa">{d}</span>)}</div>
-        <span className="justify-self-end text-tinta-2 font-bold text-[25px] sm:text-[38px] lg:text-[44px] leading-none">−</span>
-        <div className="flex gap-1 sm:gap-1.5">{Array.from({ length: huecosResta }, (_, i) => <span key={i} className="celda caja caja-verde" />)}</div>
-        <div className="col-span-2 h-[3px] rounded-full bg-tinta/70" />
-        <span />
-        <div className="flex gap-1 sm:gap-1.5">{Array.from({ length: huecosResto }, (_, i) => <span key={i} className="celda caja" />)}</div>
+      <div className="flex gap-1 sm:gap-1.5 self-start">
+        {digitosA.map((d, i) => <span key={i} className="celda caja caja-rosa">{d}</span>)}
       </div>
 
       <div className="w-[3px] rounded-full bg-tinta/70 mx-2 sm:mx-3 shrink-0" />
@@ -242,4 +246,69 @@ function CajaDivision({ a, b, buffer }: { a: number; b: number; buffer: string }
 
 function Cursor() {
   return <span className="celda celda-cursor" aria-hidden="true"><i /></span>;
+}
+
+/* Hoja de sucio para escribir a mano (dedo o ratón). No se corrige: es como el papel.
+   Vive fuera del div con key de la cuenta, así que lo escrito aguanta al cambiar de cuenta. */
+function Borrador() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const trazando = useRef(false);
+
+  useEffect(() => {
+    const c = ref.current;
+    if (!c) return;
+    const r = c.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    c.width = Math.round(r.width * dpr);
+    c.height = Math.round(r.height * dpr);
+    const ctx = c.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(dpr, dpr);
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  }, []);
+
+  const punto = (e: React.PointerEvent) => {
+    const r = ref.current!.getBoundingClientRect();
+    return [e.clientX - r.left, e.clientY - r.top] as const;
+  };
+  const empezar = (e: React.PointerEvent) => {
+    const ctx = ref.current?.getContext('2d');
+    if (!ctx) return;
+    trazando.current = true;
+    ref.current!.setPointerCapture(e.pointerId);
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-tinta').trim() || '#101323';
+    const [x, y] = punto(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+  const trazar = (e: React.PointerEvent) => {
+    if (!trazando.current) return;
+    const ctx = ref.current?.getContext('2d');
+    if (!ctx) return;
+    const [x, y] = punto(e);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+  const soltar = () => { trazando.current = false; };
+  const limpiar = () => {
+    const c = ref.current;
+    const ctx = c?.getContext('2d');
+    if (c && ctx) ctx.clearRect(0, 0, c.width, c.height);
+  };
+
+  return (
+    <div className="flex flex-col gap-2 mt-2 in">
+      <div className="flex items-center justify-between px-1">
+        <span className="text-[12px] font-semibold text-tinta-3 uppercase tracking-wide">Tu borrador</span>
+        <button type="button" onClick={limpiar} className="chip hover:text-tinta transition"><Icono nombre="backspace" size={13} />Limpiar</button>
+      </div>
+      <canvas
+        ref={ref} onPointerDown={empezar} onPointerMove={trazar} onPointerUp={soltar} onPointerCancel={soltar}
+        className="w-full h-[200px] sm:h-[240px] touch-none rounded-[16px] glass-fuerte border border-dashed border-linea cursor-crosshair"
+        aria-label="Borrador para escribir a mano"
+      />
+    </div>
+  );
 }
