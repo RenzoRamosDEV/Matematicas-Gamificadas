@@ -1,6 +1,6 @@
 export const CONFIG = {
   EJERCICIOS_POR_FASE: 5,
-  TIEMPOS: { suma: 120, resta: 150, mult: 300, div: 270 },
+  TIEMPOS: { suma: 120, resta: 150, mult: 480, div: 780 },
   PUNTOS_ACIERTO: 10,
   BONUS_FASE_PERFECTA: 25,
   BONUS_VELOCIDAD_ALTA: 20,

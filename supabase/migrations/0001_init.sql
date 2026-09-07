@@ -123,7 +123,7 @@ grant  update (respuesta, ms) on exercises to authenticated;
 create or replace function cfg_tiempo_fase(p_op text) returns int
 language sql immutable set search_path = public as $$
   select case p_op when 'suma' then 120 when 'resta' then 150
-                   when 'mult' then 300 when 'div' then 270 else 0 end
+                   when 'mult' then 480 when 'div' then 780 else 0 end
 $$;
 
 -- ---------- RPC: iniciar sesión del día --------------------------------
