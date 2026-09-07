@@ -12,7 +12,7 @@ import {
   PAISES, puntosDe, ronda, TIEMPO_POR_BANDERA, type Pais, type Veredicto,
 } from '../lib/banderas';
 
-const POR_RONDA = 10;
+const POR_RONDA = 20;
 type Resultado = Veredicto | 'tiempo';
 
 interface Props {

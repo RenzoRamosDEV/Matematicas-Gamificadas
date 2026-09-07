@@ -15,7 +15,7 @@ Sitio 100 % estático en **GitHub Pages** + **Supabase** (Postgres, Auth y RPC).
 - **Recompensas**: premios reales canjeables con los puntos —ir al cine cada 6.000, comida fuera cada 12.000—. Al canjear (con confirmación), el contador de esa recompensa se reinicia **sin gastar los puntos totales** y el servidor **avisa por correo a los padres** automáticamente.
 - **Mi progreso**: calendario mensual con el color de cada día (verde todo bien, amarillo algún fallo, rojo todo mal, círculo rojo hueco «No entró», gris sin reto), apuntes personales por día y el registro de días sin entrar (total y mayor tanda).
 - **Mis logros**: 47 insignias por constancia, aciertos por operación, perfección, velocidad y banderas.
-- **Extras · Adivina la bandera**: una ronda al día de 10 banderas de países (emoji → nombre), con 1 minuto por bandera y sin salida salvo rendirse. +2 puntos por acierto (a la cuenta, al momento) y +3 si escribe el país con su tilde; medallas por banderas distintas adivinadas (10/25/50/100/195). Es opcional: la racha no depende de él.
+- **Extras · Adivina la bandera**: una ronda al día de 20 banderas de países (emoji → nombre), con 1 minuto por bandera y sin salida salvo rendirse. +2 puntos por acierto (a la cuenta, al momento) y +3 si escribe el país con su tilde; medallas por banderas distintas adivinadas (10/25/50/100/195). Es opcional: la racha no depende de él.
 - **Estilo del juego**: desde el menú del perfil se elige entre cuatro temas completos (Cristal, Papel de cole, Terminal retro y Póster pop); se guarda en la cuenta y se aplica en cualquier dispositivo.
 - **Modo admin** (en el menú de perfil, protegido por PIN que se pide en cada entrada): panel de estadísticas de solo lectura por día/semana/mes/año —aciertos, constancia, evolución por operación, puntos débiles, tiempos y días sin entrar— con las gráficas adaptadas al tema activo.
 
@@ -118,7 +118,7 @@ npm run build
 
 **Racha** (`now()` de Postgres, zona `Europe/Madrid`): jugó ayer → +1; hoy → igual; anteayer con comodín disponible → +1 y gasta el comodín (se recarga 1 cada 30 días); otro caso → 1.
 
-**Banderas** (RPCs `banderas_empezar` y `banderas_acierto`): la ronda diaria y los puntos (+2/+3) se validan y suman en el servidor, con tope de 10 aciertos al día.
+**Banderas** (RPCs `banderas_empezar` y `banderas_acierto`): la ronda diaria y los puntos (+2/+3) se validan y suman en el servidor, con tope de 20 aciertos al día.
 
 **Recompensas** (RPC `canjear_recompensa`, precios en `cfg_precio_recompensa`): el canje se valida en el servidor contra los puntos totales menos la base del último canje de esa recompensa. Canjear reinicia el contador de esa recompensa **sin restar puntos**, queda registrado en `canjes` y dispara el aviso por correo.
 
@@ -142,6 +142,6 @@ Menú de perfil → **Modo admin** → PIN. En el código solo vive el **SHA-256
 - ✅ Canjes (`canjes`): solo se insertan por la RPC, que valida el precio en el servidor con la fila del perfil bloqueada; el cliente solo los lee.
 - ✅ El tema del perfil se guarda con un grant de UPDATE **solo de esa columna**: la policy de update no abre puntos ni racha.
 - ✅ La API key de Resend y el correo de aviso viven en la tabla `ajustes`, con RLS y sin policies ni grants: invisibles desde la API.
-- ⚠️ En el juego de banderas el nombre del país lo valida el cliente; el servidor no conoce la lista, pero acota el daño: hay que abrir la ronda del día, máximo 10 aciertos diarios y 3 puntos por acierto.
+- ⚠️ En el juego de banderas el nombre del país lo valida el cliente; el servidor no conoce la lista, pero acota el daño: hay que abrir la ronda del día, máximo 20 aciertos diarios y 3 puntos por acierto.
 - ⚠️ El cliente genera e inserta las cuentas, incluida `sol`. Alguien con conocimientos podría insertar cuentas triviales por la API. Se deja así a propósito; cerrarlo del todo exige mover los generadores a plpgsql.
 - ❌ Nunca metas la `service_role` key en el front. La **anon key** sí es pública por diseño; la seguridad la da RLS.

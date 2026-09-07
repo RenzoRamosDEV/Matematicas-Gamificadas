@@ -1,7 +1,7 @@
 -- Juego extra "Adivina la bandera": banderas distintas adivinadas por jugador,
 -- candado de una ronda al día y puntos sumados por RPC (+2 acierto, +3 con tilde).
 -- El servidor no conoce los nombres de los países (los valida el cliente), pero
--- acota el daño: hay que abrir ronda, máximo 10 aciertos al día y 3 puntos por acierto.
+-- acota el daño: hay que abrir ronda, máximo 20 aciertos al día y 3 puntos por acierto.
 create table banderas (
   user_id uuid not null default auth.uid() references profiles(id) on delete cascade,
   codigo text not null check (codigo ~ '^[A-Z]{2}$'),
@@ -45,7 +45,7 @@ begin
   if p_codigo !~ '^[A-Z]{2}$' then raise exception 'código inválido'; end if;
   select banderas_dia, banderas_hoy into v_dia, v_n from profiles where id = v_user for update;
   if v_dia is distinct from v_hoy then raise exception 'la ronda no está empezada'; end if;
-  if v_n >= 10 then raise exception 'la ronda de hoy ya está completa'; end if;
+  if v_n >= 20 then raise exception 'la ronda de hoy ya está completa'; end if;
 
   insert into banderas (user_id, codigo) values (v_user, p_codigo) on conflict do nothing;
   v_nueva := found;
